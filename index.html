@@ -185,10 +185,10 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--amber); out
   </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/globe.gl@2.45.3/dist/globe.gl.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/topojson-client@3.1.0/dist/topojson-client.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/d3-array@3.2.4/dist/d3-array.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/d3-geo@3.1.1/dist/d3-geo.min.js"></script>
+<script src="vendor/globe.gl.min.js"></script>
+<script src="vendor/topojson-client.min.js"></script>
+<script src="vendor/d3-array.min.js"></script>
+<script src="vendor/d3-geo.min.js"></script>
 <script>
 let startFailed = false;
 function hideLoader() { const l = document.getElementById("loading"); if (!l || startFailed) return; l.style.opacity = 0; setTimeout(() => { if (!startFailed) l.remove(); }, 700); }

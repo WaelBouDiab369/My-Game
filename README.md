@@ -13,6 +13,7 @@ Play: https://waelboudiab369.github.io/My-Game/
 - `countries.json`: names, capitals, regions and coordinates for the 218 places.
 - `borders.json`: country borders (Natural Earth 1:50m, TopoJSON).
 - `earth-blue-marble.jpg`, `earth-topology.png`, `night-sky.png`: globe imagery (NASA Blue Marble).
+- `vendor/`: the libraries the game uses (globe.gl, topojson-client, d3-geo, d3-array), stored here so the game never depends on an outside download site. Their licenses are next to them.
 - `tools/build-data.js`: rebuilds the two JSON files from the `world-countries` and `world-atlas` npm packages.
 
 Data: world-countries (ODbL), Natural Earth via world-atlas (public domain), NASA Blue Marble imagery (public domain). Globe: globe.gl.
