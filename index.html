@@ -3,184 +3,132 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="description" content="Learn world geography on a real satellite globe: 218 countries and territories, capitals and country names.">
+<meta name="description" content="Learn world geography on a real satellite globe: 218 countries and territories, flags, capitals and country names in English, Arabic and French.">
 <title>GeoQuest Globe</title>
-<meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,800&display=swap">
-<style>
-/* Layout: the globe fills the screen; HUD floats top, question card docks bottom; menus are glass sheets over space. */
-:root {
-  --space: #04060c;
-  --panel: rgba(9, 14, 26, 0.82);
-  --panel-solid: #0c1322;
-  --ink: #eef2f8;
-  --muted: #9aa8bd;
-  --line: rgba(190, 210, 240, 0.16);
-  --amber: #ffb547;
-  --amber-ink: #241500;
-  --good: #4ade80;
-  --bad: #fb7185;
-  --font-display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
-  --font-body: "Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
-  --gx: max(16px, env(safe-area-inset-left, 0px));
-  --gxr: max(16px, env(safe-area-inset-right, 0px));
-  color-scheme: dark;
-}
-html, body { height: 100%; }
-[hidden] { display: none !important; }
-body { background: var(--space); color: var(--ink); font-family: var(--font-body); font-size: 16px; overflow: hidden; }
-#globe { position: fixed; inset: 0; }
-button { font: inherit; color: inherit; cursor: pointer; }
-button:focus-visible, input:focus-visible { outline: 3px solid var(--amber); outline-offset: 2px; }
-
-.hud { position: fixed; top: calc(env(safe-area-inset-top, 0px) + 12px); left: var(--gx); right: var(--gxr); display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; pointer-events: none; z-index: 5; }
-.hud > * { pointer-events: auto; }
-.brand { font-family: var(--font-display); font-weight: 800; font-size: 20px; letter-spacing: -0.01em; text-shadow: 0 2px 12px #000; display: flex; align-items: center; gap: 10px; }
-.brand small { font-family: var(--font-body); font-weight: 400; font-size: 13px; color: var(--muted); }
-.stats { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
-.chip { background: var(--panel); border: 1px solid var(--line); border-radius: 999px; padding: 6px 12px; font-size: 14px; font-variant-numeric: tabular-nums; backdrop-filter: blur(8px); white-space: nowrap; }
-.chip b { font-family: var(--font-display); font-weight: 800; }
-.chip.streak b { color: var(--amber); }
-.iconbtn { background: var(--panel); border: 1px solid var(--line); border-radius: 999px; padding: 6px 12px; font-size: 14px; backdrop-filter: blur(8px); }
-.iconbtn:hover { border-color: var(--amber); }
-
-.card { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(env(safe-area-inset-bottom, 0px) + 16px); width: min(560px, calc(100% - 32px)); background: var(--panel); border: 1px solid var(--line); border-radius: 18px; padding: 16px 18px; backdrop-filter: blur(14px); box-shadow: 0 20px 60px rgba(0,0,0,.5); z-index: 6; display: grid; gap: 12px; }
-.progress { height: 4px; border-radius: 4px; background: var(--line); overflow: hidden; }
-.progress i { display: block; height: 100%; width: 0; background: var(--amber); transition: width .4s; }
-.qlabel { font-size: 12px; text-transform: uppercase; letter-spacing: .12em; color: var(--muted); display: flex; justify-content: space-between; gap: 8px; }
-.question { font-family: var(--font-display); font-weight: 800; font-size: clamp(24px, 5vw, 34px); line-height: 1.1; text-wrap: balance; }
-.question .tgt { color: var(--amber); }
-.sub { color: var(--muted); font-size: 14px; }
-.answer-row { display: flex; gap: 8px; }
-.answer-row input { flex: 1; min-width: 0; background: rgba(255,255,255,.06); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; color: var(--ink); font-family: var(--font-body); font-size: 20px; letter-spacing: .03em; }
-.answer-row input::placeholder { color: var(--muted); letter-spacing: 0; font-size: 16px; }
-.btn { border: 0; border-radius: 12px; padding: 12px 16px; font-weight: 700; background: var(--amber); color: var(--amber-ink); }
-.btn.ghost { background: transparent; color: var(--ink); border: 1px solid var(--line); }
-.btn:hover { filter: brightness(1.08); }
-.actions { display: flex; gap: 8px; flex-wrap: wrap; }
-.actions .btn { padding: 8px 12px; font-size: 14px; }
-.hintline { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 18px; letter-spacing: .18em; color: var(--amber); }
-.feedback { border-radius: 12px; padding: 10px 12px; font-size: 15px; line-height: 1.4; }
-.feedback.good { background: rgba(74,222,128,.12); border: 1px solid rgba(74,222,128,.4); }
-.feedback.close { background: rgba(255,181,71,.12); border: 1px solid rgba(255,181,71,.4); }
-.feedback.bad { background: rgba(251,113,133,.12); border: 1px solid rgba(251,113,133,.4); }
-.feedback .spell { font-family: var(--font-display); font-weight: 800; font-size: 22px; letter-spacing: .04em; display: block; margin-top: 4px; }
-.spell .d { color: var(--amber); text-decoration: underline; text-underline-offset: 4px; }
-.shake { animation: shake .35s; }
-@keyframes shake { 25% { transform: translateX(-6px) } 75% { transform: translateX(6px) } }
-
-.sheet { position: fixed; inset: 0; z-index: 10; display: grid; place-items: center; padding-block: calc(env(safe-area-inset-top, 0px) + 16px) calc(env(safe-area-inset-bottom, 0px) + 16px); padding-left: var(--gx); padding-right: var(--gxr); background: radial-gradient(ellipse at 30% 50%, transparent 0%, rgba(4,6,12,.55) 55%, rgba(4,6,12,.85) 100%); overflow-y: auto; }
-.menu { width: min(520px, 100%); background: var(--panel); border: 1px solid var(--line); border-radius: 22px; padding: 24px; backdrop-filter: blur(16px); display: grid; gap: 18px; }
-.menu h1 { font-family: var(--font-display); font-weight: 800; font-size: clamp(34px, 8vw, 48px); line-height: .95; letter-spacing: -0.02em; margin: 0; text-wrap: balance; }
-.menu h1 span { color: var(--amber); }
-.menu p { margin: 0; color: var(--muted); line-height: 1.5; }
-.group { display: grid; gap: 8px; }
-.group > label { font-size: 12px; text-transform: uppercase; letter-spacing: .12em; color: var(--muted); }
-.opts { display: flex; flex-wrap: wrap; gap: 6px; }
-.opt { background: rgba(255,255,255,.04); border: 1px solid var(--line); border-radius: 10px; padding: 8px 12px; font-size: 15px; }
-.opt[aria-pressed="true"] { background: var(--amber); color: var(--amber-ink); border-color: var(--amber); font-weight: 700; }
-.modes { display: grid; gap: 8px; }
-.mode { text-align: left; background: rgba(255,255,255,.04); border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px; display: grid; gap: 2px; }
-.mode strong { font-family: var(--font-display); font-weight: 800; font-size: 18px; }
-.mode span { color: var(--muted); font-size: 14px; }
-.mode[aria-pressed="true"] { border-color: var(--amber); background: rgba(255,181,71,.1); }
-.mode[aria-pressed="true"] strong { color: var(--amber); }
-.menu p.notice { font-size: 14px; color: var(--ink); background: rgba(255,181,71,.1); border: 1px solid rgba(255,181,71,.35); border-radius: 12px; padding: 10px 12px; }
-.best { font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
-.bigscore { font-family: var(--font-display); font-weight: 800; font-size: 64px; line-height: 1; color: var(--amber); font-variant-numeric: tabular-nums; }
-.summary { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
-.summary div { background: rgba(255,255,255,.04); border: 1px solid var(--line); border-radius: 12px; padding: 10px; text-align: center; font-size: 13px; color: var(--muted); }
-.summary b { display: block; font-family: var(--font-display); font-size: 22px; color: var(--ink); font-variant-numeric: tabular-nums; }
-.mistakes { max-height: 30vh; overflow-y: auto; display: grid; gap: 4px; font-size: 15px; }
-.mistakes div { display: flex; justify-content: space-between; gap: 12px; padding: 6px 0; border-bottom: 1px solid var(--line); }
-.mistakes div span:last-child { color: var(--amber); font-weight: 700; text-align: right; }
-.loading { position: fixed; inset: 0; display: grid; place-items: center; z-index: 20; background: var(--space); font-family: var(--font-display); font-size: 20px; color: var(--muted); transition: opacity .6s; }
-.tooltip { font-family: var(--font-body); background: var(--panel-solid); border: 1px solid var(--line); border-radius: 8px; padding: 4px 8px; font-size: 13px; color: var(--ink); }
-@media (max-width: 520px) {
-  .brand small { display: none; }
-  .card { padding: 14px; }
-  .chip { padding: 5px 10px; font-size: 13px; }
-}
-@media (prefers-reduced-motion: reduce) { .shake { animation: none; } .progress i { transition: none; } }
-</style>
-
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,800&family=Tajawal:wght@400;700;800&display=swap">
+<link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 <div id="globe" aria-label="Interactive globe"></div>
-<div class="loading" id="loading">Loading the Earth…</div>
+<div class="loading" id="loading" data-i18n="loading">Loading the Earth…</div>
 
 <header class="hud">
-  <div class="brand">GeoQuest <small id="modeLabel">218 countries and territories</small></div>
+  <div class="brand">GeoQuest <small id="modeLabel"></small></div>
   <div class="stats">
-    <div class="chip" id="chipScore" hidden>Score <b id="score">0</b></div>
-    <div class="chip streak" id="chipStreak" hidden>Streak <b id="streak">0</b></div>
-    <button class="iconbtn" id="btnView" type="button" hidden>Reset view</button>
-    <button class="iconbtn" id="btnMenu" type="button" hidden>Menu</button>
+    <div class="chip" id="chipScore" hidden><span data-i18n="score"></span> <b id="score">0</b></div>
+    <div class="chip streak" id="chipStreak" hidden><span data-i18n="streak"></span> <b id="streak">0</b></div>
+    <div class="chip lives" id="chipLives" hidden><b id="lives"></b></div>
+    <button class="iconbtn" id="btnView" type="button" hidden data-i18n="resetView"></button>
+    <button class="iconbtn" id="btnMenu" type="button" hidden data-i18n="menu"></button>
+    <div class="lang" id="langSwitch" role="group" aria-label="Language">
+      <button type="button" data-lang="en" lang="en">EN</button>
+      <button type="button" data-lang="ar" lang="ar">عربي</button>
+      <button type="button" data-lang="fr" lang="fr">FR</button>
+    </div>
   </div>
 </header>
 
+<!-- Question card (all quiz games) -->
 <section class="card" id="card" hidden aria-live="polite">
   <div class="progress"><i id="bar"></i></div>
-  <div class="qlabel"><span id="qcount">1 / 10</span><span id="qregion">World</span></div>
+  <div class="qlabel"><span id="qcount"></span><span id="qregion"></span></div>
+  <div class="timer" id="timer" hidden><i id="timerBar"></i></div>
+  <img class="flag-lg" id="qflag" alt="" hidden>
   <div class="question" id="question"></div>
   <div class="sub" id="qsub"></div>
   <div class="hintline" id="hintline" hidden></div>
   <form class="answer-row" id="answerForm" hidden autocomplete="off">
-    <input id="answer" type="text" autocomplete="off" autocapitalize="words" spellcheck="false" aria-label="Your answer">
-    <button class="btn" id="btnSubmit" type="submit">Check</button>
+    <input id="answer" type="text" autocomplete="off" autocapitalize="words" spellcheck="false" aria-label="Answer">
+    <button class="btn" id="btnSubmit" type="submit" data-i18n="check"></button>
   </form>
   <div id="feedback" class="feedback" hidden></div>
   <div class="actions">
-    <button class="btn ghost" id="btnHint" type="button">Hint</button>
-    <button class="btn ghost" id="btnSkip" type="button">Skip</button>
-    <button class="btn" id="btnNext" type="button" hidden>Next →</button>
+    <button class="btn ghost" id="btnHint" type="button" data-i18n="hint"></button>
+    <button class="btn ghost" id="btnSkip" type="button" data-i18n="skip"></button>
+    <button class="btn" id="btnNext" type="button" hidden data-i18n="next"></button>
+  </div>
+</section>
+
+<!-- Study card -->
+<section class="card" id="studyCard" hidden aria-live="polite">
+  <div id="studyEmpty">
+    <div class="question" data-i18n="studyTitle"></div>
+    <div class="sub" data-i18n="studySub"></div>
+  </div>
+  <div id="studyInfo" hidden>
+    <div class="study-head"><img class="flag-lg" id="sFlag" alt=""><div class="question" id="sName"></div></div>
+    <dl class="facts">
+      <dt data-i18n="capitalLabel"></dt><dd id="sCapital"></dd>
+      <dt data-i18n="regionLabel"></dt><dd id="sRegion"></dd>
+      <dt data-i18n="areaLabel"></dt><dd id="sArea"></dd>
+      <dt data-i18n="statusLabel"></dt><dd id="sStatus"></dd>
+    </dl>
+    <div class="actions">
+      <button class="btn ghost" id="btnListen" type="button" data-i18n="listen"></button>
+      <button class="btn ghost" id="btnQuizRegion" type="button"></button>
+    </div>
+  </div>
+  <div class="search">
+    <div class="results" id="results" hidden></div>
+    <input id="search" type="search" autocomplete="off" spellcheck="false" aria-label="Search">
   </div>
 </section>
 
 <div class="sheet" id="startSheet">
   <div class="menu">
-    <h1>Learn the world, <span>one place at a time</span></h1>
-    <p>A real satellite globe with 218 countries and territories. Spin it, zoom in, and type answers to learn the spelling.</p>
+    <h1><span data-i18n="heroA" style="color:inherit"></span> <span data-i18n="heroB"></span></h1>
+    <p data-i18n="intro"></p>
     <div class="group">
-      <label>Game</label>
-      <div class="modes" id="modes">
-        <button class="mode" type="button" data-mode="find" aria-pressed="true"><strong>Find the country</strong><span>We name a country. You find it on the globe and tap it.</span></button>
-        <button class="mode" type="button" data-mode="capital" aria-pressed="false"><strong>Write the capital</strong><span>We highlight a country. You type its capital city.</span></button>
-        <button class="mode" type="button" data-mode="name" aria-pressed="false"><strong>Name the country</strong><span>We highlight a country. You type its name.</span></button>
-      </div>
+      <label data-i18n="labelGame"></label>
+      <div class="modes" id="modes"></div>
     </div>
     <div class="group">
-      <label>Region</label>
+      <label data-i18n="labelRegion"></label>
       <div class="opts" id="regions"></div>
     </div>
-    <div class="group">
-      <label>Questions</label>
+    <div class="group" data-quiz-only>
+      <label data-i18n="labelQuestions"></label>
       <div class="opts" id="lengths">
         <button class="opt" type="button" data-len="10" aria-pressed="true">10</button>
         <button class="opt" type="button" data-len="25" aria-pressed="false">25</button>
-        <button class="opt" type="button" data-len="0" aria-pressed="false">All</button>
+        <button class="opt" type="button" data-len="0" aria-pressed="false" data-i18n="all"></button>
       </div>
     </div>
-    <p class="notice" id="glNotice" hidden>You're seeing the simple globe because 3D graphics are switched off in this browser. For the satellite globe in Chrome: open <b>Settings → System</b>, turn on <b>Use graphics acceleration when available</b>, then click <b>Relaunch</b>.</p>
+    <div class="group" data-quiz-only>
+      <label data-i18n="labelLevel"></label>
+      <div class="opts" id="levels">
+        <button class="opt" type="button" data-level="easy" aria-pressed="false" data-i18n="levelEasy"></button>
+        <button class="opt" type="button" data-level="normal" aria-pressed="true" data-i18n="levelNormal"></button>
+      </div>
+      <div class="level-hint" data-i18n="levelEasyHint"></div>
+    </div>
+    <div class="group" data-quiz-only>
+      <label data-i18n="labelChallenge"></label>
+      <div class="opts">
+        <button class="opt" type="button" id="optTimer" aria-pressed="false" data-i18n="optTimer"></button>
+        <button class="opt" type="button" id="optLives" aria-pressed="false" data-i18n="optLives"></button>
+      </div>
+    </div>
+    <p class="notice" id="glNotice" hidden data-i18n-html="glNotice"></p>
     <div class="best" id="bestLine"></div>
-    <button class="btn" id="btnStart" type="button">Start</button>
+    <button class="btn" id="btnStart" type="button"></button>
   </div>
 </div>
 
 <div class="sheet" id="endSheet" hidden>
   <div class="menu">
-    <div class="group"><label id="endTitle">Round complete</label><div class="bigscore" id="endScore">0</div><div class="best" id="endBest"></div></div>
+    <div class="group"><label id="endTitle"></label><div class="bigscore" id="endScore">0</div><div class="best" id="endBest"></div></div>
     <div class="summary">
-      <div><b id="endRight">0</b>correct</div>
-      <div><b id="endAcc">0%</b>accuracy</div>
-      <div><b id="endTime">0:00</b>time</div>
+      <div><b id="endRight">0</b><span data-i18n="correct"></span></div>
+      <div><b id="endAcc">0%</b><span data-i18n="accuracy"></span></div>
+      <div><b id="endTime">0:00</b><span data-i18n="time"></span></div>
     </div>
-    <div class="group" id="mistakeGroup"><label>Practise these</label><div class="mistakes" id="mistakeList"></div></div>
+    <div class="group" id="mistakeGroup"><label data-i18n="practiseThese"></label><div class="mistakes" id="mistakeList"></div></div>
     <div class="actions">
-      <button class="btn" id="btnPractice" type="button">Practise mistakes</button>
-      <button class="btn ghost" id="btnAgain" type="button">Play again</button>
-      <button class="btn ghost" id="btnHome" type="button">Change game</button>
+      <button class="btn" id="btnPractice" type="button" data-i18n="practiseMistakes"></button>
+      <button class="btn ghost" id="btnAgain" type="button" data-i18n="playAgain"></button>
+      <button class="btn ghost" id="btnHome" type="button" data-i18n="changeGame"></button>
     </div>
   </div>
 </div>
@@ -189,512 +137,7 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--amber); out
 <script src="vendor/topojson-client.min.js"></script>
 <script src="vendor/d3-array.min.js"></script>
 <script src="vendor/d3-geo.min.js"></script>
-<script>
-let startFailed = false;
-function hideLoader() { const l = document.getElementById("loading"); if (!l || startFailed) return; l.style.opacity = 0; setTimeout(() => { if (!startFailed) l.remove(); }, 700); }
-// Never leave the screen covered: the menu shows after 8 seconds at the latest.
-setTimeout(hideLoader, 8000);
-(async function () {
-  const $ = (id) => document.getElementById(id);
-  if (typeof topojson === "undefined") throw new Error("A required file did not download. Check your internet connection and reload.");
-  const probe = document.createElement("canvas");
-  let hasGL = false;
-  try { hasGL = !!(probe.getContext("webgl2") || probe.getContext("webgl")); } catch {}
-  const use3D = hasGL && typeof Globe !== "undefined";
-  if (!use3D && typeof d3 === "undefined") throw new Error("This browser has 3D graphics turned off, and the simple globe could not download.");
-  const getJSON = (f) => fetch(f).then((r) => { if (!r.ok) throw new Error(`Could not load ${f} (${r.status}).`); return r.json(); });
-  const REGIONS = {
-    World:    { lat: 20, lng: 15, altitude: 2.4 },
-    Africa:   { lat: 2, lng: 18, altitude: 1.5 },
-    Americas: { lat: 12, lng: -78, altitude: 2.1 },
-    Asia:     { lat: 28, lng: 88, altitude: 1.7 },
-    Europe:   { lat: 50, lng: 15, altitude: 0.95 },
-    Oceania:  { lat: -12, lng: 160, altitude: 1.7 },
-  };
-  const MODE_TEXT = { find: "Find the country", capital: "Write the capital", name: "Name the country" };
-
-  // ---------- data ----------
-  const [countries, topo] = await Promise.all([
-    getJSON("countries.json"),
-    getJSON("borders.json"),
-  ]);
-  const byId = Object.fromEntries(countries.map((c) => [c.id, c]));
-  const features = topojson.feature(topo, topo.objects.countries).features.filter((f) => byId[f.id]);
-  // Tiny places get a tappable dot so they can be found and clicked.
-  const dots = countries.filter((c) => !c.poly || c.area < 1500).map((c) => ({ id: c.id, lat: c.ll[0], lng: c.ll[1] }));
-
-  // ---------- state ----------
-  const store = {
-    get(k) { try { return JSON.parse(localStorage.getItem(k)); } catch { return null; } },
-    set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} },
-  };
-  const S = { mode: "find", region: "World", len: 10, queue: [], i: 0, score: 0, streak: 0, bestStreak: 0, right: 0,
-              mistakes: [], phase: "idle", attempts: 0, hints: 0, hover: null, flash: {}, started: 0, playing: false };
-
-  // ---------- globe ----------
-  // Two views with the same three methods: update(points), pointOfView(pov, ms), setAutoRotate(on).
-  // The satellite globe needs WebGL; the simple globe draws on a 2D canvas and works everywhere.
-  const el = $("globe");
-  const globe = use3D ? makeSatelliteGlobe() : makeSimpleGlobe();
-  globe.pointOfView(REGIONS.World, 0);
-  if (!use3D) $("glNotice").hidden = false;
-
-  function makeSatelliteGlobe() {
-    const g = new Globe(el, { animateIn: true })
-      .globeImageUrl("earth-blue-marble.jpg")
-      .bumpImageUrl("earth-topology.png")
-      .backgroundImageUrl("night-sky.png")
-      .showAtmosphere(true).atmosphereColor("#7fb2ff").atmosphereAltitude(0.18)
-      .polygonsData(features)
-      .polygonGeoJsonGeometry("geometry")
-      .polygonCapColor(capColor)
-      .polygonSideColor(() => "rgba(0,0,0,0)")
-      .polygonStrokeColor(strokeColor)
-      .polygonAltitude((f) => (S.flash[f.id] || f.id === S.hover || isTarget(f.id)) ? 0.012 : 0.004)
-      .polygonsTransitionDuration(250)
-      .polygonLabel((f) => hoverLabel(f.id))
-      .onPolygonHover((f) => { if (S.mode !== "find" || !S.playing) return; S.hover = f ? f.id : null; el.style.cursor = f ? "pointer" : "grab"; refresh(); })
-      .onPolygonClick((f) => guessPlace(f.id))
-      .pointsData([])
-      .pointLat("lat").pointLng("lng")
-      .pointAltitude(0.006).pointRadius(0.28)
-      .pointColor((d) => S.flash[d.id] ? flashColor(S.flash[d.id]) : (d.id === S.hover ? "#ffffff" : "rgba(255,255,255,0.75)"))
-      .pointLabel((d) => hoverLabel(d.id))
-      .onPointHover((d) => { if (S.mode !== "find" || !S.playing) return; S.hover = d ? d.id : null; refresh(); })
-      .onPointClick((d) => guessPlace(d.id))
-      .onGlobeReady(hideLoader);
-    const ctrl = g.controls();
-    ctrl.autoRotate = true; ctrl.autoRotateSpeed = 0.35;
-    const resize = () => g.width(window.innerWidth).height(window.innerHeight);
-    window.addEventListener("resize", resize); resize();
-    return {
-      update(points) { g.polygonsData(features); g.pointsData(points); },
-      pointOfView(pov, ms) { g.pointOfView(pov, ms); },
-      setAutoRotate(on) { ctrl.autoRotate = on; },
-    };
-  }
-
-  function makeSimpleGlobe() {
-    const canvas = document.createElement("canvas");
-    canvas.style.cssText = "display:block;touch-action:none;cursor:grab";
-    el.appendChild(canvas);
-    const ctx = canvas.getContext("2d");
-    const tip = document.createElement("div");
-    tip.style.cssText = "position:fixed;pointer-events:none;z-index:4;transform:translate(12px,12px)";
-    document.body.appendChild(tip);
-    const proj = d3.geoOrthographic().clipAngle(90).precision(0.6);
-    const path = d3.geoPath(proj, ctx);
-    const grat = d3.geoGraticule10();
-    const LAND = ["#5b7a4a", "#6d8450", "#7c8a55", "#628055", "#87865a", "#70795a"];
-    const tone = (id) => LAND[[...id].reduce((a, ch) => a + ch.charCodeAt(0), 0) % LAND.length];
-    const SOLID = { good: "#3fbf6f", bad: "#e25d73", close: "#f0a73a", hint: "#f0a73a" };
-    let W = 0, H = 0, dpr = 1, pov = { lat: 20, lng: 15, altitude: 2.4 }, pts = [], auto = true, anim = null, dirty = true;
-    let drag = null, pinch = null;
-    const pointers = new Map();
-
-    function resize() {
-      dpr = Math.min(2, window.devicePixelRatio || 1); W = window.innerWidth; H = window.innerHeight;
-      canvas.width = W * dpr; canvas.height = H * dpr; canvas.style.width = W + "px"; canvas.style.height = H + "px"; dirty = true;
-    }
-    window.addEventListener("resize", resize); resize();
-    const scaleFor = (alt) => Math.min(W, H) * 0.4 * 2.4 / alt;
-    const front = (lng, lat) => d3.geoDistance([lng, lat], [pov.lng, pov.lat]) < Math.PI / 2 - 0.02;
-
-    function draw() {
-      proj.rotate([-pov.lng, -pov.lat]).scale(scaleFor(pov.altitude)).translate([W / 2, H / 2]);
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      ctx.fillStyle = "#04060c"; ctx.fillRect(0, 0, W, H);
-      const r = proj.scale();
-      const sea = ctx.createRadialGradient(W / 2 - r * 0.35, H / 2 - r * 0.35, r * 0.05, W / 2, H / 2, r);
-      sea.addColorStop(0, "#2a6aa8"); sea.addColorStop(1, "#0b2a52");
-      ctx.beginPath(); path({ type: "Sphere" }); ctx.fillStyle = sea; ctx.fill();
-      ctx.beginPath(); path(grat); ctx.strokeStyle = "rgba(255,255,255,0.08)"; ctx.lineWidth = 1; ctx.stroke();
-      for (const f of features) {
-        const hot = S.flash[f.id] || isTarget(f.id);
-        ctx.beginPath(); path(f);
-        ctx.fillStyle = S.flash[f.id] ? SOLID[S.flash[f.id]] : isTarget(f.id) ? "#f5a83c" : f.id === S.hover ? "#b9c79a" : tone(f.id);
-        ctx.fill();
-        ctx.strokeStyle = hot ? "rgba(255,240,210,0.95)" : "rgba(20,30,20,0.55)";
-        ctx.lineWidth = hot ? 1.8 : 0.6; ctx.stroke();
-      }
-      for (const d of pts) {
-        if (!front(d.lng, d.lat)) continue;
-        const [x, y] = proj([d.lng, d.lat]);
-        ctx.beginPath(); ctx.arc(x, y, 5, 0, Math.PI * 2);
-        ctx.fillStyle = S.flash[d.id] ? SOLID[S.flash[d.id]] : d.id === S.hover ? "#ffffff" : "rgba(255,255,255,0.85)";
-        ctx.fill(); ctx.lineWidth = 1; ctx.strokeStyle = "rgba(0,0,0,0.6)"; ctx.stroke();
-      }
-      ctx.beginPath(); path({ type: "Sphere" }); ctx.strokeStyle = "rgba(127,178,255,0.55)"; ctx.lineWidth = 2; ctx.stroke();
-    }
-    function tick(now) {
-      if (anim) {
-        const t = Math.min(1, (now - anim.t0) / anim.ms), e = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
-        const dl = ((anim.to.lng - anim.from.lng + 540) % 360) - 180;
-        pov = { lng: anim.from.lng + dl * e, lat: anim.from.lat + (anim.to.lat - anim.from.lat) * e,
-                altitude: anim.from.altitude * Math.pow(anim.to.altitude / anim.from.altitude, e) };
-        if (t >= 1) anim = null;
-        dirty = true;
-      } else if (auto && !drag && !pinch) { pov.lng += 0.06; dirty = true; }
-      if (dirty) { draw(); dirty = false; }
-      requestAnimationFrame(tick);
-    }
-    requestAnimationFrame(tick);
-    setTimeout(hideLoader, 100);
-
-    function hit(x, y) {
-      for (const d of pts) {
-        if (!front(d.lng, d.lat)) continue;
-        const [px, py] = proj([d.lng, d.lat]);
-        if (Math.hypot(px - x, py - y) < 10) return d.id;
-      }
-      const p = proj.invert([x, y]);
-      if (!p || !front(p[0], p[1])) return null;
-      for (const f of features) if (d3.geoContains(f, p)) return f.id;
-      return null;
-    }
-    function showTip(id, x, y) {
-      tip.innerHTML = id ? hoverLabel(id) : "";
-      tip.style.left = x + "px"; tip.style.top = y + "px";
-    }
-    canvas.addEventListener("pointerdown", (e) => {
-      canvas.setPointerCapture(e.pointerId); pointers.set(e.pointerId, [e.clientX, e.clientY]); anim = null;
-      if (pointers.size === 2) {
-        const [a, b] = [...pointers.values()];
-        pinch = { d: Math.hypot(a[0] - b[0], a[1] - b[1]), alt: pov.altitude }; drag = null;
-      } else drag = { x: e.clientX, y: e.clientY, moved: 0 };
-      canvas.style.cursor = "grabbing";
-    });
-    canvas.addEventListener("pointermove", (e) => {
-      if (pointers.has(e.pointerId)) pointers.set(e.pointerId, [e.clientX, e.clientY]);
-      if (pinch && pointers.size === 2) {
-        const [a, b] = [...pointers.values()];
-        pov.altitude = Math.min(4, Math.max(0.08, pinch.alt * pinch.d / Math.max(10, Math.hypot(a[0] - b[0], a[1] - b[1]))));
-        dirty = true; return;
-      }
-      if (drag) {
-        const dx = e.clientX - drag.x, dy = e.clientY - drag.y, k = 180 / Math.PI / proj.scale();
-        drag.moved += Math.abs(dx) + Math.abs(dy); drag.x = e.clientX; drag.y = e.clientY;
-        pov.lng -= dx * k; pov.lat = Math.max(-85, Math.min(85, pov.lat + dy * k)); dirty = true; return;
-      }
-      if (e.pointerType === "mouse") {
-        const id = hit(e.clientX, e.clientY);
-        if (S.mode === "find" && S.playing && id !== S.hover) { S.hover = id; dirty = true; }
-        canvas.style.cursor = id ? "pointer" : "grab";
-        showTip(id, e.clientX, e.clientY);
-      }
-    });
-    const end = (e) => {
-      pointers.delete(e.pointerId);
-      if (drag && drag.moved < 6 && e.type === "pointerup") { const id = hit(e.clientX, e.clientY); if (id) guessPlace(id); }
-      if (pointers.size < 2) pinch = null;
-      drag = null; canvas.style.cursor = "grab";
-    };
-    canvas.addEventListener("pointerup", end);
-    canvas.addEventListener("pointercancel", end);
-    canvas.addEventListener("pointerleave", () => showTip(null));
-    canvas.addEventListener("wheel", (e) => {
-      e.preventDefault(); anim = null;
-      pov.altitude = Math.min(4, Math.max(0.08, pov.altitude * Math.exp(e.deltaY * 0.0012))); dirty = true;
-    }, { passive: false });
-
-    return {
-      update(points) { pts = points; dirty = true; },
-      pointOfView(p, ms) { if (!ms) { pov = { ...p }; dirty = true; } else anim = { from: { ...pov }, to: p, t0: performance.now(), ms }; },
-      setAutoRotate(on) { auto = on; },
-    };
-  }
-
-  function isTarget(id) { return S.playing && S.mode !== "find" && current() && current().id === id && !S.flash[id]; }
-  function flashColor(kind) { return kind === "good" ? "rgba(74,222,128,0.6)" : kind === "bad" ? "rgba(251,113,133,0.55)" : "rgba(255,181,71,0.6)"; }
-  function capColor(f) {
-    if (S.flash[f.id]) return flashColor(S.flash[f.id]);
-    if (isTarget(f.id)) return "rgba(255,181,71,0.55)";
-    if (f.id === S.hover) return "rgba(255,255,255,0.22)";
-    return "rgba(255,255,255,0.015)";
-  }
-  function strokeColor(f) {
-    if (isTarget(f.id) || S.flash[f.id]) return "rgba(255,230,180,0.95)";
-    return "rgba(255,255,255,0.35)";
-  }
-  function hoverLabel(id) {
-    // While finding, never reveal names on hover. Show them once answered, or outside a game.
-    if (S.playing && !(S.flash[id])) return "";
-    const c = byId[id]; if (!c) return "";
-    return `<div class="tooltip">${c.flag} ${c.name}${c.capital.length ? " · " + c.capital[0] : ""}</div>`;
-  }
-  function refresh() { globe.update(S.mode === "find" && S.playing ? dots : (S.playing && current() && !byId[current().id].poly ? [current()].map((c) => ({ id: c.id, lat: c.ll[0], lng: c.ll[1] })) : [])); }
-  function flyTo(c, ms = 1400) {
-    const size = Math.sqrt(Math.max(c.area || 1, 1));
-    const altitude = Math.min(2.2, Math.max(0.28, size / 1400));
-    // Aim a little south so the country sits above the question card.
-    const lat = Math.max(-80, c.ll[0] - altitude * 14);
-    globe.pointOfView({ lat, lng: c.ll[1], altitude }, ms);
-  }
-
-  // ---------- text matching ----------
-  function norm(s) {
-    return s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase()
-      .replace(/&/g, " and ").replace(/\bst\.?\s/g, "saint ").replace(/\bthe\s/g, "")
-      .replace(/[^a-z0-9]+/g, " ").trim();
-  }
-  function lev(a, b) {
-    const m = a.length, n = b.length, d = Array.from({ length: m + 1 }, (_, i) => [i]);
-    for (let j = 1; j <= n; j++) d[0][j] = j;
-    for (let i = 1; i <= m; i++) for (let j = 1; j <= n; j++)
-      d[i][j] = Math.min(d[i - 1][j] + 1, d[i][j - 1] + 1, d[i - 1][j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
-    return d[m][n];
-  }
-  function accepted(c) { return S.mode === "capital" ? c.capital : [c.name, ...c.alt]; }
-  function judge(input, c) {
-    const x = norm(input); if (!x) return { kind: "empty" };
-    let best = { kind: "bad", dist: 99 };
-    for (const a of accepted(c)) {
-      const y = norm(a);
-      if (x === y) return { kind: "good", match: a };
-      const d = lev(x, y), tol = y.length > 7 ? 2 : 1;
-      if (d <= tol && d < best.dist) best = { kind: "close", dist: d, match: a };
-    }
-    return best;
-  }
-  // Mark letters in the correct spelling that the player got wrong.
-  function diffSpell(input, target) {
-    const a = norm(input).replace(/ /g, ""), out = [];
-    let k = 0;
-    for (const ch of target) {
-      const base = norm(ch);
-      if (!base || base === " ") { out.push(esc(ch)); continue; }
-      if (a[k] === base) { out.push(esc(ch)); k++; }
-      else { out.push(`<span class="d">${esc(ch)}</span>`); if (a[k + 1] === base) k += 2; else if (a[k] && a[k] !== base && norm(target).replace(/ /g, "").length === a.length) k++; }
-    }
-    return out.join("");
-  }
-  const esc = (s) => s.replace(/[&<>"]/g, (m) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[m]));
-
-  // ---------- game flow ----------
-  const current = () => S.queue[S.i];
-  function pool() {
-    return countries.filter((c) => (S.region === "World" || c.region === S.region) && (S.mode !== "capital" || c.capital.length));
-  }
-  function shuffle(a) { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
-
-  function startRound(list) {
-    const p = list || shuffle(pool().slice());
-    S.queue = list ? shuffle(list.slice()) : (S.len ? p.slice(0, S.len) : p);
-    Object.assign(S, { i: 0, score: 0, streak: 0, bestStreak: 0, right: 0, mistakes: [], playing: true, started: Date.now(), hover: null, flash: {} });
-    $("startSheet").hidden = true; $("endSheet").hidden = true;
-    $("card").hidden = false; $("chipScore").hidden = false; $("chipStreak").hidden = false; $("btnMenu").hidden = false; $("btnView").hidden = false;
-    $("modeLabel").textContent = MODE_TEXT[S.mode] + " · " + S.region;
-    globe.setAutoRotate(false);
-    if (S.mode === "find") globe.pointOfView(REGIONS[S.region], 1500);
-    ask();
-  }
-
-  function ask() {
-    const c = current();
-    S.phase = "ask"; S.attempts = 0; S.hints = 0; S.flash = {}; S.hover = null;
-    $("qcount").textContent = `${S.i + 1} / ${S.queue.length}`;
-    $("qregion").textContent = c.region + (c.sub ? " · " + c.sub : "");
-    $("bar").style.width = (S.i / S.queue.length * 100) + "%";
-    $("feedback").hidden = true; $("btnNext").hidden = true; $("btnSkip").hidden = false; $("btnHint").hidden = false;
-    $("hintline").hidden = true;
-    const terr = c.sov ? (c.sov === "disputed" ? " (disputed territory)" : ` (territory of ${c.sov})`) : "";
-    if (S.mode === "find") {
-      $("question").innerHTML = `Find <span class="tgt">${esc(c.name)}</span>`;
-      $("qsub").textContent = "Spin and zoom the globe, then tap it." + (c.sov ? (c.sov === "disputed" ? " It is a disputed territory." : ` It is a territory of ${c.sov}.`) : "");
-      $("answerForm").hidden = true;
-    } else {
-      $("question").innerHTML = S.mode === "capital"
-        ? `What is the capital of <span class="tgt">${esc(c.name)}</span>?`
-        : `Which country is <span class="tgt">highlighted</span>?`;
-      $("qsub").textContent = S.mode === "capital"
-        ? (c.capital.length > 1 ? `${c.name} has more than one capital. Any of them counts.` : (terr ? c.name + terr + "." : "Type the city name. Accents are optional."))
-        : (terr ? "This one is a territory, not an independent country." : "Type the name. Accents are optional.");
-      $("answerForm").hidden = false;
-      const inp = $("answer"); inp.value = ""; inp.placeholder = S.mode === "capital" ? "Type the capital…" : "Type the country…";
-      setTimeout(() => inp.focus({ preventScroll: true }), 50);
-      flyTo(c);
-    }
-    refresh();
-  }
-
-  function points(base) { const p = Math.round(base * Math.pow(0.7, S.hints)) + Math.min(S.streak, 5) * 10; return p; }
-  function updateHud() { $("score").textContent = S.score; $("streak").textContent = S.streak; }
-
-  function win(base) {
-    S.score += points(base); S.streak++; S.bestStreak = Math.max(S.bestStreak, S.streak); S.right++; updateHud();
-  }
-  function lose(c) { S.streak = 0; updateHud(); if (!S.mistakes.includes(c)) S.mistakes.push(c); }
-
-  function guessPlace(id) {
-    if (!S.playing || S.mode !== "find" || S.phase !== "ask") return;
-    const c = current();
-    if (id === c.id) {
-      win([100, 50, 25][S.attempts] || 25);
-      S.flash = { [c.id]: "good" };
-      feedback("good", `Correct! That's ${c.flag} ${esc(c.name)}${c.capital.length ? `, capital ${esc(c.capital[0])}` : ""}.`);
-      finishQuestion();
-    } else {
-      S.attempts++;
-      const wrong = byId[id];
-      S.flash = { [id]: "bad" };
-      if (S.attempts >= 3) {
-        lose(c); S.flash[c.id] = "good";
-        feedback("bad", `That was ${esc(wrong.name)}. ${esc(c.name)} is here, highlighted in green.`);
-        flyTo(c); finishQuestion();
-      } else {
-        feedback("bad", `That's ${wrong.flag} ${esc(wrong.name)}. Try again (${3 - S.attempts} ${3 - S.attempts === 1 ? "try" : "tries"} left).`);
-        $("card").classList.remove("shake"); void $("card").offsetWidth; $("card").classList.add("shake");
-      }
-    }
-    refresh();
-  }
-
-  function submitTyped() {
-    const c = current(), inp = $("answer"), val = inp.value;
-    if (S.phase === "retype") {
-      if (judge(val, c).kind === "good") { feedback("good", `Good. Now you've written <b>${esc(accepted(c)[0])}</b> once yourself.`); finishQuestion(true); }
-      else { inp.classList.remove("shake"); void inp.offsetWidth; inp.classList.add("shake"); }
-      return;
-    }
-    if (S.phase !== "ask") return;
-    const r = judge(val, c);
-    if (r.kind === "empty") return;
-    const right = accepted(c)[0];
-    if (r.kind === "good") {
-      win(100); S.flash = { [c.id]: "good" };
-      const others = S.mode === "capital" && c.capital.length > 1 ? ` (${c.name}'s capitals: ${c.capital.map(esc).join(", ")})` : "";
-      feedback("good", `Correct! ${c.flag} <b>${esc(r.match)}</b>${others}`);
-      finishQuestion();
-    } else if (r.kind === "close") {
-      win(50); S.flash = { [c.id]: "close" };
-      feedback("close", `Almost. Check the spelling (half points):<span class="spell">${diffSpell(val, r.match)}</span>`);
-      finishQuestion();
-    } else {
-      lose(c); S.flash = { [c.id]: "bad" };
-      startRetype(`Not quite. The answer is:<span class="spell">${esc(right)}</span>Type it once to help you remember.`);
-    }
-    refresh();
-  }
-
-  function startRetype(html) {
-    S.phase = "retype";
-    feedback("bad", html);
-    const inp = $("answer"); inp.value = ""; inp.placeholder = `Type “${accepted(current())[0]}”`; inp.focus({ preventScroll: true });
-    $("btnHint").hidden = true; $("btnSkip").textContent = "Skip";
-  }
-
-  function feedback(kind, html) { const f = $("feedback"); f.className = "feedback " + kind; f.innerHTML = html; f.hidden = false; }
-  function finishQuestion(fromRetype) {
-    S.phase = "done";
-    $("btnHint").hidden = true; $("btnSkip").hidden = true; $("btnNext").hidden = false;
-    $("answerForm").hidden = true;
-    $("hintline").hidden = true;
-    $("bar").style.width = ((S.i + 1) / S.queue.length * 100) + "%";
-    setTimeout(() => $("btnNext").focus({ preventScroll: true }), 30);
-    refresh();
-  }
-  function next() {
-    if (S.phase !== "done") return;
-    S.i++;
-    if (S.i >= S.queue.length) return endRound();
-    ask();
-  }
-
-  function hint() {
-    const c = current();
-    if (S.phase !== "ask") return;
-    S.hints++;
-    if (S.mode === "find") {
-      // Find mode hints: 1) sub-region, 2) fly close, 3) highlight.
-      if (S.hints === 1) { $("qsub").textContent = `Hint: it is in ${c.sub || c.region}.`; }
-      else if (S.hints === 2) { const near = Object.assign({}, c, { area: c.area * 40 }); flyTo(near); $("qsub").textContent = "Hint: it is somewhere in this view."; }
-      else { S.flash = { [c.id]: "hint" }; refresh(); $("qsub").textContent = "Hint: tap the highlighted place."; $("btnHint").hidden = true; }
-      return;
-    }
-    const word = accepted(c)[0];
-    const shown = Math.min(S.hints, word.replace(/[^\p{L}]/gu, "").length - 1);
-    let n = 0;
-    const pattern = [...word].map((ch) => /\p{L}/u.test(ch) ? (n++ < shown ? ch : "_") : ch).join(" ");
-    const h = $("hintline"); h.textContent = pattern + `   (${word.replace(/[^\p{L}]/gu, "").length} letters)`; h.hidden = false;
-    $("answer").focus({ preventScroll: true });
-  }
-
-  function skip() {
-    const c = current();
-    if (S.phase === "retype") { finishQuestion(); return; }
-    if (S.phase !== "ask") return;
-    lose(c); S.flash = { [c.id]: "good" };
-    if (S.mode === "find") { feedback("bad", `${esc(c.name)} is here, highlighted in green.`); flyTo(c); finishQuestion(); }
-    else startRetype(`The answer is:<span class="spell">${esc(accepted(c)[0])}</span>Type it once to help you remember.`);
-    refresh();
-  }
-
-  function endRound() {
-    S.playing = false; S.phase = "idle"; S.flash = {}; refresh();
-    $("card").hidden = true; $("btnView").hidden = true;
-    const total = S.queue.length, secs = Math.round((Date.now() - S.started) / 1000);
-    const key = `gq-best-${S.mode}-${S.region}-${S.len}`, prev = store.get(key);
-    const isBest = !prev || S.score > prev.score;
-    if (isBest) store.set(key, { score: S.score, right: S.right, total });
-    $("endTitle").textContent = `${MODE_TEXT[S.mode]} · ${S.region}`;
-    $("endScore").textContent = S.score;
-    $("endBest").textContent = isBest ? (prev ? `New best score (previous ${prev.score})` : "Your first score for this game") : `Best score: ${prev.score}`;
-    $("endRight").textContent = `${S.right}/${total}`;
-    $("endAcc").textContent = Math.round(S.right / total * 100) + "%";
-    $("endTime").textContent = `${Math.floor(secs / 60)}:${String(secs % 60).padStart(2, "0")}`;
-    $("mistakeGroup").hidden = !S.mistakes.length; $("btnPractice").hidden = !S.mistakes.length;
-    $("mistakeList").innerHTML = S.mistakes.map((c) => `<div><span>${c.flag} ${esc(c.name)}</span><span>${S.mode === "capital" ? esc(c.capital[0]) : S.mode === "name" ? "" : esc(c.region)}</span></div>`).join("");
-    $("endSheet").hidden = false;
-    globe.setAutoRotate(true);
-  }
-
-  function toMenu() {
-    S.playing = false; S.phase = "idle"; S.flash = {}; refresh();
-    $("card").hidden = true; $("endSheet").hidden = true; $("startSheet").hidden = false;
-    ["chipScore", "chipStreak", "btnMenu", "btnView"].forEach((i) => $(i).hidden = true);
-    $("modeLabel").textContent = "218 countries and territories";
-    globe.setAutoRotate(true); showBest();
-  }
-
-  // ---------- menu ----------
-  const regionWrap = $("regions");
-  Object.keys(REGIONS).forEach((r) => {
-    const b = document.createElement("button");
-    b.className = "opt"; b.type = "button"; b.dataset.region = r; b.setAttribute("aria-pressed", r === S.region);
-    b.textContent = r; regionWrap.appendChild(b);
-  });
-  function pick(wrap, attr, val) { wrap.querySelectorAll("[data-" + attr + "]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset[attr] === String(val)))); }
-  function showBest() {
-    const n = pool().length;
-    const b = store.get(`gq-best-${S.mode}-${S.region}-${S.len}`);
-    $("bestLine").textContent = `${n} places in ${S.region === "World" ? "the world" : S.region}` + (b ? ` · Your best: ${b.score} (${b.right}/${b.total})` : "");
-    if (S.region !== "World") globe.pointOfView(REGIONS[S.region], 1200);
-  }
-  $("modes").addEventListener("click", (e) => { const b = e.target.closest("[data-mode]"); if (!b) return; S.mode = b.dataset.mode; pick($("modes"), "mode", S.mode); showBest(); });
-  regionWrap.addEventListener("click", (e) => { const b = e.target.closest("[data-region]"); if (!b) return; S.region = b.dataset.region; pick(regionWrap, "region", S.region); showBest(); });
-  $("lengths").addEventListener("click", (e) => { const b = e.target.closest("[data-len]"); if (!b) return; S.len = +b.dataset.len; pick($("lengths"), "len", S.len); showBest(); });
-  $("btnStart").addEventListener("click", () => startRound());
-  $("btnAgain").addEventListener("click", () => startRound());
-  $("btnPractice").addEventListener("click", () => startRound(S.mistakes));
-  $("btnHome").addEventListener("click", toMenu);
-  $("btnMenu").addEventListener("click", toMenu);
-  $("btnView").addEventListener("click", () => globe.pointOfView(REGIONS[S.region], 1000));
-  $("answerForm").addEventListener("submit", (e) => { e.preventDefault(); submitTyped(); });
-  $("btnHint").addEventListener("click", hint);
-  $("btnSkip").addEventListener("click", skip);
-  $("btnNext").addEventListener("click", next);
-  document.addEventListener("keydown", (e) => { if (e.key === "Enter" && S.phase === "done" && document.activeElement !== $("btnNext")) { e.preventDefault(); next(); } });
-  showBest();
-})().catch((err) => {
-  startFailed = true;
-  let l = document.getElementById("loading");
-  if (!l) { l = document.createElement("div"); l.className = "loading"; l.id = "loading"; document.body.appendChild(l); }
-  l.style.opacity = 1; l.style.color = "#eef2f8";
-  l.innerHTML = '<div style="max-width:440px;padding:0 16px;text-align:center;line-height:1.5">The globe could not start.<br><small></small><br><small>Try reloading, or open the link in Chrome, Edge or Safari on a computer.</small></div>';
-  l.querySelector("small").textContent = String((err && err.message) || err);
-  console.error(err);
-});
-</script>
-
+<script src="js/strings.js"></script>
+<script src="js/game.js"></script>
 </body>
 </html>
