@@ -2,13 +2,13 @@
 // {name} style placeholders are filled in by the game. Keep the same placeholders in every language.
 window.STRINGS = {
   en: {
-    tagline: "218 countries and territories", home: "← Home",
+    tagline: "197 countries", home: "← Home",
     loading: "Loading the Earth…",
     heroA: "Learn the world,", heroB: "one place at a time",
-    intro: "A real satellite globe with 218 countries and territories. Spin it, zoom in, and type answers to learn the spelling.",
+    intro: "A real satellite globe with all 197 countries of the world. Spin it, zoom in, and type answers to learn the spelling.",
     labelGame: "Game", labelRegion: "Region", labelQuestions: "Questions", labelLevel: "Level", labelChallenge: "Challenge",
     levelEasy: "Easy", levelNormal: "Normal", levelEasyHint: "Easy: larger countries only, with extra help.",
-    optTimer: "Timer · 20 s", optLives: "3 lives", all: "All",
+    optTimer: "Timer · 20 s", optLives: "3 lives", optTerr: "Include 21 territories", zoomIn: "Zoom in", zoomOut: "Zoom out", all: "All",
     mode_study: "Study the map", mode_study_d: "Tap any country to see its flag, capital and name. No score.",
     mode_find: "Find the country", mode_find_d: "We name a country. You find it on the globe and tap it.",
     mode_flag: "Flags", mode_flag_d: "We show a flag. You find its country on the globe.",
@@ -51,13 +51,13 @@ window.STRINGS = {
   },
 
   ar: {
-    tagline: "218 دولة وإقليمًا", home: "→ الرئيسية",
+    tagline: "197 دولة", home: "→ الرئيسية",
     loading: "جارٍ تحميل الأرض…",
     heroA: "تعلّم العالم،", heroB: "مكانًا تلو الآخر",
-    intro: "كرة أرضية حقيقية بصور الأقمار الصناعية فيها 218 دولة وإقليمًا. دوّرها وكبّرها واكتب الإجابات لتتعلّم كتابتها.",
+    intro: "كرة أرضية حقيقية بصور الأقمار الصناعية فيها دول العالم الـ197 كلها. دوّرها وكبّرها واكتب الإجابات لتتعلّم كتابتها.",
     labelGame: "اللعبة", labelRegion: "المنطقة", labelQuestions: "عدد الأسئلة", labelLevel: "المستوى", labelChallenge: "التحدّي",
     levelEasy: "سهل", levelNormal: "عادي", levelEasyHint: "سهل: الدول الكبيرة فقط، مع مساعدة إضافية.",
-    optTimer: "مؤقّت · 20 ثانية", optLives: "3 فرص", all: "الكل",
+    optTimer: "مؤقّت · 20 ثانية", optLives: "3 فرص", optTerr: "أضف 21 إقليمًا", zoomIn: "تكبير", zoomOut: "تصغير", all: "الكل",
     mode_study: "استكشف الخريطة", mode_study_d: "اضغط على أي دولة لترى علمها وعاصمتها واسمها. بدون نقاط.",
     mode_find: "جِد الدولة", mode_find_d: "نذكر اسم دولة، وأنت تجدها على الكرة وتضغط عليها.",
     mode_flag: "الأعلام", mode_flag_d: "نعرض علمًا، وأنت تجد دولته على الكرة.",
@@ -107,13 +107,13 @@ window.STRINGS = {
   },
 
   fr: {
-    tagline: "218 pays et territoires", home: "← Accueil",
+    tagline: "197 pays", home: "← Accueil",
     loading: "Chargement de la Terre…",
     heroA: "Découvre le monde,", heroB: "un pays à la fois",
-    intro: "Un vrai globe vu par satellite avec 218 pays et territoires. Fais-le tourner, zoome et écris les réponses pour apprendre l'orthographe.",
+    intro: "Un vrai globe vu par satellite avec les 197 pays du monde. Fais-le tourner, zoome et écris les réponses pour apprendre l'orthographe.",
     labelGame: "Jeu", labelRegion: "Région", labelQuestions: "Questions", labelLevel: "Niveau", labelChallenge: "Défi",
     levelEasy: "Facile", levelNormal: "Normal", levelEasyHint: "Facile : seulement les grands pays, avec plus d'aide.",
-    optTimer: "Chrono · 20 s", optLives: "3 vies", all: "Tout",
+    optTimer: "Chrono · 20 s", optLives: "3 vies", optTerr: "Ajouter 21 territoires", zoomIn: "Zoomer", zoomOut: "Dézoomer", all: "Tout",
     mode_study: "Explorer la carte", mode_study_d: "Touche un pays pour voir son drapeau, sa capitale et son nom. Sans score.",
     mode_find: "Trouve le pays", mode_find_d: "On te donne un pays. Trouve-le sur le globe et touche-le.",
     mode_flag: "Drapeaux", mode_flag_d: "On montre un drapeau. Trouve son pays sur le globe.",

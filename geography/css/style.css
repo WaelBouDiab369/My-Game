@@ -122,6 +122,17 @@ html[dir="rtl"] .timer i { transform-origin: right; }
 .capmark { pointer-events: none; display: flex; align-items: center; gap: 6px; transform: translate(-6px, -50%); white-space: nowrap; }
 .capmark i { width: 10px; height: 10px; border-radius: 50%; background: #fff; box-shadow: 0 0 0 3px rgba(255,181,71,.9), 0 0 12px rgba(0,0,0,.8); flex: none; }
 .capmark span { font-family: var(--font-display); font-weight: 800; font-size: 14px; color: #fff; background: rgba(9,14,26,.82); border: 1px solid rgba(255,181,71,.6); border-radius: 8px; padding: 2px 8px; }
+/* ring markers for tiny countries: same size on screen at every zoom */
+.smark { width: 22px; height: 22px; margin: -11px 0 0 -11px; padding: 0; border-radius: 50%; border: 2.5px solid rgba(255,255,255,.92); background: rgba(9,14,26,.25); box-shadow: 0 0 0 1px rgba(0,0,0,.45), 0 0 10px rgba(0,0,0,.6); cursor: pointer; pointer-events: auto; transition: transform .15s; }
+.smark::after { content: ""; display: block; width: 6px; height: 6px; margin: auto; border-radius: 50%; background: currentColor; color: #fff; }
+.smark:hover, .smark[data-state="hover"] { transform: scale(1.25); border-color: #fff; }
+.smark[data-state="target"], .smark[data-state="hint"], .smark[data-state="close"] { border-color: var(--amber); color: var(--amber); }
+.smark[data-state="good"] { border-color: var(--good); color: var(--good); }
+.smark[data-state="bad"] { border-color: var(--bad); color: var(--bad); }
+.zoom { position: fixed; inset-inline-end: var(--gxr); top: 50%; transform: translateY(-50%); display: grid; gap: 6px; z-index: 7; }
+.zoom button { width: 44px; height: 44px; border-radius: 12px; border: 1px solid var(--line); background: var(--panel); color: var(--ink); font-size: 24px; line-height: 1; backdrop-filter: blur(8px); }
+.zoom button:hover { border-color: var(--amber); }
+.feedback .note { display: block; margin-top: 6px; font-size: 13px; color: var(--muted); }
 html[lang="ar"] body { font-size: 17px; }
 html[lang="ar"] * { letter-spacing: 0 !important; text-transform: none !important; }
 html[lang="ar"] .menu h1 { line-height: 1.25; }

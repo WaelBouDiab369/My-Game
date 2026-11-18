@@ -13,11 +13,14 @@ const pkg = (p) => path.join(PK, p);
 
 const wc = require(pkg("world-countries-5.1.0/package/countries.json"));
 const topo = require(pkg("world-atlas-2.0.2/package/countries-50m.json"));
+const topo10 = require(pkg("world-atlas-2.0.2/package/countries-10m.json"));
+const topojson = require(pkg("topojson-client-3.1.0/package/dist/topojson-client.js"));
 const cities = require(pkg("country-state-city-3.2.1/package/lib/assets/city.json"));
 const tz = (l) => require(pkg(`cldr-dates-full-47.0.0/package/main/${l}/timeZoneNames.json`)).main[l].dates.timeZoneNames.zone;
 const tzAr = tz("ar"), tzFr = tz("fr");
 
-// 193 UN members + these 25 = 218 places.
+// The game teaches 197 countries: the 193 UN members + Vatican City, Palestine, Kosovo and Taiwan.
+// The other 21 places below are territories, shown only when a player turns on "Include territories".
 const EXTRA = ["VAT", "PSE", "UNK", "TWN", "GRL", "PRI", "HKG", "MAC", "ESH", "NCL", "PYF", "GUM", "BMU", "CYM", "ABW", "CUW", "FRO", "ASM", "VIR", "VGB", "MNP", "GIB", "IMN", "TCA", "SXM"];
 const SOVEREIGN = { GRL: "DNK", PRI: "USA", HKG: "CHN", MAC: "CHN", ESH: "disputed", NCL: "FRA", PYF: "FRA", GUM: "USA", BMU: "GBR", CYM: "GBR", ABW: "NLD", CUW: "NLD", FRO: "DNK", ASM: "USA", VIR: "USA", VGB: "GBR", MNP: "USA", GIB: "GBR", IMN: "GBR", TCA: "GBR", SXM: "NLD" };
 
@@ -27,7 +30,7 @@ const CAP = {
   MYS: ["Kuala Lumpur", "Putrajaya"], HKG: [], MAC: [], MNG: ["Ulaanbaatar", "Ulan Bator"], PYF: ["Papeete"], ISL: ["Reykjavík", "Reykjavik"],
   KIR: ["South Tarawa", "Tarawa"], USA: ["Washington, D.C.", "Washington", "Washington DC"], MMR: ["Naypyidaw", "Nay Pyi Taw", "Naypyitaw"],
   UKR: ["Kyiv", "Kiev"], GUM: ["Hagåtña", "Agana", "Hagatna"], ATG: ["Saint John's", "St John's"], GRD: ["St. George's", "Saint George's"],
-  PSE: ["Ramallah", "East Jerusalem", "Jerusalem"], KAZ: ["Astana"], YEM: ["Sana'a", "Sanaa"], VAT: ["Vatican City", "Vatican"],
+  PSE: ["East Jerusalem", "Ramallah", "Jerusalem"], ISR: ["Jerusalem", "Tel Aviv"], KAZ: ["Astana"], YEM: ["Sana'a", "Sanaa"], VAT: ["Vatican City", "Vatican"],
   SMR: ["San Marino", "City of San Marino"], ESH: ["Laayoune", "El Aaiún", "El Aaiun"], MDA: ["Chișinău", "Chisinau"], PLW: ["Ngerulmud", "Melekeok"],
   CIV: ["Yamoussoukro"], BDI: ["Gitega"], NRU: ["Yaren"],
 };
@@ -49,13 +52,13 @@ const CAP_I18N = {
   TON: ["نوكو ألوفا", "Nuku'alofa"], TUR: ["أنقرة", "Ankara"], TCA: ["كوكبيرن تاون", "Cockburn Town"], VIR: ["شارلوت أمالي", "Charlotte-Amélie"],
   ARE: ["أبوظبي", "Abou Dabi"], USA: ["واشنطن العاصمة", "Washington"], VUT: ["بورت فيلا", "Port-Vila"], VNM: ["هانوي", "Hanoï"], YEM: ["صنعاء", "Sanaa"],
   // corrections to CLDR matches
-  ATG: ["سانت جونز", "Saint John's"], BOL: ["سوكري", "Sucre"], PSE: ["رام الله", "Ramallah"], LKA: ["سري جاياواردنابورا كوتي", "Sri Jayawardenepura Kotte"],
+  ATG: ["سانت جونز", "Saint John's"], BOL: ["سوكري", "Sucre"], PSE: ["القدس الشرقية", "Jérusalem-Est"], LKA: ["سري جاياواردنابورا كوتي", "Sri Jayawardenepura Kotte"],
   LBY: ["طرابلس", "Tripoli"], MNG: ["أولان باتور", "Oulan-Bator"], KOR: ["سيول", "Séoul"], UKR: ["كييف", "Kyiv"], KIR: ["تاراوا الجنوبية", "Tarawa-Sud"],
   VAT: ["الفاتيكان", "Cité du Vatican"], MEX: ["مكسيكو سيتي", "Mexico"], ISR: ["القدس", "Jérusalem"],
 };
 // Extra answers accepted in any language (other capitals of multi-capital countries, common spellings).
 const CAP_ALSO = {
-  BOL: ["لا باز"], ZAF: ["كيب تاون", "بلومفونتين", "Le Cap"], KOR: ["سول"], UKR: ["Kiev"], LKA: ["كولومبو"], MYS: ["بوتراجايا"], SWZ: ["لوبامبا"],
+  BOL: ["لا باز"], PSE: ["رام الله", "القدس"], ISR: ["تل أبيب", "Tel-Aviv", "Tel Aviv-Yafo"], ZAF: ["كيب تاون", "بلومفونتين", "Le Cap"], KOR: ["سول"], UKR: ["Kiev"], LKA: ["كولومبو"], MYS: ["بوتراجايا"], SWZ: ["لوبامبا"],
 };
 // Capital coordinates the city database does not cover (or gets wrong). [lat, lng]
 const CAP_LL = {
@@ -63,9 +66,22 @@ const CAP_LL = {
   CUW: [12.1091, -68.9316], FRO: [62.0079, -6.79], PYF: [-17.535, -149.5696], GIB: [36.1408, -5.3536], GRL: [64.1814, -51.6941], GUM: [13.4757, 144.7489],
   GNB: [11.8636, -15.5977], IMN: [54.1523, -4.4861], KAZ: [51.1694, 71.4491], UNK: [42.6629, 21.1655], MDG: [-18.8792, 47.5079], MHL: [7.0897, 171.3803],
   MRT: [18.0735, -15.9582], MEX: [19.4326, -99.1332], MCO: [43.7384, 7.4246], MNG: [47.8864, 106.9057], NCL: [-22.2758, 166.458], NER: [13.5116, 2.1254],
-  MNP: [15.185, 145.7467], PSE: [31.9038, 35.2034], PRY: [-25.2637, -57.5759], PRI: [18.4655, -66.1057], KNA: [17.3026, -62.7177], SXM: [18.026, -63.0458],
+  MNP: [15.185, 145.7467], PSE: [31.7834, 35.2339], PRY: [-25.2637, -57.5759], PRI: [18.4655, -66.1057], KNA: [17.3026, -62.7177], SXM: [18.026, -63.0458],
   SSD: [4.8594, 31.5713], TJK: [38.5598, 68.787], TCA: [21.4612, -71.1419], VIR: [18.3419, -64.9307], VAT: [41.9029, 12.4534], ESH: [27.1253, -13.1625],
   CRI: [9.9333, -84.0833], ARE: [24.4539, 54.3773], COL: [4.711, -74.0721], FSM: [6.9248, 158.1611], PAN: [8.9824, -79.5199], PLW: [7.5006, 134.6242],
+};
+// Short notes shown after answering and in Study mode, for capitals that are disputed or shared.
+const NOTE = {
+  ISR: {
+    en: "Israel declares Jerusalem its capital, but most countries keep their embassies in Tel Aviv. Both answers are accepted.",
+    ar: "تعلن إسرائيل القدس عاصمة لها، لكن معظم الدول تُبقي سفاراتها في تل أبيب. تُقبل الإجابتان.",
+    fr: "Israël déclare Jérusalem capitale, mais la plupart des pays gardent leur ambassade à Tel-Aviv. Les deux réponses sont acceptées.",
+  },
+  PSE: {
+    en: "Palestine declares East Jerusalem its capital; its government works from Ramallah. Both answers are accepted.",
+    ar: "تعلن فلسطين القدس الشرقية عاصمة لها، وتعمل حكومتها من رام الله. تُقبل الإجابتان.",
+    fr: "La Palestine déclare Jérusalem-Est capitale ; son gouvernement siège à Ramallah. Les deux réponses sont acceptées.",
+  },
 };
 const NAME_EN = { CIV: "Côte d'Ivoire", TUR: "Türkiye", CZE: "Czechia", COD: "DR Congo", VIR: "U.S. Virgin Islands", MKD: "North Macedonia", SWZ: "Eswatini", CPV: "Cabo Verde", TLS: "Timor-Leste" };
 const NAME_ALT = {
@@ -120,7 +136,7 @@ const out = sel.map((x) => {
     alt: [...new Set([x.name.common, x.name.official, x.translations.ara.official, x.translations.fra.official, ...(NAME_ALT[id] || [])])].filter((n) => n && n !== en),
     capital: capEn.length ? { en: capEn[0], ar: capAr, fr: capFr } : null,
     capAlt: capEn.length ? [...new Set([...capEn.slice(1), ...(CAP_ALSO[id] || [])])] : [],
-    capLL,
+    capLL, note: NOTE[id] || null,
   };
 });
 out.sort((a, b) => a.name.en.localeCompare(b.name.en));
@@ -128,6 +144,17 @@ if (missing.length) { console.error("Missing:", missing.join(", ")); process.exi
 
 fs.writeFileSync(path.join(OUT, "data/countries.json"), JSON.stringify(out));
 fs.writeFileSync(path.join(OUT, "data/borders.json"), JSON.stringify(topo));
+
+// Sharper outlines (1:10 million) for small countries and islands, which the 1:50 million borders draw too roughly.
+const SMALL = new Set(out.filter((o) => o.area < 30000).map((o) => o.id));
+const round = (c) => (typeof c[0] === "number" ? [+c[0].toFixed(4), +c[1].toFixed(4)] : c.map(round));
+const small = topojson.feature(topo10, topo10.objects.countries).features
+  .map((f) => ({ id: byNum[f.id] || REDIRECT[f.properties.name], geometry: f.geometry }))
+  .filter((f) => f.id && SMALL.has(f.id) && f.geometry)
+  .map((f) => ({ type: "Feature", id: f.id, properties: {}, geometry: { type: f.geometry.type, coordinates: round(f.geometry.coordinates) } }));
+fs.writeFileSync(path.join(OUT, "data/borders-small.json"), JSON.stringify({ type: "FeatureCollection", features: small }));
+const covered = new Set(small.map((f) => f.id));
+console.log(`Sharper outlines for ${covered.size} of ${SMALL.size} small places; still without a shape: ${out.filter((o) => !o.poly && !covered.has(o.id)).map((o) => o.id).join(", ") || "none"}.`);
 fs.mkdirSync(path.join(OUT, "flags"), { recursive: true });
 for (const o of out) fs.copyFileSync(pkg(`flag-icons-7.6.0/package/flags/4x3/${o.cc}.svg`), path.join(OUT, `flags/${o.cc}.svg`));
-console.log(`${out.length} places, ${out.filter((o) => o.capital).length} with capitals, ${out.length} flags.`);
+console.log(`${out.filter((o) => !o.sov).length} countries + ${out.filter((o) => o.sov).length} territories, ${out.filter((o) => o.capital).length} with capitals, ${out.length} flags.`);

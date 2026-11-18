@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="description" content="Learn world geography on a real satellite globe: 218 countries and territories, flags, capitals and country names in English, Arabic and French.">
+<meta name="description" content="Learn world geography on a real satellite globe: 197 countries (plus 21 optional territories), flags, capitals and country names in English, Arabic and French.">
 <title>GeoQuest Globe · MindQuest</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,800&family=Tajawal:wght@400;700;800&display=swap">
@@ -29,6 +29,11 @@
     </div>
   </div>
 </header>
+
+<div class="zoom" id="zoomBox" role="group" aria-label="Zoom" hidden>
+  <button type="button" id="zoomIn" aria-label="Zoom in" data-i18n-aria="zoomIn">+</button>
+  <button type="button" id="zoomOut" aria-label="Zoom out" data-i18n-aria="zoomOut">−</button>
+</div>
 
 <!-- Question card (all quiz games) -->
 <section class="card" id="card" hidden aria-live="polite">
@@ -65,6 +70,7 @@
       <dt data-i18n="areaLabel"></dt><dd id="sArea"></dd>
       <dt data-i18n="statusLabel"></dt><dd id="sStatus"></dd>
     </dl>
+    <p class="sub" id="sNote" hidden></p>
     <div class="actions">
       <button class="btn ghost" id="btnListen" type="button" data-i18n="listen"></button>
       <button class="btn ghost" id="btnQuizRegion" type="button"></button>
@@ -109,6 +115,7 @@
       <div class="opts">
         <button class="opt" type="button" id="optTimer" aria-pressed="false" data-i18n="optTimer"></button>
         <button class="opt" type="button" id="optLives" aria-pressed="false" data-i18n="optLives"></button>
+        <button class="opt" type="button" id="optTerr" aria-pressed="false" data-i18n="optTerr"></button>
       </div>
     </div>
     <p class="notice" id="glNotice" hidden data-i18n-html="glNotice"></p>

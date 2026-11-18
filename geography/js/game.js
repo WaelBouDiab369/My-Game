@@ -48,22 +48,56 @@ setTimeout(hideLoader, 8000);
   const flag = (c) => `<img class="flag-sm" src="flags/${c.cc}.svg" alt="">`;
 
   // ---------- data ----------
-  const [countries, topo] = await Promise.all([getJSON("data/countries.json"), getJSON("data/borders.json")]);
+  const [countries, topo, smallGeo] = await Promise.all([getJSON("data/countries.json"), getJSON("data/borders.json"), getJSON("data/borders-small.json")]);
   const byId = Object.fromEntries(countries.map((c) => [c.id, c]));
-  const features = topojson.feature(topo, topo.objects.countries).features.filter((f) => byId[f.id]);
-  // Tiny places get a tappable dot so they can be found and clicked.
-  const dots = countries.filter((c) => !c.poly || c.area < 1500).map((c) => ({ id: c.id, lat: c.ll[0], lng: c.ll[1] }));
+  // Small countries and islands use sharper 1:10m outlines; everything else the 1:50m ones.
+  const smallIds = new Set(smallGeo.features.map((f) => f.id));
+  const features = [
+    ...topojson.feature(topo, topo.objects.countries).features.filter((f) => byId[f.id] && !smallIds.has(f.id)),
+    ...smallGeo.features.filter((f) => byId[f.id]),
+  ];
+  for (const f of features) byId[f.id].poly = true;
+  // Safety: a ring wound the wrong way would cover the whole planet except itself. Turn any such ring round,
+  // and drop rings too small to have an inside after rounding.
+  for (const f of features) {
+    const g = f.geometry, polys = g.type === "Polygon" ? [g.coordinates] : g.type === "MultiPolygon" ? g.coordinates : [];
+    for (const poly of polys) {
+      for (let i = poly.length - 1; i >= 0; i--) if (poly[i].length < 4) poly.splice(i, 1);
+      if (poly.length && d3.geoArea({ type: "Polygon", coordinates: poly }) > 2 * Math.PI) poly.forEach((ring) => ring.reverse());
+    }
+    if (g.type === "MultiPolygon") g.coordinates = g.coordinates.filter((p) => p.length);
+  }
+  // Exact hit testing: which country contains this point on the Earth? Bounding boxes skip most shapes quickly.
+  const boxes = features.map((f) => d3.geoBounds(f));
+  function countryAt(lat, lng) {
+    let found = null;
+    for (let i = 0; i < features.length; i++) {
+      const [[x0, y0], [x1, y1]] = boxes[i];
+      if (lat < y0 - 0.01 || lat > y1 + 0.01) continue;
+      if (x0 <= x1 ? (lng < x0 - 0.01 || lng > x1 + 0.01) : (lng < x0 - 0.01 && lng > x1 + 0.01)) continue;
+      if (d3.geoContains(features[i], [lng, lat])) { found = features[i].id; if (smallIds.has(found)) break; }
+    }
+    if (found) return found;
+    // Atolls and river-mouth capitals: a tap in the water within ~30 km of a tiny country counts as that country.
+    let best = null, bestD = 0.005;
+    for (const m of nearPoints) { const d = d3.geoDistance([lng, lat], [m.lng, m.lat]); if (d < bestD) { bestD = d; best = m.id; } }
+    return best;
+  }
+  // Tiny places also get a ring marker that stays the same size on screen, so they are easy to see and tap.
+  const marks = countries.filter((c) => c.area < 3000).map((c) => ({ kind: "mark", id: c.id, lat: c.capLL ? c.capLL[0] : c.ll[0], lng: c.capLL ? c.capLL[1] : c.ll[1], el: null }));
+  const markById = Object.fromEntries(marks.map((m) => [m.id, m]));
+  const nearPoints = countries.filter((c) => smallIds.has(c.id)).map((c) => ({ id: c.id, lat: c.capLL ? c.capLL[0] : c.ll[0], lng: c.capLL ? c.capLL[1] : c.ll[1] }));
 
   // ---------- state ----------
   const saved = store.get("gq-settings") || {};
   const S = {
     mode: MODES.includes(saved.mode) ? saved.mode : "find", region: REGIONS[saved.region] ? saved.region : "World",
     len: [10, 25, 0].includes(saved.len) ? saved.len : 10, level: saved.level === "easy" ? "easy" : "normal",
-    timer: !!saved.timer, lives: !!saved.lives,
+    timer: !!saved.timer, lives: !!saved.lives, terr: !!saved.terr,
     queue: [], i: 0, score: 0, streak: 0, right: 0, mistakes: [], phase: "idle", attempts: 0, hints: 0,
     hover: null, flash: {}, started: 0, active: false, livesLeft: 3, deadline: 0, fb: null, cap: null, sel: null, end: null,
   };
-  const saveSettings = () => store.set("gq-settings", { mode: S.mode, region: S.region, len: S.len, level: S.level, timer: S.timer, lives: S.lives });
+  const saveSettings = () => store.set("gq-settings", { mode: S.mode, region: S.region, len: S.len, level: S.level, timer: S.timer, lives: S.lives, terr: S.terr });
   const current = () => S.queue[S.i];
   const quizActive = () => S.active && S.mode !== "study";
   const canTap = () => S.active && (TAP_MODES.has(S.mode) || S.mode === "study");
@@ -87,31 +121,54 @@ setTimeout(hideLoader, 8000);
       .polygonCapColor(capColor)
       .polygonSideColor(() => "rgba(0,0,0,0)")
       .polygonStrokeColor(strokeColor)
-      .polygonAltitude((f) => (S.flash[f.id] || f.id === S.hover || isTarget(f.id)) ? 0.012 : 0.004)
-      .polygonsTransitionDuration(250)
-      .polygonLabel((f) => hoverLabel(f.id))
-      .onPolygonHover((f) => { if (!canTap()) return; S.hover = f ? f.id : null; el.style.cursor = f ? "pointer" : "grab"; refresh(); })
-      .onPolygonClick((f) => guessPlace(f.id))
-      .pointsData([])
-      .pointLat("lat").pointLng("lng")
-      .pointAltitude(0.006).pointRadius(0.28)
-      .pointColor((d) => S.flash[d.id] ? flashColor(S.flash[d.id]) : (d.id === S.hover ? "#ffffff" : "rgba(255,255,255,0.75)"))
-      .pointLabel((d) => hoverLabel(d.id))
-      .onPointHover((d) => { if (!canTap()) return; S.hover = d ? d.id : null; refresh(); })
-      .onPointClick((d) => guessPlace(d.id))
+      // All shapes lie flat at one height, so the outline you see is exactly where a click lands.
+      .polygonAltitude(0.005)
+      .polygonsTransitionDuration(200)
+      .onPolygonClick((f, ev) => tapAt(ev))
+      .onGlobeClick((coords, ev) => tapAt(ev))
       .htmlElementsData([])
-      .htmlLat("lat").htmlLng("lng").htmlAltitude(0.012)
-      .htmlElement((d) => { const m = document.createElement("div"); m.className = "capmark"; m.innerHTML = "<i></i><span dir=\"auto\"></span>"; m.querySelector("span").textContent = d.label; return m; })
+      .htmlLat("lat").htmlLng("lng").htmlAltitude((d) => (d.kind === "cap" ? 0.012 : 0.008))
+      .htmlTransitionDuration(0)
+      .htmlElement((d) => {
+        if (d.kind === "mark") { if (!d.el) d.el = makeMarkEl(d); return d.el; }
+        const m = document.createElement("div"); m.className = "capmark"; m.innerHTML = "<i></i><span dir=\"auto\"></span>"; m.querySelector("span").textContent = d.label; return m;
+      })
       .onGlobeReady(hideLoader);
+    // Work out the country from the exact point on the Earth under the pointer.
+    const at = (ev) => { const r = el.getBoundingClientRect(); const c = g.toGlobeCoords(ev.clientX - r.left, ev.clientY - r.top); return c ? countryAt(c.lat, c.lng) : null; };
+    function tapAt(ev) { const id = at(ev); if (id) guessPlace(id); }
+    const tip = document.createElement("div");
+    tip.style.cssText = "position:fixed;pointer-events:none;z-index:4;transform:translate(12px,12px)";
+    document.body.appendChild(tip);
+    let pending = null;
+    el.addEventListener("pointermove", (ev) => {
+      if (ev.pointerType !== "mouse" || ev.buttons) { tip.innerHTML = ""; return; }
+      if (pending) return;
+      pending = requestAnimationFrame(() => {
+        pending = null;
+        const id = at(ev);
+        if (canTap() && id !== S.hover) { S.hover = id; refresh(); }
+        el.style.cursor = id && canTap() ? "pointer" : "grab";
+        tip.innerHTML = id ? hoverLabel(id) : ""; tip.style.left = ev.clientX + "px"; tip.style.top = ev.clientY + "px";
+      });
+    });
+    el.addEventListener("pointerleave", () => { tip.innerHTML = ""; });
+    let shownMarks = [], cap = null;
+    const pushHtml = () => g.htmlElementsData([...shownMarks, ...(cap ? [cap] : [])]);
     const ctrl = g.controls();
     ctrl.autoRotate = true; ctrl.autoRotateSpeed = 0.35;
     const resize = () => g.width(window.innerWidth).height(window.innerHeight);
     window.addEventListener("resize", resize); resize();
     return {
-      update(points) { g.polygonsData(features); g.pointsData(points); },
+      update(points) {
+        g.polygonsData(features);
+        if (points.length !== shownMarks.length || points.some((m, i) => m !== shownMarks[i])) { shownMarks = points; pushHtml(); }
+        styleMarks();
+      },
       pointOfView(pov, ms) { g.pointOfView(pov, ms); },
       setAutoRotate(on) { ctrl.autoRotate = on; },
-      setCapital(m) { g.htmlElementsData(m ? [m] : []); },
+      setCapital(m) { const next = m ? { kind: "cap", ...m } : null; if (JSON.stringify(next) !== JSON.stringify(cap)) { cap = next; pushHtml(); } },
+      zoomBy(f) { const p = g.pointOfView(); g.pointOfView({ ...p, altitude: Math.min(4, Math.max(0.03, p.altitude * f)) }, 450); },
     };
   }
 
@@ -161,9 +218,9 @@ setTimeout(hideLoader, 8000);
       for (const d of pts) {
         if (!front(d.lng, d.lat)) continue;
         const [x, y] = proj([d.lng, d.lat]);
-        ctx.beginPath(); ctx.arc(x, y, 5, 0, Math.PI * 2);
-        ctx.fillStyle = S.flash[d.id] ? SOLID[S.flash[d.id]] : d.id === S.hover ? "#ffffff" : "rgba(255,255,255,0.85)";
-        ctx.fill(); ctx.lineWidth = 1; ctx.strokeStyle = "rgba(0,0,0,0.6)"; ctx.stroke();
+        const col = S.flash[d.id] ? SOLID[S.flash[d.id]] : isTarget(d.id) ? "#f5a83c" : d.id === S.hover ? "#ffffff" : "rgba(255,255,255,0.9)";
+        ctx.beginPath(); ctx.arc(x, y, 8, 0, Math.PI * 2); ctx.lineWidth = 2.5; ctx.strokeStyle = col; ctx.stroke();
+        ctx.beginPath(); ctx.arc(x, y, 3, 0, Math.PI * 2); ctx.fillStyle = col; ctx.fill();
       }
       ctx.beginPath(); path({ type: "Sphere" }); ctx.strokeStyle = "rgba(127,178,255,0.55)"; ctx.lineWidth = 2; ctx.stroke();
       if (mark && front(mark.lng, mark.lat)) {
@@ -197,12 +254,11 @@ setTimeout(hideLoader, 8000);
       for (const d of pts) {
         if (!front(d.lng, d.lat)) continue;
         const [px, py] = proj([d.lng, d.lat]);
-        if (Math.hypot(px - x, py - y) < 10) return d.id;
+        if (Math.hypot(px - x, py - y) < 14) return d.id;
       }
       const p = proj.invert([x, y]);
       if (!p || !front(p[0], p[1])) return null;
-      for (const f of features) if (d3.geoContains(f, p)) return f.id;
-      return null;
+      return countryAt(p[1], p[0]);
     }
     function showTip(id, x, y) {
       tip.innerHTML = id ? hoverLabel(id) : "";
@@ -220,7 +276,7 @@ setTimeout(hideLoader, 8000);
       if (pointers.has(e.pointerId)) pointers.set(e.pointerId, [e.clientX, e.clientY]);
       if (pinch && pointers.size === 2) {
         const [a, b] = [...pointers.values()];
-        pov.altitude = Math.min(4, Math.max(0.08, pinch.alt * pinch.d / Math.max(10, Math.hypot(a[0] - b[0], a[1] - b[1]))));
+        pov.altitude = Math.min(4, Math.max(0.03, pinch.alt * pinch.d / Math.max(10, Math.hypot(a[0] - b[0], a[1] - b[1]))));
         dirty = true; return;
       }
       if (drag) {
@@ -246,7 +302,7 @@ setTimeout(hideLoader, 8000);
     canvas.addEventListener("pointerleave", () => showTip(null));
     canvas.addEventListener("wheel", (e) => {
       e.preventDefault(); anim = null;
-      pov.altitude = Math.min(4, Math.max(0.08, pov.altitude * Math.exp(e.deltaY * 0.0012))); dirty = true;
+      pov.altitude = Math.min(4, Math.max(0.03, pov.altitude * Math.exp(e.deltaY * 0.0012))); dirty = true;
     }, { passive: false });
 
     return {
@@ -254,6 +310,7 @@ setTimeout(hideLoader, 8000);
       pointOfView(p, ms) { if (!ms) { pov = { ...p }; dirty = true; } else anim = { from: { ...pov }, to: p, t0: performance.now(), ms }; },
       setAutoRotate(on) { auto = on; },
       setCapital(m) { mark = m; dirty = true; },
+      zoomBy(f) { anim = { from: { ...pov }, to: { ...pov, altitude: Math.min(4, Math.max(0.03, pov.altitude * f)) }, t0: performance.now(), ms: 400 }; },
     };
   }
 
@@ -275,17 +332,34 @@ setTimeout(hideLoader, 8000);
     const c = byId[id]; if (!c) return "";
     return `<div class="tooltip" dir="auto">${flag(c)} ${esc(nm(c))}${c.capital ? " · " + esc(capOf(c)) : ""}</div>`;
   }
+  const inPlay = (c) => S.mode === "study" || S.terr || !c.sov;
   function refresh() {
     let pts = [];
-    if (canTap()) pts = dots;
-    else { const c = quizActive() ? current() : null; if (c && !c.poly) pts = [{ id: c.id, lat: c.ll[0], lng: c.ll[1] }]; }
+    if (canTap()) pts = marks.filter((m) => inPlay(byId[m.id]));
+    else { const c = quizActive() ? current() : null; if (c && markById[c.id]) pts = [markById[c.id]]; }
     globe.update(pts);
     globe.setCapital(S.cap);
+  }
+  function makeMarkEl(m) {
+    const b = document.createElement("button");
+    b.type = "button"; b.className = "smark"; b.setAttribute("aria-label", "");
+    b.addEventListener("click", (e) => { e.stopPropagation(); guessPlace(m.id); });
+    b.addEventListener("pointerdown", (e) => e.stopPropagation());
+    b.addEventListener("mouseenter", () => { if (canTap()) { S.hover = m.id; refresh(); } });
+    b.addEventListener("mouseleave", () => { if (S.hover === m.id) { S.hover = null; refresh(); } });
+    return b;
+  }
+  function styleMarks() {
+    for (const m of marks) {
+      if (!m.el) continue;
+      const k = S.flash[m.id] || (isTarget(m.id) ? "target" : m.id === S.hover ? "hover" : "");
+      m.el.dataset.state = k;
+    }
   }
   function showCap(c) { S.cap = c && c.capLL ? { lat: c.capLL[0], lng: c.capLL[1], label: capOf(c) } : null; }
   function flyTo(c, ms = 1400) {
     const size = Math.sqrt(Math.max(c.area || 1, 1));
-    const altitude = Math.min(2.2, Math.max(0.28, size / 1400));
+    const altitude = Math.min(2.2, Math.max(0.12, size / 1400));
     // Aim a little south so the country sits above the card.
     const lat = Math.max(-80, c.ll[0] - altitude * 14);
     globe.pointOfView({ lat, lng: c.ll[1], altitude }, ms);
@@ -344,7 +418,7 @@ setTimeout(hideLoader, 8000);
 
   // ---------- quiz ----------
   function pool() {
-    let p = countries.filter((c) => (S.region === "World" || c.region === S.region) && (S.mode !== "capital" || c.capital));
+    let p = countries.filter((c) => (S.region === "World" || c.region === S.region) && (S.mode !== "capital" || c.capital) && (S.terr || !c.sov));
     if (S.level === "easy" && S.mode !== "study") {
       // Easy: independent countries only, the larger half of the region.
       p = p.filter((c) => !c.sov).sort((a, b) => b.area - a.area);
@@ -358,7 +432,7 @@ setTimeout(hideLoader, 8000);
   function showHud(on) {
     $("chipScore").hidden = !on || S.mode === "study"; $("chipStreak").hidden = !on || S.mode === "study";
     $("chipLives").hidden = !on || S.mode === "study" || !S.lives;
-    $("btnMenu").hidden = !on; $("btnView").hidden = !on;
+    $("btnMenu").hidden = !on; $("btnView").hidden = !on; $("zoomBox").hidden = !on;
     updateLabel();
   }
   function updateLabel() { $("modeLabel").textContent = S.active ? `${t("mode_" + S.mode)} · ${regionName(S.region)}` : t("tagline"); }
@@ -394,6 +468,8 @@ setTimeout(hideLoader, 8000);
     refresh();
   }
 
+  // Disputed or shared capitals carry a short explanation, shown once the player has answered.
+  function noteHtml(c) { return S.mode === "capital" && c.note ? `<span class="note">${esc(c.note[lang] || c.note.en)}</span>` : ""; }
   function terrNote(c) { return c.sov ? (c.sov === "disputed" ? t("disputed") : t("territoryOf", { country: esc(nm(byId[c.sov])) })) : ""; }
   function renderAsk() {
     const c = current(); if (!c) return;
@@ -473,11 +549,11 @@ setTimeout(hideLoader, 8000);
     showCap(c);
     if (r.kind === "good") {
       win(100); S.flash = { [c.id]: "good" };
-      setFb("good", () => t("correctTyped", { flag: flag(c), answer: `<b>${esc(shown(c))}</b>` }));
+      setFb("good", () => t("correctTyped", { flag: flag(c), answer: `<b>${esc(shown(c))}</b>` }) + noteHtml(c));
       finishQuestion();
     } else if (r.kind === "close") {
       win(50); S.flash = { [c.id]: "close" };
-      setFb("close", () => `${t("almost")}<span class="spell" dir="auto">${diffSpell(val, r.match)}</span>`);
+      setFb("close", () => `${t("almost")}<span class="spell" dir="auto">${diffSpell(val, r.match)}</span>` + noteHtml(c));
       finishQuestion();
     } else {
       lose(c); S.flash = { [c.id]: "bad" };
@@ -489,7 +565,7 @@ setTimeout(hideLoader, 8000);
   function startRetype(lead) {
     S.phase = "retype"; stopTimer();
     const c = current();
-    setFb("bad", () => `${lead}<span class="spell" dir="auto">${esc(shown(c))}</span>${t("typeOnce")}`);
+    setFb("bad", () => `${lead}<span class="spell" dir="auto">${esc(shown(c))}</span>${t("typeOnce")}` + noteHtml(c));
     const inp = $("answer"); inp.value = ""; inp.placeholder = t("phRetype", { w: shown(c) }); inp.focus({ preventScroll: true });
     $("btnHint").hidden = true; $("hintline").hidden = true;
   }
@@ -626,7 +702,8 @@ setTimeout(hideLoader, 8000);
     $("sName").textContent = nm(c);
     $("sCapital").textContent = c.capital ? capOf(c) : t("noCapital");
     $("sRegion").textContent = regionName(c.region) + (c.sub ? " · " + subName(c.sub) : "");
-    $("sArea").textContent = Math.round(c.area).toLocaleString(LOCALE[lang]) + " " + t("km2");
+    $("sArea").textContent = (c.area < 10 ? c.area.toLocaleString(LOCALE[lang], { maximumFractionDigits: 2 }) : Math.round(c.area).toLocaleString(LOCALE[lang])) + " " + t("km2");
+    $("sNote").hidden = !c.note; if (c.note) $("sNote").textContent = c.note[lang] || c.note.en;
     $("sStatus").textContent = c.sov ? (c.sov === "disputed" ? t("disputedShort") : t("territoryShort", { country: nm(byId[c.sov]) })) : t("independent");
     $("btnQuizRegion").textContent = t("quizRegion", { region: regionName(c.region) });
     $("btnListen").hidden = !("speechSynthesis" in window);
@@ -682,7 +759,7 @@ setTimeout(hideLoader, 8000);
     modeWrap.querySelectorAll("[data-mode]").forEach((b) => { b.querySelector("strong").textContent = t("mode_" + b.dataset.mode); b.querySelector("span").textContent = t("mode_" + b.dataset.mode + "_d"); });
     regionWrap.querySelectorAll("[data-region]").forEach((b) => { b.textContent = regionName(b.dataset.region); });
     pick(modeWrap, "mode", S.mode); pick(regionWrap, "region", S.region); pick($("lengths"), "len", S.len); pick($("levels"), "level", S.level);
-    $("optTimer").setAttribute("aria-pressed", String(S.timer)); $("optLives").setAttribute("aria-pressed", String(S.lives));
+    $("optTimer").setAttribute("aria-pressed", String(S.timer)); $("optLives").setAttribute("aria-pressed", String(S.lives)); $("optTerr").setAttribute("aria-pressed", String(S.terr));
     document.querySelectorAll("[data-quiz-only]").forEach((g) => (g.hidden = S.mode === "study"));
     $("btnStart").textContent = S.mode === "study" ? t("startStudy") : t("start");
     const n = S.mode === "study" ? countries.filter((c) => S.region === "World" || c.region === S.region).length : pool().length;
@@ -697,6 +774,7 @@ setTimeout(hideLoader, 8000);
     root.lang = lang; root.dir = lang === "ar" ? "rtl" : "ltr";
     document.querySelectorAll("[data-i18n]").forEach((el) => { el.textContent = t(el.dataset.i18n); });
     document.querySelectorAll("[data-i18n-html]").forEach((el) => { el.innerHTML = t(el.dataset.i18nHtml); });
+    document.querySelectorAll("[data-i18n-aria]").forEach((el) => { el.setAttribute("aria-label", t(el.dataset.i18nAria)); });
     pick($("langSwitch"), "lang", lang);
     renderMenu(); updateLabel();
     if (quizActive()) renderAsk();
@@ -714,12 +792,15 @@ setTimeout(hideLoader, 8000);
   $("levels").addEventListener("click", (e) => { const b = e.target.closest("[data-level]"); if (!b) return; S.level = b.dataset.level; saveSettings(); renderMenu(); });
   $("optTimer").addEventListener("click", () => { S.timer = !S.timer; saveSettings(); renderMenu(); });
   $("optLives").addEventListener("click", () => { S.lives = !S.lives; saveSettings(); renderMenu(); });
+  $("optTerr").addEventListener("click", () => { S.terr = !S.terr; saveSettings(); renderMenu(); refresh(); });
   $("btnStart").addEventListener("click", () => startRound());
   $("btnAgain").addEventListener("click", () => startRound());
   $("btnPractice").addEventListener("click", () => startRound(S.mistakes));
   $("btnHome").addEventListener("click", toMenu);
   $("btnMenu").addEventListener("click", toMenu);
   $("btnView").addEventListener("click", () => globe.pointOfView(REGIONS[S.region], 1000));
+  $("zoomIn").addEventListener("click", () => globe.zoomBy(0.55));
+  $("zoomOut").addEventListener("click", () => globe.zoomBy(1.8));
   $("answerForm").addEventListener("submit", (e) => { e.preventDefault(); submitTyped(); });
   $("btnHint").addEventListener("click", hint);
   $("btnSkip").addEventListener("click", () => giveUp(false));
