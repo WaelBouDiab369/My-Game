@@ -1,9 +1,9 @@
-// Builds data/countries.json, data/borders.json and flags/*.svg from npm packages.
+// Builds geography/data/countries.json, geography/data/borders.json and geography/flags/*.svg from npm packages.
 //
 //   mkdir pkgs && cd pkgs
 //   npm pack world-countries@5.1.0 world-atlas@2.0.2 country-state-city@3.2.1 cldr-dates-full@47.0.0 flag-icons@7.6.0
 //   for f in *.tgz; do mkdir -p "${f%.tgz}" && tar xzf "$f" -C "${f%.tgz}"; done
-//   cd .. && node tools/build-data.js pkgs .
+//   cd .. && node tools/build-data.js pkgs geography
 //
 // Edit the tables below to change which places are in the game, their capitals or translations.
 const fs = require("fs");

@@ -33,6 +33,7 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--amber); out
 .chip.streak b { color: var(--amber); }
 .iconbtn { background: var(--panel); border: 1px solid var(--line); border-radius: 999px; padding: 6px 12px; font-size: 14px; backdrop-filter: blur(8px); }
 .iconbtn:hover { border-color: var(--amber); }
+a.iconbtn { text-decoration: none; color: var(--ink); }
 
 .card { position: fixed; left: 50%; transform: translateX(-50%); max-height: calc(100% - 90px); overflow-y: auto; bottom: calc(env(safe-area-inset-bottom, 0px) + 16px); width: min(560px, calc(100% - 32px)); background: var(--panel); border: 1px solid var(--line); border-radius: 18px; padding: 16px 18px; backdrop-filter: blur(14px); box-shadow: 0 20px 60px rgba(0,0,0,.5); z-index: 6; display: grid; gap: 12px; }
 .progress { height: 4px; border-radius: 4px; background: var(--line); overflow: hidden; }

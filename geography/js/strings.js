@@ -2,7 +2,7 @@
 // {name} style placeholders are filled in by the game. Keep the same placeholders in every language.
 window.STRINGS = {
   en: {
-    tagline: "218 countries and territories",
+    tagline: "218 countries and territories", home: "← Home",
     loading: "Loading the Earth…",
     heroA: "Learn the world,", heroB: "one place at a time",
     intro: "A real satellite globe with 218 countries and territories. Spin it, zoom in, and type answers to learn the spelling.",
@@ -51,7 +51,7 @@ window.STRINGS = {
   },
 
   ar: {
-    tagline: "218 دولة وإقليمًا",
+    tagline: "218 دولة وإقليمًا", home: "→ الرئيسية",
     loading: "جارٍ تحميل الأرض…",
     heroA: "تعلّم العالم،", heroB: "مكانًا تلو الآخر",
     intro: "كرة أرضية حقيقية بصور الأقمار الصناعية فيها 218 دولة وإقليمًا. دوّرها وكبّرها واكتب الإجابات لتتعلّم كتابتها.",
@@ -107,7 +107,7 @@ window.STRINGS = {
   },
 
   fr: {
-    tagline: "218 pays et territoires",
+    tagline: "218 pays et territoires", home: "← Accueil",
     loading: "Chargement de la Terre…",
     heroA: "Découvre le monde,", heroB: "un pays à la fois",
     intro: "Un vrai globe vu par satellite avec 218 pays et territoires. Fais-le tourner, zoome et écris les réponses pour apprendre l'orthographe.",

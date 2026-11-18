@@ -3,141 +3,526 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="description" content="Learn world geography on a real satellite globe: 218 countries and territories, flags, capitals and country names in English, Arabic and French.">
-<title>GeoQuest Globe</title>
+<meta name="description" content="Science games for curious kids and adults: geography, chemistry, physics, math and biology, in English, Arabic and French.">
+<title>MindQuest Home</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,800&family=Tajawal:wght@400;700;800&display=swap">
-<link rel="stylesheet" href="css/style.css">
+<style>
+/* Layout: a living "network of knowledge" canvas fills the back; header, hero with a fact card, then a category grid where the playable science is the large tile. */
+:root {
+  --ink: #060912;
+  --panel: rgba(12, 17, 32, 0.72);
+  --panel-solid: #0d1324;
+  --text: #f1f4fb;
+  --muted: #a3aec4;
+  --line: rgba(200, 215, 245, 0.14);
+  --geo: #2ee6c5;
+  --chem: #b8f03a;
+  --phys: #4d8dff;
+  --math: #ffb547;
+  --bio: #ff5c9a;
+  --font-display: "Bricolage Grotesque", "Tajawal", "Segoe UI", system-ui, sans-serif;
+  --font-body: "Atkinson Hyperlegible", "Tajawal", "Segoe UI", system-ui, sans-serif;
+  color-scheme: dark;
+}
+html, body { min-height: 100%; }
+body { background: var(--ink); color: var(--text); font-family: var(--font-body); font-size: 16px; }
+[hidden] { display: none !important; }
+#bg { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 0; display: block; }
+.page { position: relative; z-index: 1; max-width: 1180px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 18px 40px; display: grid; gap: 36px; }
+a { color: inherit; }
+button { font: inherit; color: inherit; cursor: pointer; }
+:focus-visible { outline: 3px solid var(--math); outline-offset: 3px; }
+
+/* header */
+.top { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.logo { display: flex; align-items: center; gap: 10px; font-family: var(--font-display); font-weight: 800; font-size: 22px; letter-spacing: -0.02em; text-decoration: none; }
+.logo svg { width: 34px; height: 34px; }
+.lang { display: inline-flex; background: var(--panel); border: 1px solid var(--line); border-radius: 999px; padding: 3px; backdrop-filter: blur(10px); }
+.lang button { background: none; border: 0; border-radius: 999px; padding: 6px 12px; font-size: 14px; color: var(--muted); }
+.lang button[aria-pressed="true"] { background: var(--text); color: var(--ink); font-weight: 700; }
+
+/* hero */
+.hero { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 28px; align-items: end; }
+.hero h1 { font-family: var(--font-display); font-weight: 800; font-size: clamp(40px, 7vw, 84px); line-height: 0.95; letter-spacing: -0.035em; margin: 0; text-wrap: balance; }
+.hero h1 .spark { background: linear-gradient(90deg, var(--geo), var(--chem) 30%, var(--math) 55%, var(--bio) 80%, var(--phys)); background-size: 200% 100%; -webkit-background-clip: text; background-clip: text; color: transparent; animation: shimmer 8s linear infinite; }
+@keyframes shimmer { to { background-position: -200% 0; } }
+.hero p { margin: 16px 0 0; color: var(--muted); font-size: 18px; line-height: 1.5; max-width: 52ch; }
+.fact { background: var(--panel); border: 1px solid var(--line); border-radius: 20px; padding: 18px 20px; backdrop-filter: blur(12px); display: grid; gap: 10px; min-height: 150px; align-content: start; }
+.fact .label { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+.fact .label b { display: inline-flex; align-items: center; gap: 8px; color: var(--text); }
+.fact .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--fact-c, var(--geo)); box-shadow: 0 0 12px var(--fact-c, var(--geo)); }
+.fact .text { font-family: var(--font-display); font-weight: 500; font-size: 21px; line-height: 1.3; transition: opacity .4s; }
+.fact .text.fade { opacity: 0; }
+.fact .cat { font-size: 13px; color: var(--fact-c, var(--geo)); font-weight: 700; }
+.fact .nextfact { background: none; border: 1px solid var(--line); border-radius: 999px; padding: 4px 10px; font-size: 12px; color: var(--muted); letter-spacing: 0; text-transform: none; }
+.fact .nextfact:hover { color: var(--text); border-color: var(--text); }
+
+/* categories */
+.section-title { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: -16px; }
+.section-title h2 { font-family: var(--font-display); font-weight: 800; font-size: 24px; margin: 0; }
+.section-title span { color: var(--muted); font-size: 14px; }
+.grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 16px; }
+.cat-card { --c: var(--geo); position: relative; display: grid; grid-template-rows: auto 1fr auto; gap: 14px; text-decoration: none; text-align: start; background: linear-gradient(160deg, color-mix(in srgb, var(--c) 16%, transparent), transparent 55%), var(--panel); border: 1px solid var(--line); border-radius: 24px; padding: 20px; backdrop-filter: blur(12px); overflow: hidden; transition: transform .25s ease, border-color .25s, box-shadow .25s; min-height: 330px; flex: 0 0 calc((100% - 64px) / 5); min-width: 0; box-sizing: border-box; }
+.cat-card::after { content: ""; position: absolute; inset: auto -30% -60% auto; width: 70%; aspect-ratio: 1; border-radius: 50%; background: radial-gradient(circle, color-mix(in srgb, var(--c) 35%, transparent), transparent 70%); pointer-events: none; transition: transform .4s; }
+.cat-card:hover, .cat-card:focus-visible { transform: translateY(-4px); border-color: color-mix(in srgb, var(--c) 70%, transparent); box-shadow: 0 18px 50px -20px var(--c); }
+.cat-card:hover::after { transform: scale(1.25); }
+.cat-card .art { width: 112px; height: 112px; max-width: 100%; display: block; }
+.cat-card h3 { font-family: var(--font-display); font-weight: 800; font-size: 27px; line-height: 1.05; margin: 0; letter-spacing: -0.02em; overflow-wrap: anywhere; }
+.cat-card p { margin: 8px 0 0; color: var(--muted); line-height: 1.45; max-width: 40ch; }
+.cat-card .foot { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; position: relative; z-index: 1; }
+.pill { display: inline-flex; align-items: center; gap: 6px; border-radius: 999px; padding: 6px 12px; font-size: 13px; font-weight: 700; }
+.pill.play { background: var(--c); color: #071016; }
+.pill.play svg { width: 14px; height: 14px; }
+.pill.soon { border: 1px dashed color-mix(in srgb, var(--c) 60%, transparent); color: var(--c); }
+.meta { font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.cat-card.shake { animation: shake .4s; }
+@keyframes shake { 25% { translate: -6px 0; } 75% { translate: 6px 0; } }
+
+.toast { position: fixed; left: 50%; bottom: calc(env(safe-area-inset-bottom, 0px) + 20px); transform: translate(-50%, 20px); opacity: 0; background: var(--panel-solid); border: 1px solid var(--line); border-radius: 14px; padding: 12px 16px; z-index: 5; width: max-content; max-width: calc(100% - 32px); transition: opacity .25s, transform .25s; pointer-events: none; box-shadow: 0 16px 40px rgba(0,0,0,.5); }
+.toast.show { opacity: 1; transform: translate(-50%, 0); }
+.footer { color: var(--muted); font-size: 13px; display: flex; gap: 12px; flex-wrap: wrap; justify-content: space-between; }
+
+/* illustrations */
+.spin { animation: spin 18s linear infinite; transform-origin: 50% 50%; transform-box: fill-box; }
+.spin-r { animation: spin 9s linear infinite reverse; transform-origin: 50px 50px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.meridian { animation: meridian 6s linear infinite; transform-origin: 50px 50px; }
+@keyframes meridian { 0% { transform: scaleX(1); } 50% { transform: scaleX(0.05); } 100% { transform: scaleX(1); } }
+.bubble { animation: bubble 2.6s ease-in infinite; }
+@keyframes bubble { 0% { transform: translateY(0); opacity: 0; } 15% { opacity: 1; } 100% { transform: translateY(-34px); opacity: 0; } }
+.wave { stroke-dasharray: 220; animation: draw 4s ease-in-out infinite; }
+@keyframes draw { 0% { stroke-dashoffset: 220; } 60%, 100% { stroke-dashoffset: 0; } }
+.rung { transform-box: fill-box; transform-origin: center; animation: twist 2.4s ease-in-out infinite; }
+@keyframes twist { 0%, 100% { transform: scaleX(1); } 50% { transform: scaleX(-1); } }
+
+html[lang="ar"] * { letter-spacing: 0 !important; text-transform: none !important; }
+html[lang="ar"] .hero h1 { line-height: 1.2; }
+html[lang="ar"] .cat-card h3 { line-height: 1.25; }
+
+@media (max-width: 1060px) { .cat-card { flex-basis: calc((100% - 32px) / 3); } }
+@media (max-width: 900px) { .hero { grid-template-columns: 1fr; } }
+@media (max-width: 700px) { .cat-card { flex-basis: calc((100% - 16px) / 2); min-height: 300px; } }
+@media (max-width: 480px) { .cat-card { flex-basis: 100%; min-height: 0; } .hero p { font-size: 16px; } }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+</style>
+
 </head>
 <body>
-<div id="globe" aria-label="Interactive globe"></div>
-<div class="loading" id="loading" data-i18n="loading">Loading the Earth…</div>
+<canvas id="bg" aria-hidden="true"></canvas>
 
-<header class="hud">
-  <div class="brand">GeoQuest <small id="modeLabel"></small></div>
-  <div class="stats">
-    <div class="chip" id="chipScore" hidden><span data-i18n="score"></span> <b id="score">0</b></div>
-    <div class="chip streak" id="chipStreak" hidden><span data-i18n="streak"></span> <b id="streak">0</b></div>
-    <div class="chip lives" id="chipLives" hidden><b id="lives"></b></div>
-    <button class="iconbtn" id="btnView" type="button" hidden data-i18n="resetView"></button>
-    <button class="iconbtn" id="btnMenu" type="button" hidden data-i18n="menu"></button>
-    <div class="lang" id="langSwitch" role="group" aria-label="Language">
+<div class="page">
+  <header class="top">
+    <a class="logo" href="./" aria-label="MindQuest">
+      <svg viewBox="0 0 40 40" aria-hidden="true">
+        <defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2ee6c5"/><stop offset=".5" stop-color="#ffb547"/><stop offset="1" stop-color="#ff5c9a"/></linearGradient></defs>
+        <circle cx="20" cy="20" r="17" fill="none" stroke="url(#lg)" stroke-width="3"/>
+        <circle cx="20" cy="20" r="4.5" fill="url(#lg)"/>
+        <ellipse cx="20" cy="20" rx="17" ry="6.5" fill="none" stroke="url(#lg)" stroke-width="2" transform="rotate(-30 20 20)"/>
+      </svg>
+      MindQuest
+    </a>
+    <div class="lang" role="group" aria-label="Language">
       <button type="button" data-lang="en" lang="en">EN</button>
       <button type="button" data-lang="ar" lang="ar">عربي</button>
       <button type="button" data-lang="fr" lang="fr">FR</button>
     </div>
-  </div>
-</header>
+  </header>
 
-<!-- Question card (all quiz games) -->
-<section class="card" id="card" hidden aria-live="polite">
-  <div class="progress"><i id="bar"></i></div>
-  <div class="qlabel"><span id="qcount"></span><span id="qregion"></span></div>
-  <div class="timer" id="timer" hidden><i id="timerBar"></i></div>
-  <img class="flag-lg" id="qflag" alt="" hidden>
-  <div class="question" id="question"></div>
-  <div class="sub" id="qsub"></div>
-  <div class="hintline" id="hintline" hidden></div>
-  <form class="answer-row" id="answerForm" hidden autocomplete="off">
-    <input id="answer" type="text" autocomplete="off" autocapitalize="words" spellcheck="false" aria-label="Answer">
-    <button class="btn" id="btnSubmit" type="submit" data-i18n="check"></button>
-  </form>
-  <div id="feedback" class="feedback" hidden></div>
-  <div class="actions">
-    <button class="btn ghost" id="btnHint" type="button" data-i18n="hint"></button>
-    <button class="btn ghost" id="btnSkip" type="button" data-i18n="skip"></button>
-    <button class="btn" id="btnNext" type="button" hidden data-i18n="next"></button>
-  </div>
-</section>
+  <section class="hero">
+    <div>
+      <h1><span data-t="heroA"></span> <span class="spark" data-t="heroB"></span></h1>
+      <p data-t="heroSub"></p>
+    </div>
+    <aside class="fact" id="fact" aria-live="polite">
+      <div class="label"><b><i class="dot"></i><span data-t="didYouKnow"></span></b><button class="nextfact" type="button" id="nextFact" data-t="nextFact"></button></div>
+      <div class="text" id="factText"></div>
+      <div class="cat" id="factCat"></div>
+    </aside>
+  </section>
 
-<!-- Study card -->
-<section class="card" id="studyCard" hidden aria-live="polite">
-  <div id="studyEmpty">
-    <div class="question" data-i18n="studyTitle"></div>
-    <div class="sub" data-i18n="studySub"></div>
-  </div>
-  <div id="studyInfo" hidden>
-    <div class="study-head"><img class="flag-lg" id="sFlag" alt=""><div class="question" id="sName"></div></div>
-    <dl class="facts">
-      <dt data-i18n="capitalLabel"></dt><dd id="sCapital"></dd>
-      <dt data-i18n="regionLabel"></dt><dd id="sRegion"></dd>
-      <dt data-i18n="areaLabel"></dt><dd id="sArea"></dd>
-      <dt data-i18n="statusLabel"></dt><dd id="sStatus"></dd>
-    </dl>
-    <div class="actions">
-      <button class="btn ghost" id="btnListen" type="button" data-i18n="listen"></button>
-      <button class="btn ghost" id="btnQuizRegion" type="button"></button>
-    </div>
-  </div>
-  <div class="search">
-    <div class="results" id="results" hidden></div>
-    <input id="search" type="search" autocomplete="off" spellcheck="false" aria-label="Search">
-  </div>
-</section>
+  <section>
+    <div class="section-title"><h2 data-t="pick"></h2><span data-t="pickSub"></span></div>
+  </section>
 
-<div class="sheet" id="startSheet">
-  <div class="menu">
-    <h1><span data-i18n="heroA" style="color:inherit"></span> <span data-i18n="heroB"></span></h1>
-    <p data-i18n="intro"></p>
-    <div class="group">
-      <label data-i18n="labelGame"></label>
-      <div class="modes" id="modes"></div>
-    </div>
-    <div class="group">
-      <label data-i18n="labelRegion"></label>
-      <div class="opts" id="regions"></div>
-    </div>
-    <div class="group" data-quiz-only>
-      <label data-i18n="labelQuestions"></label>
-      <div class="opts" id="lengths">
-        <button class="opt" type="button" data-len="10" aria-pressed="true">10</button>
-        <button class="opt" type="button" data-len="25" aria-pressed="false">25</button>
-        <button class="opt" type="button" data-len="0" aria-pressed="false" data-i18n="all"></button>
-      </div>
-    </div>
-    <div class="group" data-quiz-only>
-      <label data-i18n="labelLevel"></label>
-      <div class="opts" id="levels">
-        <button class="opt" type="button" data-level="easy" aria-pressed="false" data-i18n="levelEasy"></button>
-        <button class="opt" type="button" data-level="normal" aria-pressed="true" data-i18n="levelNormal"></button>
-      </div>
-      <div class="level-hint" data-i18n="levelEasyHint"></div>
-    </div>
-    <div class="group" data-quiz-only>
-      <label data-i18n="labelChallenge"></label>
-      <div class="opts">
-        <button class="opt" type="button" id="optTimer" aria-pressed="false" data-i18n="optTimer"></button>
-        <button class="opt" type="button" id="optLives" aria-pressed="false" data-i18n="optLives"></button>
-      </div>
-    </div>
-    <p class="notice" id="glNotice" hidden data-i18n-html="glNotice"></p>
-    <div class="best" id="bestLine"></div>
-    <button class="btn" id="btnStart" type="button"></button>
-  </div>
+  <section class="grid" id="grid">
+    <a class="cat-card" style="--c: var(--geo)" href="geography/" data-cat="geo">
+      <canvas class="art" id="miniGlobe" width="224" height="224" aria-hidden="true"></canvas>
+      <div><h3 data-t="geo"></h3><p data-t="geoD"></p></div>
+      <div class="foot"><span class="pill play"><svg viewBox="0 0 14 14" aria-hidden="true"><path d="M3 1.8v10.4L12 7z" fill="currentColor"/></svg><span data-t="play"></span></span><span class="meta" data-t="geoMeta"></span></div>
+    </a>
+
+    <button class="cat-card" type="button" style="--c: var(--chem)" data-cat="chem">
+      <svg class="art" viewBox="0 0 100 100" aria-hidden="true">
+        <path d="M40 12h20M43 12v24L22 76c-3 7 1 12 8 12h40c7 0 11-5 8-12L57 36V12" fill="none" stroke="#e8ffc0" stroke-width="3" stroke-linejoin="round"/>
+        <path d="M30 62h40l7 15c2 5-1 9-6 9H29c-5 0-8-4-6-9z" fill="#b8f03a" fill-opacity=".85"/>
+        <circle class="bubble" cx="42" cy="70" r="3" fill="#f4ffd9"/>
+        <circle class="bubble" style="animation-delay:-.9s" cx="55" cy="74" r="2.2" fill="#f4ffd9"/>
+        <circle class="bubble" style="animation-delay:-1.7s" cx="49" cy="68" r="2.6" fill="#f4ffd9"/>
+      </svg>
+      <div><h3 data-t="chem"></h3><p data-t="chemD"></p></div>
+      <div class="foot"><span class="pill soon" data-t="soon"></span></div>
+    </button>
+
+    <button class="cat-card" type="button" style="--c: var(--phys)" data-cat="phys">
+      <svg class="art" viewBox="0 0 100 100" aria-hidden="true">
+        <g fill="none" stroke="#bcd3ff" stroke-width="2">
+          <ellipse cx="50" cy="50" rx="40" ry="14"/>
+          <ellipse cx="50" cy="50" rx="40" ry="14" transform="rotate(60 50 50)"/>
+          <ellipse cx="50" cy="50" rx="40" ry="14" transform="rotate(-60 50 50)"/>
+        </g>
+        <circle cx="50" cy="50" r="7" fill="#4d8dff"/>
+        <circle r="4" fill="#ffffff"><animateMotion dur="3s" repeatCount="indefinite" path="M10 50a40 14 0 1 0 80 0a40 14 0 1 0-80 0"/></circle>
+        <g transform="rotate(60 50 50)"><circle r="4" fill="#9dc0ff"><animateMotion dur="4s" repeatCount="indefinite" path="M90 50a40 14 0 1 0 -80 0a40 14 0 1 0 80 0"/></circle></g>
+        <g transform="rotate(-60 50 50)"><circle r="4" fill="#ffffff"><animateMotion dur="5s" repeatCount="indefinite" path="M10 50a40 14 0 1 0 80 0a40 14 0 1 0-80 0"/></circle></g>
+      </svg>
+      <div><h3 data-t="phys"></h3><p data-t="physD"></p></div>
+      <div class="foot"><span class="pill soon" data-t="soon"></span></div>
+    </button>
+
+    <button class="cat-card" type="button" style="--c: var(--math)" data-cat="math">
+      <svg class="art" viewBox="0 0 100 100" aria-hidden="true">
+        <path d="M10 50h80M20 85V15" stroke="#ffe2b0" stroke-opacity=".5" stroke-width="1.5"/>
+        <path class="wave" d="M20 50c7-26 13-26 20 0s13 26 20 0 13-26 20 0" fill="none" stroke="#ffb547" stroke-width="4" stroke-linecap="round"/>
+        <text x="66" y="30" font-family="Bricolage Grotesque, serif" font-weight="800" font-size="26" fill="#fff1d6">π</text>
+        <text x="26" y="88" font-family="Bricolage Grotesque, serif" font-weight="800" font-size="15" fill="#ffd38a">∑ √ ∞</text>
+      </svg>
+      <div><h3 data-t="math"></h3><p data-t="mathD"></p></div>
+      <div class="foot"><span class="pill soon" data-t="soon"></span></div>
+    </button>
+
+    <button class="cat-card" type="button" style="--c: var(--bio)" data-cat="bio">
+      <svg class="art" viewBox="0 0 100 100" aria-hidden="true">
+        <path d="M34 10c0 12 32 12 32 24s-32 12-32 24 32 12 32 24" fill="none" stroke="#ff5c9a" stroke-width="3" stroke-opacity=".9"/>
+        <path d="M66 10c0 12-32 12-32 24s32 12 32 24-32 12-32 24" fill="none" stroke="#ffb3cf" stroke-width="3" stroke-opacity=".9"/>
+        <g stroke-width="3" stroke-linecap="round" stroke-opacity=".75">
+          <line class="rung" x1="34" y1="16" x2="66" y2="16" stroke="#ff5c9a" style="animation-delay:0s"/>
+          <line class="rung" x1="34" y1="27" x2="66" y2="27" stroke="#ffb3cf" style="animation-delay:-.3s"/>
+          <line class="rung" x1="34" y1="38" x2="66" y2="38" stroke="#ff5c9a" style="animation-delay:-.6s"/>
+          <line class="rung" x1="34" y1="49" x2="66" y2="49" stroke="#ffb3cf" style="animation-delay:-.9s"/>
+          <line class="rung" x1="34" y1="60" x2="66" y2="60" stroke="#ff5c9a" style="animation-delay:-1.2s"/>
+          <line class="rung" x1="34" y1="71" x2="66" y2="71" stroke="#ffb3cf" style="animation-delay:-1.5s"/>
+          <line class="rung" x1="34" y1="82" x2="66" y2="82" stroke="#ff5c9a" style="animation-delay:-1.8s"/>
+        </g>
+        <circle cx="76" cy="24" r="9" fill="none" stroke="#ffd0e1" stroke-width="2"/><circle cx="76" cy="24" r="3" fill="#ffd0e1"/>
+      </svg>
+      <div><h3 data-t="bio"></h3><p data-t="bioD"></p></div>
+      <div class="foot"><span class="pill soon" data-t="soon"></span></div>
+    </button>
+  </section>
+
+  <footer class="footer"><span data-t="footA"></span><span data-t="footB"></span></footer>
 </div>
 
-<div class="sheet" id="endSheet" hidden>
-  <div class="menu">
-    <div class="group"><label id="endTitle"></label><div class="bigscore" id="endScore">0</div><div class="best" id="endBest"></div></div>
-    <div class="summary">
-      <div><b id="endRight">0</b><span data-i18n="correct"></span></div>
-      <div><b id="endAcc">0%</b><span data-i18n="accuracy"></span></div>
-      <div><b id="endTime">0:00</b><span data-i18n="time"></span></div>
-    </div>
-    <div class="group" id="mistakeGroup"><label data-i18n="practiseThese"></label><div class="mistakes" id="mistakeList"></div></div>
-    <div class="actions">
-      <button class="btn" id="btnPractice" type="button" data-i18n="practiseMistakes"></button>
-      <button class="btn ghost" id="btnAgain" type="button" data-i18n="playAgain"></button>
-      <button class="btn ghost" id="btnHome" type="button" data-i18n="changeGame"></button>
-    </div>
-  </div>
-</div>
+<div class="toast" id="toast" role="status"></div>
 
-<script src="vendor/globe.gl.min.js"></script>
-<script src="vendor/topojson-client.min.js"></script>
-<script src="vendor/d3-array.min.js"></script>
-<script src="vendor/d3-geo.min.js"></script>
-<script src="js/strings.js"></script>
-<script src="js/game.js"></script>
+<script>
+const T = {
+  en: {
+    heroA: "What will you", heroB: "discover today?",
+    heroSub: "Pick a science and play. Every game teaches you something real, for curious kids and grown-ups alike.",
+    didYouKnow: "Did you know?", nextFact: "Another fact",
+    pick: "Choose a science", pickSub: "More games are being built",
+    geo: "Geography", geoD: "Countries, capitals and flags on a real satellite globe.", geoMeta: "218 places · 5 games",
+    chem: "Chemistry", chemD: "Elements, the periodic table and reactions you can mix.",
+    phys: "Physics", physD: "Forces, light, energy and motion you can play with.",
+    math: "Math", mathD: "Numbers, shapes and puzzles, from counting to algebra.",
+    bio: "Biology", bioD: "Cells, the human body, animals and plants.",
+    play: "Play", soon: "Coming soon",
+    soonToast: "{name} is coming soon. Geography is ready to play now.",
+    footA: "Made for learners aged 8 and up", footB: "English · العربية · Français",
+    cats: { geo: "Geography", chem: "Chemistry", phys: "Physics", math: "Math", bio: "Biology" },
+    facts: [
+      ["geo", "Russia is so wide that it covers 11 time zones."],
+      ["phys", "Sunlight takes about 8 minutes and 20 seconds to reach Earth."],
+      ["chem", "Gold can be hammered into sheets thinner than a human hair."],
+      ["bio", "An octopus has three hearts and blue blood."],
+      ["math", "In the year 628, the Indian mathematician Brahmagupta wrote the first rules for calculating with zero."],
+      ["bio", "Your body is made of about 37 trillion cells."],
+      ["geo", "Africa has 54 independent countries, more than any other continent."],
+      ["chem", "Water is the only common substance found naturally as a solid, a liquid and a gas on Earth."],
+    ],
+  },
+  ar: {
+    heroA: "ماذا ستكتشف", heroB: "اليوم؟",
+    heroSub: "اختر علمًا وابدأ اللعب. كل لعبة تعلّمك شيئًا حقيقيًا، للصغار والكبار الفضوليين.",
+    didYouKnow: "هل تعلم؟", nextFact: "معلومة أخرى",
+    pick: "اختر علمًا", pickSub: "ألعاب جديدة قيد الإنشاء",
+    geo: "الجغرافيا", geoD: "الدول والعواصم والأعلام على كرة أرضية حقيقية بصور الأقمار الصناعية.", geoMeta: "218 مكانًا · 5 ألعاب",
+    chem: "الكيمياء", chemD: "العناصر والجدول الدوري وتفاعلات يمكنك مزجها.",
+    phys: "الفيزياء", physD: "القوى والضوء والطاقة والحركة بين يديك.",
+    math: "الرياضيات", mathD: "الأعداد والأشكال والألغاز، من العدّ إلى الجبر.",
+    bio: "الأحياء", bioD: "الخلايا وجسم الإنسان والحيوانات والنباتات.",
+    play: "العب", soon: "قريبًا",
+    soonToast: "{name} قادمة قريبًا. الجغرافيا جاهزة للعب الآن.",
+    footA: "مصمّمة للمتعلّمين من عمر 8 سنوات فما فوق", footB: "English · العربية · Français",
+    cats: { geo: "الجغرافيا", chem: "الكيمياء", phys: "الفيزياء", math: "الرياضيات", bio: "الأحياء" },
+    facts: [
+      ["geo", "روسيا واسعة جدًا لدرجة أنها تمتد على 11 منطقة زمنية."],
+      ["phys", "يحتاج ضوء الشمس إلى نحو 8 دقائق و20 ثانية ليصل إلى الأرض."],
+      ["chem", "يمكن طرق الذهب حتى يصبح صفائح أرقّ من شعرة الإنسان."],
+      ["bio", "للأخطبوط ثلاثة قلوب ودم أزرق."],
+      ["math", "في عام 628 كتب عالم الرياضيات الهندي براهماغوبتا أول قواعد للحساب باستخدام الصفر."],
+      ["bio", "يتكوّن جسمك من نحو 37 تريليون خلية."],
+      ["geo", "في أفريقيا 54 دولة مستقلة، وهو أكبر عدد بين القارات."],
+      ["chem", "الماء هو المادة الشائعة الوحيدة التي توجد طبيعيًا على الأرض صلبةً وسائلةً وغازية."],
+    ],
+  },
+  fr: {
+    heroA: "Que vas-tu", heroB: "découvrir aujourd'hui ?",
+    heroSub: "Choisis une science et joue. Chaque jeu t'apprend quelque chose de vrai, pour les enfants curieux comme pour les grands.",
+    didYouKnow: "Le savais-tu ?", nextFact: "Un autre",
+    pick: "Choisis une science", pickSub: "D'autres jeux sont en préparation",
+    geo: "Géographie", geoD: "Pays, capitales et drapeaux sur un vrai globe satellite.", geoMeta: "218 lieux · 5 jeux",
+    chem: "Chimie", chemD: "Les éléments, le tableau périodique et des réactions à mélanger.",
+    phys: "Physique", physD: "Forces, lumière, énergie et mouvement à manipuler.",
+    math: "Maths", mathD: "Nombres, formes et énigmes, du calcul à l'algèbre.",
+    bio: "Biologie", bioD: "Les cellules, le corps humain, les animaux et les plantes.",
+    play: "Jouer", soon: "Bientôt",
+    soonToast: "{name} arrive bientôt. La géographie est déjà prête.",
+    footA: "Pour les curieux dès 8 ans", footB: "English · العربية · Français",
+    cats: { geo: "Géographie", chem: "Chimie", phys: "Physique", math: "Maths", bio: "Biologie" },
+    facts: [
+      ["geo", "La Russie est si large qu'elle s'étend sur 11 fuseaux horaires."],
+      ["phys", "La lumière du Soleil met environ 8 minutes et 20 secondes pour atteindre la Terre."],
+      ["chem", "On peut aplatir l'or en feuilles plus fines qu'un cheveu."],
+      ["bio", "La pieuvre a trois cœurs et du sang bleu."],
+      ["math", "En 628, le mathématicien indien Brahmagupta a écrit les premières règles de calcul avec le zéro."],
+      ["bio", "Ton corps compte environ 37 000 milliards de cellules."],
+      ["geo", "L'Afrique compte 54 pays indépendants, plus que tout autre continent."],
+      ["chem", "L'eau est la seule substance courante présente naturellement sur Terre à l'état solide, liquide et gazeux."],
+    ],
+  },
+};
+const COLORS = { geo: "#2ee6c5", chem: "#b8f03a", phys: "#4d8dff", math: "#ffb547", bio: "#ff5c9a" };
+let lang = "en";
+try { const s = JSON.parse(localStorage.getItem("gq-lang")); if (T[s]) lang = s; else if (T[(navigator.language || "").slice(0, 2)]) lang = navigator.language.slice(0, 2); } catch {}
+let factIndex = Math.floor(Math.random() * T.en.facts.length), factTimer = null;
+
+function applyLang() {
+  const d = T[lang];
+  document.documentElement.lang = lang;
+  document.documentElement.dir = lang === "ar" ? "rtl" : "ltr";
+  document.querySelectorAll("[data-t]").forEach((el) => { el.textContent = d[el.dataset.t]; });
+  document.querySelectorAll("[data-lang]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.lang === lang)));
+  showFact(false);
+}
+function showFact(animate) {
+  const d = T[lang], [cat, text] = d.facts[factIndex], box = document.getElementById("fact"), el = document.getElementById("factText");
+  const put = () => { el.textContent = text; document.getElementById("factCat").textContent = d.cats[cat]; box.style.setProperty("--fact-c", COLORS[cat]); el.classList.remove("fade"); };
+  if (animate) { el.classList.add("fade"); setTimeout(put, 350); } else put();
+}
+function nextFact() { factIndex = (factIndex + 1) % T.en.facts.length; showFact(true); clearInterval(factTimer); factTimer = setInterval(nextFact, 9000); }
+document.getElementById("nextFact").addEventListener("click", nextFact);
+factTimer = setInterval(nextFact, 9000);
+document.querySelector(".lang").addEventListener("click", (e) => {
+  const b = e.target.closest("[data-lang]"); if (!b) return;
+  lang = b.dataset.lang; try { localStorage.setItem("gq-lang", JSON.stringify(lang)); } catch {}
+  applyLang();
+});
+let toastTimer;
+document.getElementById("grid").addEventListener("click", (e) => {
+  const card = e.target.closest("button.cat-card"); if (!card) return;
+  card.classList.remove("shake"); void card.offsetWidth; card.classList.add("shake");
+  const t = document.getElementById("toast");
+  t.textContent = T[lang].soonToast.replace("{name}", T[lang].cats[card.dataset.cat]);
+  t.classList.add("show"); clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove("show"), 2600);
+});
+applyLang();
+
+const EARTH = "img/earth-mini.jpg";
+
+// ---------- Geography card: a spinning satellite Earth ----------
+(function () {
+  const cv = document.getElementById("miniGlobe"); if (!cv) return;
+  const ctx = cv.getContext("2d");
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const dpr = Math.min(2, window.devicePixelRatio || 1), CSS = 112, N = Math.round(CSS * dpr);
+  cv.width = N; cv.height = N;
+  const R = N * 0.4, cx = N / 2, cy = N / 2, D = Math.ceil(R * 2);
+  const TILT = 0.38;                       // viewed a little from above, like a desk globe
+  const CITIES = [[48.86, 2.35, "#ffb547"], [30.04, 31.24, "#ff5c9a"], [35.68, 139.69, "#b8f03a"], [-22.91, -43.17, "#4d8dff"], [40.71, -74.0, "#2ee6c5"], [-33.87, 151.21, "#ffb547"], [-1.29, 36.82, "#b8f03a"], [28.61, 77.21, "#ff5c9a"]];
+  const img = new Image();
+  img.onload = () => {
+    const tc = document.createElement("canvas"); tc.width = img.width; tc.height = img.height;
+    const tctx = tc.getContext("2d"); tctx.drawImage(img, 0, 0);
+    const tex = tctx.getImageData(0, 0, tc.width, tc.height).data, TW = tc.width, TH = tc.height;
+    // Work out once, for every pixel of the disc, which latitude it shows, its longitude offset and its lighting.
+    const off = document.createElement("canvas"); off.width = D; off.height = D;
+    const octx = off.getContext("2d"), out = octx.createImageData(D, D);
+    const idx = [], row = [], ub = [], shade = [];
+    const L = [-0.42, 0.38, 0.82], cosT = Math.cos(TILT), sinT = Math.sin(TILT);
+    for (let py = 0; py < D; py++) for (let px = 0; px < D; px++) {
+      const x = (px + 0.5 - R) / R, y = -(py + 0.5 - R) / R, rr = x * x + y * y;
+      if (rr > 1) continue;
+      const z = Math.sqrt(1 - rr), gy = y * cosT + z * sinT, gz = -y * sinT + z * cosT;
+      const lat = Math.asin(Math.max(-1, Math.min(1, gy))), lon = Math.atan2(x, gz);
+      const diff = Math.max(0, x * L[0] + y * L[1] + z * L[2]);
+      const edge = Math.min(1, rr * rr * 0.9);
+      idx.push((py * D + px) * 4);
+      row.push(Math.min(TH - 1, Math.floor((0.5 - lat / Math.PI) * TH)) * TW);
+      ub.push((lon + Math.PI) / (2 * Math.PI) * TW);
+      shade.push((0.38 + 1.0 * diff) * (1 - edge * 0.3));
+    }
+    let rot = 0, last = performance.now();
+    function project(lat, lon) {
+      const la = lat * Math.PI / 180, lo = lon * Math.PI / 180 + rot;
+      const gx = Math.cos(la) * Math.sin(lo), gy = Math.sin(la), gz = Math.cos(la) * Math.cos(lo);
+      return [gx, gy * cosT - gz * sinT, gy * sinT + gz * cosT];
+    }
+    function orbitPoint(a) {                // a tilted ring around the globe
+      const ox = Math.cos(a) * 1.2, oz = Math.sin(a) * 1.2, tilt = 0.5;
+      return [ox, oz * Math.sin(tilt) * 0.55, oz * Math.cos(tilt)];
+    }
+    function drawOrbit(front) {
+      ctx.lineWidth = 1.2 * dpr; ctx.strokeStyle = "rgba(46,230,197,0.45)"; ctx.setLineDash([3 * dpr, 4 * dpr]);
+      ctx.beginPath(); let started = false;
+      for (let i = 0; i <= 120; i++) {
+        const p = orbitPoint(i / 120 * Math.PI * 2);
+        if ((p[2] > 0) !== front) { started = false; continue; }
+        const sx = cx + p[0] * R, sy = cy - p[1] * R;
+        started ? ctx.lineTo(sx, sy) : ctx.moveTo(sx, sy); started = true;
+      }
+      ctx.stroke(); ctx.setLineDash([]);
+    }
+    function drawSat(t, front) {
+      const p = orbitPoint(t * 0.0011); if ((p[2] > 0) !== front) return;
+      const sx = cx + p[0] * R, sy = cy - p[1] * R;
+      ctx.fillStyle = "#ffffff"; ctx.shadowColor = "#2ee6c5"; ctx.shadowBlur = 10 * dpr;
+      ctx.beginPath(); ctx.arc(sx, sy, 2.6 * dpr, 0, Math.PI * 2); ctx.fill(); ctx.shadowBlur = 0;
+    }
+    function frame(t) {
+      const dt = Math.min(64, t - last); last = t;
+      if (!reduce) rot += dt * 0.00032;
+      const shift = (rot / (2 * Math.PI)) * TW;
+      const px = out.data;
+      for (let i = 0; i < idx.length; i++) {
+        let u = Math.floor(ub[i] - shift) % TW; if (u < 0) u += TW;
+        const s4 = (row[i] + u) * 4, o = idx[i], k = shade[i];
+        px[o] = Math.min(255, tex[s4] * k); px[o + 1] = Math.min(255, tex[s4 + 1] * k); px[o + 2] = Math.min(255, tex[s4 + 2] * k + 6); px[o + 3] = 255;
+      }
+      octx.putImageData(out, 0, 0);
+      ctx.clearRect(0, 0, N, N);
+      // atmosphere glow
+      const glow = ctx.createRadialGradient(cx, cy, R * 0.92, cx, cy, R * 1.25);
+      glow.addColorStop(0, "rgba(110,190,255,0.55)"); glow.addColorStop(1, "rgba(110,190,255,0)");
+      ctx.fillStyle = glow; ctx.beginPath(); ctx.arc(cx, cy, R * 1.25, 0, Math.PI * 2); ctx.fill();
+      drawOrbit(false); drawSat(t, false);
+      ctx.drawImage(off, cx - R, cy - R);
+      // thin bright rim, like the edge of the atmosphere
+      ctx.strokeStyle = "rgba(160,215,255,0.55)"; ctx.lineWidth = 1.2 * dpr; ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2); ctx.stroke();
+      // city pins on the side facing us
+      for (const [la, lo, c] of CITIES) {
+        const [x, y, z] = project(la, lo); if (z < 0.2) continue;
+        const sx = cx + x * R, sy = cy - y * R, pulse = (((t / 900 + la) % 1) + 1) % 1;
+        ctx.globalAlpha = z;
+        ctx.strokeStyle = c; ctx.lineWidth = 1.2 * dpr; ctx.globalAlpha = z * (1 - pulse);
+        ctx.beginPath(); ctx.arc(sx, sy, (2 + pulse * 7) * dpr, 0, Math.PI * 2); ctx.stroke();
+        ctx.globalAlpha = z; ctx.fillStyle = c; ctx.shadowColor = c; ctx.shadowBlur = 8 * dpr;
+        ctx.beginPath(); ctx.arc(sx, sy, 2.2 * dpr, 0, Math.PI * 2); ctx.fill(); ctx.shadowBlur = 0; ctx.globalAlpha = 1;
+      }
+      drawOrbit(true); drawSat(t, true);
+      if (!reduce) requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+  };
+  img.src = EARTH;
+})();
+
+// ---------- background: a drifting network of ideas ----------
+(function () {
+  const cv = document.getElementById("bg"), ctx = cv.getContext("2d");
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const PALETTE = Object.values(COLORS);
+  const GLYPHS = ["H₂O", "π", "E=mc²", "∑", "DNA", "√2", "Fe", "λ", "∞", "Δ", "CO₂", "x²", "Au", "F=ma", "°C", "N", "O₂", "%", "÷", "Ω"];
+  let W = 0, H = 0, dpr = 1, nodes = [], pulses = [], blobs = [], mouse = { x: -999, y: -999 };
+
+  function resize() {
+    dpr = Math.min(2, window.devicePixelRatio || 1);
+    W = window.innerWidth; H = window.innerHeight;
+    cv.width = W * dpr; cv.height = H * dpr;
+    const count = Math.round(Math.min(90, Math.max(36, W * H / 17000)));
+    nodes = Array.from({ length: count }, (_, i) => ({
+      x: Math.random() * W, y: Math.random() * H,
+      vx: (Math.random() - 0.5) * 0.35, vy: (Math.random() - 0.5) * 0.35,
+      c: PALETTE[i % PALETTE.length], r: 1.6 + Math.random() * 2.2,
+      g: i % 3 === 0 ? GLYPHS[(i / 3) % GLYPHS.length | 0] : null,
+      s: 12 + Math.random() * 10,
+    }));
+    blobs = PALETTE.map((c, i) => ({ c, a: (i / PALETTE.length) * Math.PI * 2, rad: 0.5 + Math.random() * 0.25, sp: 0.00012 + Math.random() * 0.0001 }));
+  }
+  window.addEventListener("resize", resize); resize();
+  window.addEventListener("pointermove", (e) => { mouse.x = e.clientX; mouse.y = e.clientY; });
+  window.addEventListener("pointerleave", () => { mouse.x = mouse.y = -999; });
+
+  const LINK = 150;
+  function frame(t) {
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.fillStyle = "#060912"; ctx.fillRect(0, 0, W, H);
+    // aurora of colour
+    ctx.globalCompositeOperation = "lighter";
+    for (const b of blobs) {
+      const x = W / 2 + Math.cos(b.a + t * b.sp) * W * 0.42, y = H / 2 + Math.sin(b.a * 1.3 + t * b.sp * 1.4) * H * 0.38, r = Math.max(W, H) * b.rad * 0.55;
+      const g = ctx.createRadialGradient(x, y, 0, x, y, r);
+      g.addColorStop(0, b.c + "22"); g.addColorStop(1, b.c + "00");
+      ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+    }
+    ctx.globalCompositeOperation = "source-over";
+    // move
+    for (const n of nodes) {
+      if (!reduce) { n.x += n.vx; n.y += n.vy; }
+      const dx = n.x - mouse.x, dy = n.y - mouse.y, d2 = dx * dx + dy * dy;
+      if (d2 < 120 * 120 && d2 > 1) { const f = (1 - Math.sqrt(d2) / 120) * 0.6; n.x += dx / Math.sqrt(d2) * f; n.y += dy / Math.sqrt(d2) * f; }
+      if (n.x < -30) n.x = W + 30; if (n.x > W + 30) n.x = -30;
+      if (n.y < -30) n.y = H + 30; if (n.y > H + 30) n.y = -30;
+    }
+    // links
+    ctx.lineWidth = 1;
+    for (let i = 0; i < nodes.length; i++) for (let j = i + 1; j < nodes.length; j++) {
+      const a = nodes[i], b = nodes[j], dx = a.x - b.x, dy = a.y - b.y, d = Math.hypot(dx, dy);
+      if (d < LINK) {
+        const al = (1 - d / LINK) * 0.35;
+        const g = ctx.createLinearGradient(a.x, a.y, b.x, b.y);
+        g.addColorStop(0, a.c); g.addColorStop(1, b.c);
+        ctx.globalAlpha = al; ctx.strokeStyle = g;
+        ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+        if (!reduce && Math.random() < 0.0009) pulses.push({ a, b, p: 0 });
+      }
+    }
+    ctx.globalAlpha = 1;
+    // signals travelling between ideas
+    pulses = pulses.filter((s) => {
+      s.p += 0.018;
+      const d = Math.hypot(s.a.x - s.b.x, s.a.y - s.b.y);
+      if (s.p >= 1 || d > LINK) return false;
+      const x = s.a.x + (s.b.x - s.a.x) * s.p, y = s.a.y + (s.b.y - s.a.y) * s.p;
+      ctx.shadowColor = s.b.c; ctx.shadowBlur = 14; ctx.fillStyle = "#ffffff";
+      ctx.beginPath(); ctx.arc(x, y, 2.2, 0, Math.PI * 2); ctx.fill(); ctx.shadowBlur = 0;
+      return true;
+    });
+    // nodes and symbols
+    for (const n of nodes) {
+      if (n.g) {
+        ctx.font = `800 ${n.s}px "Bricolage Grotesque", system-ui, sans-serif`;
+        ctx.textAlign = "center"; ctx.textBaseline = "middle";
+        ctx.shadowColor = n.c; ctx.shadowBlur = 12; ctx.fillStyle = n.c; ctx.globalAlpha = 0.85;
+        ctx.fillText(n.g, n.x, n.y); ctx.shadowBlur = 0; ctx.globalAlpha = 1;
+      } else {
+        ctx.fillStyle = n.c; ctx.shadowColor = n.c; ctx.shadowBlur = 10;
+        ctx.beginPath(); ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2); ctx.fill(); ctx.shadowBlur = 0;
+      }
+    }
+    // soft vignette so the cards stay readable
+    const v = ctx.createRadialGradient(W / 2, H * 0.45, Math.min(W, H) * 0.2, W / 2, H / 2, Math.max(W, H) * 0.75);
+    v.addColorStop(0, "rgba(6,9,18,0)"); v.addColorStop(1, "rgba(6,9,18,0.75)");
+    ctx.fillStyle = v; ctx.fillRect(0, 0, W, H);
+    if (!reduce) requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+})();
+</script>
+
 </body>
 </html>

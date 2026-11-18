@@ -1,4 +1,14 @@
-# GeoQuest
+# MindQuest
+
+Science games for curious kids and adults, in English, Arabic and French.
+
+- Home page: `index.html` (category cards, fact of the day, animated background). `img/earth-mini.jpg` is the spinning Earth on the Geography card.
+- Geography: `geography/`, the GeoQuest game below.
+- Chemistry, Physics, Math, Biology: coming soon.
+
+Play: https://waelboudiab369.github.io/My-Game/
+
+## GeoQuest (geography/)
 
 A geography game on a real satellite globe. 218 countries and territories, in English, Arabic and French.
 
@@ -11,9 +21,9 @@ A geography game on a real satellite globe. 218 countries and territories, in En
 Options: region, number of questions, Easy level (larger countries, a free first letter, an extra try), a 20-second timer, and 3 lives.
 After each answer the capital city is marked on the globe.
 
-Play: https://waelboudiab369.github.io/My-Game/
+Play: https://waelboudiab369.github.io/My-Game/geography/
 
-## Files
+## Files (inside geography/)
 - `index.html`: the page layout.
 - `css/style.css`: the look.
 - `js/strings.js`: every piece of interface text in English, Arabic and French. Edit here to change wording.
@@ -23,6 +33,6 @@ Play: https://waelboudiab369.github.io/My-Game/
 - `flags/`: flag images (flag-icons, MIT).
 - `img/`: globe imagery (NASA Blue Marble).
 - `vendor/`: the libraries the game uses (globe.gl, topojson-client, d3-geo, d3-array), stored here so the game never depends on an outside download site. Their licenses are next to them.
-- `tools/build-data.js`: rebuilds `data/` and `flags/` from npm packages; the tables at its top control which places are included, capitals and translations.
+- `tools/build-data.js` (at the top level): rebuilds `geography/data/` and `geography/flags/` from npm packages; the tables at its top control which places are included, capitals and translations.
 
 Data: world-countries (ODbL), Natural Earth via world-atlas (public domain), country-state-city (capital coordinates), Unicode CLDR (Arabic and French city names), flag-icons (MIT), NASA Blue Marble imagery (public domain). Globe: globe.gl.
