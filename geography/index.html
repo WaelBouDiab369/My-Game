@@ -6,169 +6,576 @@
 <meta name="description" content="Geography games on a real satellite globe: countries, capitals, flags, continents, oceans, seas, rivers, lakes, mountains, deserts, islands and more, in English, Arabic and French.">
 <title>Geography · MindQuest</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,800&family=Tajawal:wght@400;700;800&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Tajawal:wght@400;700;800&display=swap">
 <style>
-/* Layout: a field atlas index. Header, then sections of equal tiles; each tile is a small original drawing of its topic. */
+/* Layout: mission-control for the planet. A live satellite Earth fills the hero beside the title and counters;
+   below, filter chips and a wall of animated topic cards, each a small living scene of its subject. */
 :root {
-  --ink: #060912; --panel: rgba(12, 17, 32, 0.78); --text: #f1f4fb; --muted: #a3aec4; --line: rgba(200, 215, 245, 0.14);
-  --geo: #2ee6c5; --land: #b8f03a; --water: #4d8dff; --people: #ffb547; --earth: #ff5c9a;
+  --ink: #050811; --panel: rgba(13, 19, 36, 0.72); --panel-2: rgba(20, 28, 52, 0.85); --text: #f2f5fc; --muted: #a6b2c9; --line: rgba(200, 215, 245, 0.13);
+  --world: #2ee6c5; --land: #ffb547; --water: #4da3ff; --people: #ff6fae; --earth: #b18cff;
   --font-display: "Bricolage Grotesque", "Tajawal", "Segoe UI", system-ui, sans-serif;
   --font-body: "Atkinson Hyperlegible", "Tajawal", "Segoe UI", system-ui, sans-serif;
   color-scheme: dark;
 }
 [hidden] { display: none !important; }
 html, body { min-height: 100%; }
-body { margin: 0; background: radial-gradient(1200px 700px at 85% -10%, rgba(46,230,197,.14), transparent 60%), radial-gradient(900px 600px at -10% 30%, rgba(77,141,255,.12), transparent 60%), var(--ink); background-attachment: fixed; color: var(--text); font-family: var(--font-body); font-size: 16px; }
-.page { max-width: 1180px; margin: 0 auto; padding-block: 18px 48px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: grid; gap: 30px; }
+html, body { overflow-x: clip; }
+body { margin: 0; background: var(--ink); color: var(--text); font-family: var(--font-body); font-size: 16px; }
+#sky { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 0; display: block; }
+.page { position: relative; z-index: 1; max-width: 1240px; margin: 0 auto; padding-block: 16px 64px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: grid; gap: 28px; }
 a { color: inherit; }
 button { font: inherit; color: inherit; cursor: pointer; }
-:focus-visible { outline: 3px solid var(--people); outline-offset: 3px; }
+:focus-visible { outline: 3px solid var(--land); outline-offset: 3px; }
+
+/* top bar */
 .top { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-.back { text-decoration: none; background: var(--panel); border: 1px solid var(--line); border-radius: 999px; padding: 7px 14px; font-size: 14px; }
-.back:hover { border-color: var(--text); }
-.lang { display: inline-flex; background: var(--panel); border: 1px solid var(--line); border-radius: 999px; padding: 3px; }
+.pillbtn { text-decoration: none; background: var(--panel); border: 1px solid var(--line); border-radius: 999px; padding: 8px 16px; font-size: 14px; backdrop-filter: blur(10px); transition: border-color .2s, background .2s; }
+.pillbtn:hover { border-color: var(--text); background: var(--panel-2); }
+.lang { display: inline-flex; background: var(--panel); border: 1px solid var(--line); border-radius: 999px; padding: 3px; backdrop-filter: blur(10px); }
 .lang button { background: none; border: 0; border-radius: 999px; padding: 6px 12px; font-size: 14px; color: var(--muted); }
 .lang button[aria-pressed="true"] { background: var(--text); color: var(--ink); font-weight: 700; }
-.hero h1 { font-family: var(--font-display); font-weight: 800; font-size: clamp(40px, 7vw, 72px); line-height: .95; letter-spacing: -0.03em; margin: 0; }
-.hero h1 span { color: var(--geo); }
-.hero p { color: var(--muted); font-size: 17px; line-height: 1.5; margin: 12px 0 0; max-width: 60ch; }
+
+/* hero */
+.hero { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); align-items: center; gap: 24px; min-height: 460px; }
+.kicker { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; letter-spacing: .16em; text-transform: uppercase; color: var(--world); font-weight: 700; }
+.kicker i { width: 8px; height: 8px; border-radius: 50%; background: var(--world); box-shadow: 0 0 12px var(--world); animation: blip 2s ease-in-out infinite; }
+@keyframes blip { 50% { opacity: .35; transform: scale(.7); } }
+.hero h1 { font-family: var(--font-display); font-weight: 800; font-size: clamp(46px, 7.6vw, 96px); line-height: .92; letter-spacing: -0.04em; margin: 14px 0 0; text-wrap: balance; }
+.hero h1 .glow { background: linear-gradient(100deg, var(--world), var(--water) 30%, var(--earth) 55%, var(--people) 75%, var(--land)); background-size: 220% 100%; -webkit-background-clip: text; background-clip: text; color: transparent; animation: shimmer 9s linear infinite; }
+@keyframes shimmer { to { background-position: -220% 0; } }
+.hero p { color: var(--muted); font-size: 18px; line-height: 1.55; margin: 16px 0 0; max-width: 50ch; }
+.stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin-top: 26px; max-width: 560px; }
+.stat { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 12px 14px; backdrop-filter: blur(10px); }
+.stat b { display: block; font-family: var(--font-display); font-size: 30px; font-weight: 800; line-height: 1; font-variant-numeric: tabular-nums; }
+.stat span { display: block; margin-top: 6px; color: var(--muted); font-size: 12.5px; }
+.stat:nth-child(1) b { color: var(--world); } .stat:nth-child(2) b { color: var(--land); } .stat:nth-child(3) b { color: var(--water); } .stat:nth-child(4) b { color: var(--people); }
+.ctas { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 22px; }
+.cta { display: inline-flex; align-items: center; gap: 10px; border: 0; border-radius: 14px; padding: 14px 20px; font-weight: 700; font-size: 16px; text-decoration: none; position: relative; overflow: hidden; }
+.cta.main { background: linear-gradient(135deg, var(--world), #19b8d6); color: #04141a; box-shadow: 0 10px 30px -10px var(--world); }
+.cta.main::after { content: ""; position: absolute; inset: 0; background: linear-gradient(110deg, transparent 30%, rgba(255,255,255,.55) 50%, transparent 70%); transform: translateX(-120%); animation: sweep 3.6s ease-in-out infinite; }
+@keyframes sweep { 60%, 100% { transform: translateX(120%); } }
+.cta.alt { background: var(--panel); border: 1px solid var(--line); color: var(--text); }
+.cta.alt:hover { border-color: var(--land); }
+.cta svg { width: 18px; height: 18px; }
+.globe-wrap { position: relative; aspect-ratio: 1; width: min(100%, 520px); justify-self: center; }
+.globe-wrap canvas { width: 100%; height: 100%; display: block; touch-action: pan-y; cursor: grab; }
+.globe-wrap .ring { position: absolute; inset: 4%; border-radius: 50%; border: 1px dashed rgba(46,230,197,.25); animation: spin 60s linear infinite; pointer-events: none; }
+.globe-wrap .ring.r2 { inset: -2%; border-color: rgba(177,140,255,.18); animation-duration: 90s; animation-direction: reverse; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* filters */
+.filters { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; display: flex; gap: 8px; flex-wrap: wrap; padding-block: 10px; background: linear-gradient(var(--ink) 70%, transparent); }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--ink); }
+.chip { --c: var(--text); display: inline-flex; align-items: center; gap: 8px; background: var(--panel); border: 1px solid var(--line); border-radius: 999px; padding: 8px 14px; font-size: 14px; backdrop-filter: blur(10px); transition: background .2s, border-color .2s, color .2s; }
+.chip i { width: 9px; height: 9px; border-radius: 50%; background: var(--c); box-shadow: 0 0 10px var(--c); }
+.chip small { color: var(--muted); font-variant-numeric: tabular-nums; }
+.chip[aria-pressed="true"] { background: color-mix(in srgb, var(--c) 22%, var(--panel-2)); border-color: var(--c); }
+.chip:hover { border-color: var(--c); }
+.surprise { margin-inline-start: auto; }
+
+/* sections and cards */
 .section { display: grid; gap: 14px; }
-.section h2 { font-family: var(--font-display); font-weight: 800; font-size: 22px; margin: 0; display: flex; align-items: center; gap: 10px; }
-.section h2 i { width: 10px; height: 10px; border-radius: 50%; background: var(--c); box-shadow: 0 0 12px var(--c); }
-.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 14px; }
-.tile { --c: var(--geo); position: relative; display: grid; grid-template-rows: auto 1fr; gap: 10px; text-decoration: none; text-align: start; background: linear-gradient(160deg, color-mix(in srgb, var(--c) 14%, transparent), transparent 60%), var(--panel); border: 1px solid var(--line); border-radius: 20px; padding: 14px; overflow: hidden; transition: transform .2s, border-color .2s, box-shadow .2s; min-height: 200px; }
-.tile:hover, .tile:focus-visible { transform: translateY(-3px); border-color: color-mix(in srgb, var(--c) 70%, transparent); box-shadow: 0 16px 40px -20px var(--c); }
-.tile svg { width: 100%; height: auto; aspect-ratio: 16 / 10; border-radius: 12px; background: color-mix(in srgb, var(--c) 10%, #0b1222); display: block; }
-.tile b { font-family: var(--font-display); font-size: 19px; line-height: 1.15; }
-.tile span { color: var(--muted); font-size: 13.5px; line-height: 1.4; display: block; margin-top: 4px; }
-.tile .count { position: absolute; top: 20px; inset-inline-start: 20px; background: rgba(6,9,18,.75); border-radius: 999px; padding: 2px 8px; font-size: 12px; color: var(--text); font-variant-numeric: tabular-nums; }
-.tile.soon { cursor: default; }
-.tile.soon svg { filter: saturate(.55) brightness(.8); }
-.tile .soonpill { position: absolute; top: 20px; inset-inline-end: 20px; border: 1px dashed var(--c); color: var(--c); border-radius: 999px; padding: 2px 8px; font-size: 12px; background: rgba(6,9,18,.75); }
-.tile.shake { animation: shake .4s; }
-@keyframes shake { 25% { translate: -5px 0; } 75% { translate: 5px 0; } }
-html[lang="ar"] * { letter-spacing: 0 !important; }
-html[lang="ar"] .hero h1 { line-height: 1.2; }
-@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
-@media (max-width: 460px) { .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; } .tile { min-height: 0; padding: 10px; } .tile b { font-size: 16px; } .tile span { display: none; } }
+.section-head { display: flex; align-items: baseline; gap: 12px; }
+.section-head h2 { font-family: var(--font-display); font-weight: 800; font-size: clamp(22px, 3vw, 30px); margin: 0; letter-spacing: -0.02em; }
+.section-head h2 span { color: var(--c); }
+.section-head em { font-style: normal; color: var(--muted); font-size: 14px; }
+.section-head::after { content: ""; flex: 1; height: 1px; background: linear-gradient(90deg, color-mix(in srgb, var(--c) 60%, transparent), transparent); align-self: center; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 16px; }
+.card { --c: var(--world); --rx: 0deg; --ry: 0deg; position: relative; display: grid; grid-template-rows: auto 1fr; text-decoration: none; text-align: start; border: 0; padding: 0; border-radius: 22px; background: var(--panel); transform: perspective(900px) rotateX(var(--rx)) rotateY(var(--ry)); transition: transform .25s ease, box-shadow .3s; isolation: isolate; animation: rise .6s cubic-bezier(.2,.8,.2,1) both; animation-delay: calc(var(--i) * 45ms); }
+@keyframes rise { from { transform: perspective(900px) translateY(18px) scale(.98); } }
+.card::before { content: ""; position: absolute; inset: 0; border-radius: inherit; padding: 1px; background: linear-gradient(160deg, color-mix(in srgb, var(--c) 55%, transparent), var(--line) 40%, var(--line) 70%, color-mix(in srgb, var(--c) 35%, transparent)); -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude; pointer-events: none; z-index: 2; }
+.card::after { content: ""; position: absolute; inset: -1px; border-radius: inherit; background: conic-gradient(from var(--a, 0deg), transparent 0 70%, var(--c) 80%, transparent 90%); opacity: 0; transition: opacity .3s; z-index: -1; filter: blur(6px); animation: orbit 3s linear infinite; }
+@property --a { syntax: "<angle>"; initial-value: 0deg; inherits: false; }
+@keyframes orbit { to { --a: 360deg; } }
+.card:hover, .card:focus-visible { box-shadow: 0 24px 60px -26px var(--c); }
+.card:hover::after, .card:focus-visible::after { opacity: .9; }
+.art { position: relative; margin: 10px 10px 0; border-radius: 16px; overflow: hidden; aspect-ratio: 16 / 10; background: #0b1325; }
+.art svg { width: 100%; height: 100%; display: block; }
+.art .shine { position: absolute; inset: 0; background: radial-gradient(circle at var(--mx, 50%) var(--my, 0%), rgba(255,255,255,.22), transparent 45%); opacity: 0; transition: opacity .3s; pointer-events: none; }
+.card:hover .art .shine { opacity: 1; }
+.body { padding: 12px 16px 14px; display: grid; gap: 4px; align-content: start; }
+.body b { font-family: var(--font-display); font-weight: 800; font-size: 21px; letter-spacing: -0.01em; line-height: 1.15; }
+.body p { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.4; }
+.meta { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-top: 8px; font-size: 12.5px; }
+.count { color: var(--muted); font-variant-numeric: tabular-nums; }
+.badge { border-radius: 999px; padding: 3px 10px; font-weight: 700; font-size: 12px; background: color-mix(in srgb, var(--c) 18%, transparent); color: var(--c); border: 1px solid color-mix(in srgb, var(--c) 40%, transparent); white-space: nowrap; }
+.badge.best { background: rgba(255, 213, 79, .16); color: #ffd54f; border-color: rgba(255, 213, 79, .45); }
+.play { position: absolute; top: 20px; inset-inline-end: 20px; width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; background: var(--c); color: #061018; box-shadow: 0 6px 20px -6px var(--c); transform: scale(.85); opacity: 0; transition: transform .25s, opacity .25s; z-index: 3; }
+.play svg { width: 16px; height: 16px; }
+.card:hover .play, .card:focus-visible .play { transform: scale(1); opacity: 1; }
+.card.soon { cursor: default; }
+.card.soon .art svg { filter: saturate(.75); }
+.ribbon { position: absolute; top: 18px; inset-inline-start: 18px; z-index: 3; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 999px; background: rgba(5,8,17,.8); border: 1px dashed var(--c); color: var(--c); }
+.card.shake { animation: shake .4s; }
+@keyframes shake { 25% { translate: -6px 0; } 75% { translate: 6px 0; } }
+.paused * { animation-play-state: paused !important; }
+
+/* shared scene animations */
+.s-wave { animation: wave 5s linear infinite; }
+.s-wave.slow { animation-duration: 9s; }
+@keyframes wave { to { transform: translateX(-80px); } }
+.s-bob { animation: bob 3.2s ease-in-out infinite; transform-box: fill-box; }
+@keyframes bob { 50% { transform: translateY(-4px); } }
+.s-sway { animation: sway 3s ease-in-out infinite; transform-box: fill-box; transform-origin: 50% 100%; }
+@keyframes sway { 50% { transform: rotate(5deg); } }
+.s-drift { animation: drift 16s linear infinite; }
+.s-drift.d2 { animation-duration: 24s; animation-delay: -9s; }
+@keyframes drift { from { transform: translateX(-120px); } to { transform: translateX(360px); } }
+.s-flow { stroke-dasharray: 10 14; animation: flow 1.6s linear infinite; }
+@keyframes flow { to { stroke-dashoffset: -24; } }
+.s-march { stroke-dasharray: 6 5; animation: march 1.2s linear infinite; }
+@keyframes march { to { stroke-dashoffset: -22; } }
+.s-pulse { animation: pulse 2.4s ease-out infinite; transform-box: fill-box; transform-origin: center; }
+@keyframes pulse { 0% { transform: scale(.3); opacity: 1; } 100% { transform: scale(2.4); opacity: 0; } }
+.s-twinkle { animation: twinkle 2.6s ease-in-out infinite; }
+@keyframes twinkle { 50% { opacity: .15; } }
+.s-spin { animation: spin 14s linear infinite; transform-box: fill-box; transform-origin: center; }
+.s-rise { animation: risesmoke 3.4s ease-out infinite; transform-box: fill-box; transform-origin: center; }
+@keyframes risesmoke { 0% { transform: translateY(10px) scale(.6); opacity: 0; } 25% { opacity: .9; } 100% { transform: translateY(-46px) scale(1.6); opacity: 0; } }
+.s-flag { animation: flag 1.8s ease-in-out infinite; transform-box: fill-box; transform-origin: 0 50%; }
+@keyframes flag { 50% { transform: skewY(-6deg) scaleX(.94); } }
+.s-pop { animation: pop 3.6s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+@keyframes pop { 0%, 70%, 100% { transform: scale(1); } 80% { transform: scale(1.12); } }
+.s-glow { animation: glow 2.2s ease-in-out infinite; }
+@keyframes glow { 50% { opacity: .55; } }
+.s-rain { animation: rain .9s linear infinite; }
+@keyframes rain { from { transform: translateY(-10px); opacity: 0; } 30% { opacity: 1; } to { transform: translateY(26px); opacity: 0; } }
+.s-sail { animation: sail 14s ease-in-out infinite; }
+@keyframes sail { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(120px); } }
+.s-walk { animation: walk 18s linear infinite; }
+@keyframes walk { from { transform: translateX(-60px); } to { transform: translateX(340px); } }
+.s-fly { animation: fly 9s linear infinite; }
+@keyframes fly { from { transform: translate(-40px, 20px); } to { transform: translate(360px, -30px); } }
+.s-meridian { animation: meridian 6s linear infinite; transform-box: fill-box; transform-origin: center; }
+@keyframes meridian { 0%, 100% { transform: scaleX(1); } 50% { transform: scaleX(.04); } }
+.s-blink { animation: blink 4s steps(1) infinite; }
+@keyframes blink { 0%, 40% { opacity: 1; } 41%, 60% { opacity: .2; } 61% { opacity: 1; } }
+.s-merc { animation: merc 5s ease-in-out infinite; transform-box: fill-box; transform-origin: 50% 100%; }
+@keyframes merc { 0%, 100% { transform: scaleY(.55); } 50% { transform: scaleY(1); } }
+.s-ripple { animation: ripple 3s ease-out infinite; transform-box: fill-box; transform-origin: center; }
+@keyframes ripple { from { transform: scale(.2); opacity: .9; } to { transform: scale(1.6); opacity: 0; } }
+.s-slide { animation: slidebands 8s ease-in-out infinite; }
+@keyframes slidebands { 50% { transform: translateX(-14px); } }
+.s-heat { animation: heat 2s ease-in-out infinite; }
+@keyframes heat { 50% { transform: translateY(-3px); opacity: .4; } }
+.s-lava { animation: lava 1.6s ease-in infinite; transform-box: fill-box; }
+@keyframes lava { 0% { transform: translate(0, 0); opacity: 0; } 15% { opacity: 1; } 100% { transform: translate(var(--lx, 18px), 30px); opacity: 0; } }
+
+html[lang="ar"] * { letter-spacing: 0 !important; text-transform: none !important; }
+html[lang="ar"] .hero h1 { line-height: 1.15; }
+@media (max-width: 900px) {
+  .hero { grid-template-columns: 1fr; min-height: 0; }
+  .globe-wrap { width: min(86%, 420px); order: -1; }
+  .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 520px) {
+  .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .body { padding: 10px 12px 12px; } .body b { font-size: 16px; } .body p { display: none; }
+  .meta .count { display: none; } .surprise { margin-inline-start: 0; }
+  .hero p { font-size: 16px; }
+}
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
 </style>
 </head>
 <body>
+<canvas id="sky" aria-hidden="true"></canvas>
 <div class="page">
   <header class="top">
-    <a class="back" href="../" data-t="home"></a>
+    <a class="pillbtn" href="../" data-t="home"></a>
     <div class="lang" role="group" aria-label="Language">
       <button type="button" data-lang="en" lang="en">EN</button>
       <button type="button" data-lang="ar" lang="ar">عربي</button>
       <button type="button" data-lang="fr" lang="fr">FR</button>
     </div>
   </header>
+
   <section class="hero">
-    <h1 data-t="title"></h1>
-    <p data-t="intro"></p>
+    <div>
+      <div class="kicker"><i></i><span data-t="kicker"></span></div>
+      <h1><span data-t="titleA"></span> <span class="glow" data-t="titleB"></span></h1>
+      <p data-t="intro"></p>
+      <div class="stats">
+        <div class="stat"><b data-count="17">0</b><span data-t="statGames"></span></div>
+        <div class="stat"><b data-count="197">0</b><span data-t="statCountries"></span></div>
+        <div class="stat"><b data-count="480" data-plus="1">0</b><span data-t="statPlaces"></span></div>
+        <div class="stat"><b data-count="3">0</b><span data-t="statLangs"></span></div>
+      </div>
+      <div class="ctas">
+        <a class="cta main" href="world/?mode=find"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 2.5v11l9-5.5z" fill="currentColor"/></svg><span data-t="ctaStart"></span></a>
+        <button class="cta alt" type="button" id="surprise1"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 4h3l6 8h3M2 12h3l2-2.7M10 6.7 11 4h3M12 2l2 2-2 2M12 10l2 2-2 2" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg><span data-t="surprise"></span></button>
+      </div>
+    </div>
+    <div class="globe-wrap" aria-hidden="true"><div class="ring"></div><div class="ring r2"></div><canvas id="bigGlobe"></canvas></div>
   </section>
+
+  <nav class="filters" id="filters" aria-label="Filter topics"></nav>
   <div id="sections"></div>
 </div>
 
-<!-- Drawings: one small original illustration per topic, sharing a 160×100 canvas. -->
-<svg width="0" height="0" style="position:absolute" aria-hidden="true">
-  <defs>
-    <linearGradient id="sea" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2a72c9"/><stop offset="1" stop-color="#123a73"/></linearGradient>
-    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7cc4ff"/><stop offset="1" stop-color="#cfeaff"/></linearGradient>
-    <linearGradient id="sand" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffd27a"/><stop offset="1" stop-color="#e9a34a"/></linearGradient>
-    <radialGradient id="globeG" cx=".35" cy=".35" r=".8"><stop offset="0" stop-color="#6fd3ff"/><stop offset="1" stop-color="#14467f"/></radialGradient>
-    <symbol id="art-countries" viewBox="0 0 160 100"><rect width="160" height="100" fill="url(#sea)"/><path d="M20 30l18-8 16 6 10-4 8 10-6 12-14 4-6 12-12-2-8-12-10-4z" fill="#8bd46a" stroke="#fff" stroke-width="1.2"/><path d="M72 28l20-6 18 4 14 10-4 14-18 4-10 10-14-6-4-14z" fill="#f2c94c" stroke="#fff" stroke-width="1.2"/><path d="M96 58l16 2 10 12-6 14-14 2-8-12z" fill="#ff8a65" stroke="#fff" stroke-width="1.2"/><path d="M38 64l14 4 4 14-10 8-12-6z" fill="#b39ddb" stroke="#fff" stroke-width="1.2"/></symbol>
-    <symbol id="art-capitals" viewBox="0 0 160 100"><rect width="160" height="100" fill="#13213d"/><g fill="#2c4470"><rect x="14" y="44" width="16" height="56"/><rect x="34" y="30" width="14" height="70"/><rect x="112" y="36" width="18" height="64"/><rect x="134" y="50" width="14" height="50"/></g><path d="M58 100V58l22-18 22 18v42z" fill="#3c5b92"/><rect x="74" y="20" width="12" height="22" fill="#ffb547"/><path d="M80 6l4 10h-8z" fill="#ffb547"/><g fill="#ffe8b0"><rect x="64" y="66" width="6" height="10"/><rect x="77" y="66" width="6" height="10"/><rect x="90" y="66" width="6" height="10"/><rect x="18" y="52" width="4" height="5"/><rect x="38" y="40" width="4" height="5"/><rect x="118" y="44" width="4" height="5"/></g><circle cx="80" cy="88" r="5" fill="#ff5c9a" stroke="#fff" stroke-width="2"/></symbol>
-    <symbol id="art-flags" viewBox="0 0 160 100"><rect width="160" height="100" fill="#0f1a30"/><g stroke="#0f1a30" stroke-width="2"><rect x="8" y="10" width="44" height="28" fill="#e63946"/><rect x="8" y="10" width="44" height="9.3" fill="#fff"/><rect x="58" y="10" width="44" height="28" fill="#2a9d8f"/><circle cx="80" cy="24" r="7" fill="#ffd166"/><rect x="108" y="10" width="44" height="28" fill="#264653"/><rect x="108" y="10" width="14.7" height="28" fill="#f4a261"/><rect x="8" y="44" width="44" height="28" fill="#ffd166"/><rect x="8" y="53" width="44" height="10" fill="#118ab2"/><rect x="58" y="44" width="44" height="28" fill="#fff"/><circle cx="80" cy="58" r="8" fill="#e63946"/><rect x="108" y="44" width="44" height="28" fill="#06d6a0"/><path d="M108 44l22 14-22 14z" fill="#073b4c"/><rect x="33" y="78" width="44" height="18" fill="#7b2cbf"/><rect x="83" y="78" width="44" height="18" fill="#ef476f"/><rect x="83" y="84" width="44" height="6" fill="#fff"/></g></symbol>
-    <symbol id="art-continents" viewBox="0 0 160 100"><rect width="160" height="100" fill="url(#sea)"/><g stroke="#fff" stroke-width="1"><path d="M18 22l20-6 14 8-4 14-12 6-6 12-8-6-6-16z" fill="#ff9f43"/><path d="M42 56l10 4 4 14-6 18-6-4-4-16z" fill="#ff6b81"/><path d="M70 22h14l4 10-10 6-8-4z" fill="#70a1ff"/><path d="M72 42l16-2 8 14-6 22-10 4-8-18z" fill="#feca57"/><path d="M90 18l34-2 16 14-8 16-18 2-14-8-10-8z" fill="#1dd1a1"/><path d="M118 66l18-2 6 12-12 8-12-6z" fill="#c56cf0"/><path d="M40 94h80v6H40z" fill="#e8f1ff"/></g></symbol>
-    <symbol id="art-oceans" viewBox="0 0 160 100"><rect width="160" height="100" fill="url(#sea)"/><g fill="#2f5d3a" opacity=".85"><path d="M20 20l18-4 8 18-10 18 6 20-10 10-8-24z"/><path d="M78 16l20 2 6 20-8 30-12 8-8-30z"/><path d="M118 20l26 4-4 18-18 6z"/><path d="M124 66l18 4-6 12-14-4z"/></g><g fill="none" stroke="#bfe3ff" stroke-width="2" stroke-linecap="round" opacity=".8"><path d="M50 40q6-5 12 0t12 0"/><path d="M104 54q6-5 12 0t12 0"/><path d="M44 74q6-5 12 0t12 0"/><path d="M8 50q5-4 10 0"/></g></symbol>
-    <symbol id="art-seas" viewBox="0 0 160 100"><rect width="160" height="100" fill="#3c7a3f"/><path d="M14 52c14-12 30-10 44-4s24 2 34-6 26-10 40-2 16 14 14 20-18 6-28 4-24 6-36 6-28-6-40-6-30 0-28-12z" fill="url(#sea)"/><path d="M96 28c6 2 8 8 4 14" stroke="#2a72c9" stroke-width="6" fill="none" stroke-linecap="round"/><path d="M40 62q6-4 12 0t12 0M86 60q6-4 12 0" stroke="#bfe3ff" stroke-width="1.6" fill="none" stroke-linecap="round"/></symbol>
-    <symbol id="art-straits" viewBox="0 0 160 100"><rect width="160" height="100" fill="url(#sea)"/><path d="M0 0h70l-4 30 6 20-74 0z" fill="#3c7a3f"/><path d="M90 0h70v100H86l6-30-6-24z" fill="#3c7a3f"/><path d="M0 64h66l-6 36H0z" fill="#3c7a3f"/><circle cx="78" cy="56" r="16" fill="none" stroke="#fff" stroke-width="2.5" stroke-dasharray="4 3"/><path d="M60 82l10-10M96 30l-8 8" stroke="#ffb547" stroke-width="2.5" stroke-linecap="round"/></symbol>
-    <symbol id="art-rivers" viewBox="0 0 160 100"><rect width="160" height="100" fill="#4f8a3c"/><path d="M152 6c-20 14-14 30-34 34s-34-4-44 12-4 30-26 36-40 8-48 10" stroke="#69c3ff" stroke-width="7" fill="none" stroke-linecap="round"/><path d="M118 40c4 14 18 22 30 24M74 52c-12-8-26-8-38-20" stroke="#69c3ff" stroke-width="3.5" fill="none" stroke-linecap="round"/><g fill="#2e6b2a"><circle cx="30" cy="20" r="6"/><circle cx="42" cy="16" r="5"/><circle cx="130" cy="80" r="6"/><circle cx="96" cy="76" r="5"/></g></symbol>
-    <symbol id="art-lakes" viewBox="0 0 160 100"><rect width="160" height="100" fill="#5b9a44"/><path d="M30 44c8-18 34-22 52-14s30 2 40 10 10 26-6 32-34 2-50 6-38-4-38-16 2-12 2-18z" fill="url(#sea)" stroke="#d7f1ff" stroke-width="2"/><path d="M58 50q6-4 12 0t12 0M78 62q6-4 12 0" stroke="#bfe3ff" stroke-width="1.6" fill="none" stroke-linecap="round"/><path d="M10 92l20-26 18 26zM120 92l18-22 16 22z" fill="#2e6b2a"/></symbol>
-    <symbol id="art-islands" viewBox="0 0 160 100"><rect width="160" height="100" fill="url(#sea)"/><ellipse cx="62" cy="66" rx="36" ry="12" fill="#ffd27a"/><path d="M40 64c8-16 30-20 44-6" fill="#4f8a3c"/><path d="M66 60c0-16 2-26 8-34" stroke="#7a4b28" stroke-width="4" fill="none"/><path d="M74 26c-12-4-20 2-24 8M74 26c10-6 20-2 24 4M74 26c-2-10 6-16 12-16M74 26c-8-8-18-6-22-2" stroke="#2fae55" stroke-width="5" fill="none" stroke-linecap="round"/><ellipse cx="128" cy="40" rx="16" ry="6" fill="#ffd27a"/><path d="M118 38c4-8 14-8 20 0" fill="#4f8a3c"/></symbol>
-    <symbol id="art-archipelagos" viewBox="0 0 160 100"><rect width="160" height="100" fill="url(#sea)"/><g fill="#4f8a3c" stroke="#ffd27a" stroke-width="2"><ellipse cx="34" cy="30" rx="16" ry="9"/><ellipse cx="64" cy="48" rx="12" ry="7"/><ellipse cx="88" cy="30" rx="9" ry="6"/><ellipse cx="110" cy="56" rx="18" ry="9"/><ellipse cx="136" cy="34" rx="10" ry="6"/><ellipse cx="44" cy="74" rx="9" ry="5"/><ellipse cx="82" cy="80" rx="12" ry="6"/></g><ellipse cx="84" cy="54" rx="72" ry="40" fill="none" stroke="#fff" stroke-width="1.6" stroke-dasharray="5 4"/></symbol>
-    <symbol id="art-deserts" viewBox="0 0 160 100"><rect width="160" height="100" fill="url(#sky)"/><circle cx="128" cy="24" r="12" fill="#ffd166"/><path d="M0 70c30-16 60-16 90 0s50 6 70-4v34H0z" fill="url(#sand)"/><path d="M0 84c40-10 70-6 100 2s46 0 60-6v20H0z" fill="#e39a3e"/><path d="M44 74V46c0-6 8-6 8 0v28M44 58h-6v-8M52 54h6v-8" stroke="#3f9b3f" stroke-width="6" stroke-linecap="round" fill="none"/></symbol>
-    <symbol id="art-ranges" viewBox="0 0 160 100"><rect width="160" height="100" fill="url(#sky)"/><path d="M0 100l26-50 18 22 26-52 22 34 18-26 22 30 28-30v72z" fill="#4a5f87"/><path d="M70 20l-10 20 8-4 6 6 6-6zM110 28l-7 10 6-2 5 4 4-4z" fill="#fff"/><path d="M0 100l20-30 22 20 24-26 30 36z" fill="#2e6b2a"/><path d="M96 100l26-30 38 30z" fill="#3c7a3f"/></symbol>
-    <symbol id="art-mountains" viewBox="0 0 160 100"><rect width="160" height="100" fill="url(#sky)"/><path d="M14 100L80 12l66 88z" fill="#6b7fa8"/><path d="M80 12l-18 24 10-4 8 8 8-8 10 4z" fill="#fff"/><path d="M80 12v-6l12 3-12 3" fill="#ff5c9a"/><path d="M0 100l26-26 20 26zM120 100l24-22 16 22z" fill="#2e6b2a"/><text x="120" y="40" font-family="Bricolage Grotesque, sans-serif" font-weight="800" font-size="13" fill="#123a73">8848 m</text></symbol>
-    <symbol id="art-regions" viewBox="0 0 160 100"><rect width="160" height="100" fill="url(#sea)"/><path d="M10 16h60l10 14-6 26 14 20-10 18H10z" fill="#c0392b"/><path d="M90 10h62v84H96l8-20-10-18 6-22z" fill="#c0392b"/><path d="M26 30l30-4 10 18-12 20-26-6z" fill="#e8705f" stroke="#fff" stroke-width="2" stroke-dasharray="4 3"/><path d="M106 26l34 2 4 28-20 10-16-14z" fill="#e8705f" stroke="#fff" stroke-width="2" stroke-dasharray="4 3"/></symbol>
-    <symbol id="art-cities" viewBox="0 0 160 100"><rect width="160" height="100" fill="#d9822b"/><path d="M0 60c30 4 40-20 70-14s36 20 60 14 30-10 30-10v50H0z" fill="url(#sea)" opacity=".9"/><g fill="#fff"><circle cx="40" cy="32" r="3"/><circle cx="96" cy="26" r="3"/><circle cx="128" cy="44" r="3"/><circle cx="62" cy="48" r="3"/></g><g fill="none" stroke="#fff" stroke-width="1.2" opacity=".7"><circle cx="96" cy="26" r="8"/><circle cx="96" cy="26" r="14"/><circle cx="40" cy="32" r="8"/><circle cx="128" cy="44" r="8"/></g></symbol>
-    <symbol id="art-latlong" viewBox="0 0 160 100"><rect width="160" height="100" fill="#0b2a52"/><circle cx="80" cy="50" r="42" fill="url(#globeG)"/><g fill="none" stroke="#e6f4ff" stroke-width="1" opacity=".55"><ellipse cx="80" cy="50" rx="42" ry="14"/><ellipse cx="80" cy="50" rx="14" ry="42"/><ellipse cx="80" cy="50" rx="30" ry="42"/><path d="M42 32h76M42 68h76"/></g><path d="M38 50h84" stroke="#ff5c9a" stroke-width="2.5"/><path d="M80 8v84" stroke="#ffb547" stroke-width="2.5"/><circle cx="104" cy="36" r="4" fill="#fff" stroke="#ff5c9a" stroke-width="2"/></symbol>
-    <symbol id="art-earth" viewBox="0 0 160 100"><rect width="160" height="100" fill="#0e1d38"/><circle cx="80" cy="52" r="42" fill="#2a72c9"/><path d="M80 52V10a42 42 0 0 1 42 42z" fill="#0e1d38"/><circle cx="80" cy="52" r="42" fill="none"/><path d="M80 52V14a38 38 0 0 1 38 38z" fill="#d9822b"/><path d="M80 52V24a28 28 0 0 1 28 28z" fill="#f0a73a"/><path d="M80 52V36a16 16 0 0 1 16 16z" fill="#ffd166"/><path d="M80 52V44a8 8 0 0 1 8 8z" fill="#ff5c3a"/></symbol>
-    <symbol id="art-atmosphere" viewBox="0 0 160 100"><rect width="160" height="100" fill="#0b1630"/><path d="M0 100a120 60 0 0 1 160 0z" fill="#2a72c9"/><path d="M-10 100a130 70 0 0 1 180 0" stroke="#7cc4ff" stroke-width="8" fill="none" opacity=".7"/><path d="M-20 100a140 82 0 0 1 200 0" stroke="#4d8dff" stroke-width="8" fill="none" opacity=".5"/><path d="M-30 100a150 94 0 0 1 220 0" stroke="#7b5cff" stroke-width="8" fill="none" opacity=".4"/><circle cx="50" cy="40" r="4" fill="#ffd166"/><path d="M104 52l10-4 2 4-10 4z" fill="#fff"/></symbol>
-    <symbol id="art-watercycle" viewBox="0 0 160 100"><rect width="160" height="100" fill="url(#sky)"/><circle cx="26" cy="22" r="10" fill="#ffd166"/><path d="M96 26a10 10 0 0 1 18-6 12 12 0 0 1 20 8 8 8 0 0 1-2 16H98a9 9 0 0 1-2-18z" fill="#fff"/><g stroke="#2a72c9" stroke-width="2" stroke-linecap="round"><path d="M104 50l-3 8M114 50l-3 8M124 50l-3 8"/></g><path d="M0 78h160v22H0z" fill="url(#sea)"/><path d="M110 60l30 20H70z" fill="#6b7fa8"/><path d="M40 74c0-10 4-20 8-26M52 74c0-12 4-22 10-28" stroke="#ff8a65" stroke-width="2" stroke-dasharray="3 3" fill="none"/></symbol>
-    <symbol id="art-biomes" viewBox="0 0 160 100"><rect width="160" height="100" fill="url(#sea)"/><path d="M8 10h144v20H8z" fill="#e8f1ff"/><path d="M8 30h144v16H8z" fill="#2e6b2a"/><path d="M8 46h144v14H8z" fill="#8bd46a"/><path d="M8 60h144v14H8z" fill="url(#sand)"/><path d="M8 74h144v16H8z" fill="#1d8f4e"/></symbol>
-    <symbol id="art-climate" viewBox="0 0 160 100"><rect width="160" height="100" fill="url(#sky)"/><circle cx="130" cy="22" r="12" fill="#ffb547"/><path d="M0 84h160v16H0z" fill="#7fb069"/><rect x="34" y="50" width="34" height="34" fill="#c0563b"/><rect x="44" y="30" width="8" height="22" fill="#6b6b6b"/><path d="M48 28c-6-8 4-12 0-20M48 28c8-6 14 0 12-8" stroke="#9aa8bd" stroke-width="5" fill="none" stroke-linecap="round"/><rect x="96" y="40" width="10" height="44" rx="5" fill="#fff" stroke="#c0563b" stroke-width="2"/><circle cx="101" cy="80" r="8" fill="#e63946"/><rect x="99" y="52" width="4" height="26" fill="#e63946"/></symbol>
-    <symbol id="art-volcanoes" viewBox="0 0 160 100"><rect width="160" height="100" fill="#2a3f6b"/><path d="M20 100l44-56h32l44 56z" fill="#5a4636"/><path d="M64 44l8 14 8-8 8 10 8-16z" fill="#ff6b3a"/><path d="M80 40c-10-10-6-22 4-26M80 40c8-12 22-10 24-20" stroke="#ff8a3a" stroke-width="5" fill="none" stroke-linecap="round"/><circle cx="60" cy="18" r="8" fill="#9aa8bd" opacity=".7"/><circle cx="100" cy="12" r="10" fill="#9aa8bd" opacity=".6"/></symbol>
-  </defs>
-</svg>
-
 <script>
 const T = {
-  en: { home: "← Home", title: "Geography", intro: "Explore the Earth on a real satellite globe. Every topic has a study map and games to test yourself.", soon: "Coming soon",
-    soonMsg: "This topic is being built.", places: "{n} to learn",
-    sec: { world: "Countries of the world", land: "Land", water: "Water", people: "People and places", earth: "How the Earth works" },
-    t: { countries: ["Countries", "Find the 197 countries on the globe."], capitals: ["Capitals", "Write the capital of every country."], flags: ["Flags", "Match each flag to its country."],
-      continents: ["Continents", "The seven continents."], islands: ["Islands", "The biggest and best-known islands."], archipelagos: ["Archipelagos", "Groups of islands."],
-      regions: ["Regions", "Peninsulas, plains, plateaus and famous areas."], deserts: ["Deserts", "Hot and cold deserts."], ranges: ["Mountain ranges", "The great chains of mountains."],
-      mountains: ["Mountains", "The highest and most famous peaks."], oceans: ["Oceans", "The five oceans."], seas: ["Seas", "Seas, gulfs and bays."], straits: ["Straits", "Narrow passages between seas."],
+  en: { home: "← Home", kicker: "MindQuest · Geography", titleA: "Explore the", titleB: "Earth", intro: "Spin a real satellite globe and learn the whole planet: countries, oceans, rivers, mountains and more. Every topic has a study map and games to test yourself.",
+    statGames: "games to play", statCountries: "countries", statPlaces: "places to discover", statLangs: "languages", ctaStart: "Start with countries", surprise: "Surprise me",
+    all: "All", soon: "Coming soon", soonMsg: "This topic is being built.", toLearn: "{n} to learn", best: "Best {n}", fresh: "New",
+    sec: { world: ["Countries", "of the world"], land: ["Land", ""], water: ["Water", ""], people: ["People", "and places"], earth: ["How the Earth", "works"] },
+    t: { countries: ["Countries", "Find all 197 countries on the globe."], capitals: ["Capitals", "Learn to write the capital of every country."], flags: ["Flags", "Match each flag to its country."],
+      continents: ["Continents", "The seven continents of the world."], islands: ["Islands", "The biggest and best-known islands."], archipelagos: ["Archipelagos", "Island groups scattered across the seas."],
+      regions: ["Regions", "Peninsulas, plains, plateaus and famous areas."], deserts: ["Deserts", "Hot and cold deserts of the world."], ranges: ["Mountain ranges", "The great mountain chains."],
+      mountains: ["Mountains", "The highest and most famous peaks."], oceans: ["Oceans", "The five oceans of the planet."], seas: ["Seas", "Seas, gulfs and bays."], straits: ["Straits", "Narrow passages between seas."],
       rivers: ["Rivers", "The great rivers of the world."], lakes: ["Lakes", "The biggest and most famous lakes."], cities: ["Cities", "The biggest cities on Earth."],
-      latlong: ["Latitude and longitude", "Lines on the globe and finding places by coordinates."], earth: ["Inside the Earth", "Crust, mantle and core."],
-      atmosphere: ["Atmosphere", "The layers of air around the Earth."], watercycle: ["The water cycle", "How water moves around the planet."], biomes: ["Biomes", "Forests, grasslands, deserts and tundra."],
-      climate: ["Climate change", "Why the Earth is warming and what we can do."], volcanoes: ["Volcanoes", "Famous volcanoes and how they work."] } },
-  ar: { home: "→ الرئيسية", title: "الجغرافيا", intro: "استكشف الأرض على كرة حقيقية بصور الأقمار الصناعية. لكل موضوع خريطة للتعلّم وألعاب لاختبار نفسك.", soon: "قريبًا",
-    soonMsg: "هذا الموضوع قيد الإنشاء.", places: "{n} للتعلّم",
-    sec: { world: "دول العالم", land: "اليابسة", water: "المياه", people: "الناس والأماكن", earth: "كيف تعمل الأرض" },
-    t: { countries: ["الدول", "جِد دول العالم الـ197 على الكرة."], capitals: ["العواصم", "اكتب عاصمة كل دولة."], flags: ["الأعلام", "طابق كل علم مع دولته."],
-      continents: ["القارات", "القارات السبع."], islands: ["الجزر", "أكبر الجزر وأشهرها."], archipelagos: ["الأرخبيلات", "مجموعات الجزر."],
-      regions: ["المناطق", "أشباه الجزر والسهول والهضاب والمناطق الشهيرة."], deserts: ["الصحاري", "الصحاري الحارة والباردة."], ranges: ["السلاسل الجبلية", "أعظم سلاسل الجبال."],
-      mountains: ["الجبال", "أعلى القمم وأشهرها."], oceans: ["المحيطات", "المحيطات الخمسة."], seas: ["البحار", "البحار والخلجان."], straits: ["المضائق", "الممرات الضيقة بين البحار."],
+      latlong: ["Latitude & longitude", "The lines of the globe and coordinates."], earth: ["Inside the Earth", "Crust, mantle and core."], atmosphere: ["Atmosphere", "The layers of air around us."],
+      watercycle: ["The water cycle", "How water travels around the planet."], biomes: ["Biomes", "Forests, grasslands, deserts and tundra."], climate: ["Climate change", "Why the Earth is warming."], volcanoes: ["Volcanoes", "Famous volcanoes and how they erupt."] } },
+  ar: { home: "→ الرئيسية", kicker: "MindQuest · الجغرافيا", titleA: "استكشف", titleB: "الأرض", intro: "دوّر كرة أرضية حقيقية بصور الأقمار الصناعية وتعلّم الكوكب كله: الدول والمحيطات والأنهار والجبال وأكثر. لكل موضوع خريطة للتعلّم وألعاب لاختبار نفسك.",
+    statGames: "لعبة", statCountries: "دولة", statPlaces: "مكان لتكتشفه", statLangs: "لغات", ctaStart: "ابدأ بالدول", surprise: "فاجئني",
+    all: "الكل", soon: "قريبًا", soonMsg: "هذا الموضوع قيد الإنشاء.", toLearn: "{n} للتعلّم", best: "أفضل نتيجة {n}", fresh: "جديد",
+    sec: { world: ["دول", "العالم"], land: ["اليابسة", ""], water: ["المياه", ""], people: ["الناس", "والأماكن"], earth: ["كيف تعمل", "الأرض"] },
+    t: { countries: ["الدول", "جِد دول العالم الـ197 على الكرة."], capitals: ["العواصم", "تعلّم كتابة عاصمة كل دولة."], flags: ["الأعلام", "طابق كل علم مع دولته."],
+      continents: ["القارات", "قارات العالم السبع."], islands: ["الجزر", "أكبر الجزر وأشهرها."], archipelagos: ["الأرخبيلات", "مجموعات جزر منتشرة في البحار."],
+      regions: ["المناطق", "أشباه الجزر والسهول والهضاب والمناطق الشهيرة."], deserts: ["الصحاري", "صحاري العالم الحارة والباردة."], ranges: ["السلاسل الجبلية", "أعظم سلاسل الجبال."],
+      mountains: ["الجبال", "أعلى القمم وأشهرها."], oceans: ["المحيطات", "محيطات الكوكب الخمسة."], seas: ["البحار", "البحار والخلجان."], straits: ["المضائق", "الممرات الضيقة بين البحار."],
       rivers: ["الأنهار", "أعظم أنهار العالم."], lakes: ["البحيرات", "أكبر البحيرات وأشهرها."], cities: ["المدن", "أكبر مدن العالم."],
-      latlong: ["خطوط الطول والعرض", "خطوط على الكرة وإيجاد الأماكن بالإحداثيات."], earth: ["باطن الأرض", "القشرة والوشاح واللب."],
-      atmosphere: ["الغلاف الجوي", "طبقات الهواء حول الأرض."], watercycle: ["دورة الماء", "كيف ينتقل الماء حول الكوكب."], biomes: ["المناطق الحيوية", "الغابات والمراعي والصحاري والتندرا."],
-      climate: ["تغيّر المناخ", "لماذا ترتفع حرارة الأرض وماذا يمكننا أن نفعل."], volcanoes: ["البراكين", "أشهر البراكين وكيف تعمل."] } },
-  fr: { home: "← Accueil", title: "Géographie", intro: "Explore la Terre sur un vrai globe satellite. Chaque thème a une carte pour apprendre et des jeux pour te tester.", soon: "Bientôt",
-    soonMsg: "Ce thème est en préparation.", places: "{n} à apprendre",
-    sec: { world: "Pays du monde", land: "Terres", water: "Eaux", people: "Villes et repères", earth: "Comment fonctionne la Terre" },
-    t: { countries: ["Pays", "Trouve les 197 pays sur le globe."], capitals: ["Capitales", "Écris la capitale de chaque pays."], flags: ["Drapeaux", "Associe chaque drapeau à son pays."],
-      continents: ["Continents", "Les sept continents."], islands: ["Îles", "Les îles les plus grandes et les plus connues."], archipelagos: ["Archipels", "Les groupes d'îles."],
-      regions: ["Régions", "Péninsules, plaines, plateaux et régions célèbres."], deserts: ["Déserts", "Déserts chauds et froids."], ranges: ["Chaînes de montagnes", "Les grandes chaînes de montagnes."],
-      mountains: ["Montagnes", "Les sommets les plus hauts et les plus célèbres."], oceans: ["Océans", "Les cinq océans."], seas: ["Mers", "Mers, golfes et baies."], straits: ["Détroits", "Les passages étroits entre les mers."],
-      rivers: ["Fleuves", "Les grands fleuves du monde."], lakes: ["Lacs", "Les lacs les plus grands et les plus connus."], cities: ["Villes", "Les plus grandes villes du monde."],
-      latlong: ["Latitude et longitude", "Les lignes du globe et les coordonnées."], earth: ["L'intérieur de la Terre", "Croûte, manteau et noyau."],
-      atmosphere: ["Atmosphère", "Les couches d'air autour de la Terre."], watercycle: ["Le cycle de l'eau", "Comment l'eau circule sur la planète."], biomes: ["Biomes", "Forêts, prairies, déserts et toundra."],
-      climate: ["Changement climatique", "Pourquoi la Terre se réchauffe et ce que l'on peut faire."], volcanoes: ["Volcans", "Les volcans célèbres et leur fonctionnement."] } },
+      latlong: ["خطوط الطول والعرض", "خطوط الكرة الأرضية والإحداثيات."], earth: ["باطن الأرض", "القشرة والوشاح واللب."], atmosphere: ["الغلاف الجوي", "طبقات الهواء من حولنا."],
+      watercycle: ["دورة الماء", "كيف ينتقل الماء حول الكوكب."], biomes: ["المناطق الحيوية", "الغابات والمراعي والصحاري والتندرا."], climate: ["تغيّر المناخ", "لماذا ترتفع حرارة الأرض."], volcanoes: ["البراكين", "أشهر البراكين وكيف تثور."] } },
+  fr: { home: "← Accueil", kicker: "MindQuest · Géographie", titleA: "Explore la", titleB: "Terre", intro: "Fais tourner un vrai globe satellite et découvre toute la planète : pays, océans, fleuves, montagnes et plus encore. Chaque thème a une carte pour apprendre et des jeux pour te tester.",
+    statGames: "jeux", statCountries: "pays", statPlaces: "lieux à découvrir", statLangs: "langues", ctaStart: "Commencer par les pays", surprise: "Surprends-moi",
+    all: "Tout", soon: "Bientôt", soonMsg: "Ce thème est en préparation.", toLearn: "{n} à apprendre", best: "Record {n}", fresh: "Nouveau",
+    sec: { world: ["Pays", "du monde"], land: ["Terres", ""], water: ["Eaux", ""], people: ["Villes", "et repères"], earth: ["Comment marche", "la Terre"] },
+    t: { countries: ["Pays", "Trouve les 197 pays sur le globe."], capitals: ["Capitales", "Apprends à écrire chaque capitale."], flags: ["Drapeaux", "Associe chaque drapeau à son pays."],
+      continents: ["Continents", "Les sept continents du monde."], islands: ["Îles", "Les îles les plus grandes et les plus connues."], archipelagos: ["Archipels", "Des groupes d'îles dans les mers."],
+      regions: ["Régions", "Péninsules, plaines, plateaux et régions célèbres."], deserts: ["Déserts", "Les déserts chauds et froids."], ranges: ["Chaînes de montagnes", "Les grandes chaînes du monde."],
+      mountains: ["Montagnes", "Les sommets les plus hauts et célèbres."], oceans: ["Océans", "Les cinq océans de la planète."], seas: ["Mers", "Mers, golfes et baies."], straits: ["Détroits", "Les passages étroits entre les mers."],
+      rivers: ["Fleuves", "Les grands fleuves du monde."], lakes: ["Lacs", "Les lacs les plus grands et célèbres."], cities: ["Villes", "Les plus grandes villes du monde."],
+      latlong: ["Latitude et longitude", "Les lignes du globe et les coordonnées."], earth: ["L'intérieur de la Terre", "Croûte, manteau et noyau."], atmosphere: ["Atmosphère", "Les couches d'air autour de nous."],
+      watercycle: ["Le cycle de l'eau", "Le voyage de l'eau sur la planète."], biomes: ["Biomes", "Forêts, prairies, déserts et toundra."], climate: ["Changement climatique", "Pourquoi la Terre se réchauffe."], volcanoes: ["Volcans", "Les volcans célèbres et leurs éruptions."] } },
 };
-// href: where the tile goes; n: how many things to learn (shown on the tile)
+// [section, colour, [[topic, link, count, best-score keys], ...]]
 const SECTIONS = [
-  ["world", "--geo", [["countries", "world/?mode=find", 197], ["capitals", "world/?mode=capital", 197], ["flags", "world/?mode=flag", 197]]],
+  ["world", "--world", [["countries", "world/?mode=find", 197, "gq-best-find-"], ["capitals", "world/?mode=capital", 197, "gq-best-capital-"], ["flags", "world/?mode=flag", 197, "gq-best-flag-"]]],
   ["land", "--land", [["continents", "explore/?t=continents", 7], ["islands", "explore/?t=islands", 41], ["archipelagos", "explore/?t=archipelagos", 40], ["regions", "explore/?t=regions", 40],
     ["deserts", "explore/?t=deserts", 22], ["ranges", "explore/?t=ranges", 37], ["mountains", "explore/?t=mountains", 34]]],
   ["water", "--water", [["oceans", "explore/?t=oceans", 5], ["seas", "explore/?t=seas", 52], ["straits", "explore/?t=straits", 27], ["rivers", "explore/?t=rivers", 52], ["lakes", "explore/?t=lakes", 41]]],
   ["people", "--people", [["cities", "explore/?t=cities", 79], ["latlong", "explore/?t=latlong", 7]]],
   ["earth", "--earth", [["earth"], ["atmosphere"], ["watercycle"], ["biomes"], ["climate"], ["volcanoes"]]],
 ];
-let lang = "en";
+
+// ---------- animated scenes (320×200, original drawings) ----------
+const SEA = (id, a = "#2f7fd6", b = "#0e3768") => `<linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${a}"/><stop offset="1" stop-color="${b}"/></linearGradient>`;
+const WAVES = (y, c = "#cfe9ff", o = .5, cls = "") => `<g class="s-wave ${cls}" opacity="${o}"><path d="M-80 ${y}${Array.from({ length: 6 }, (_, i) => ` q20 -7 40 0 t40 0`).join("")}" fill="none" stroke="${c}" stroke-width="2.2" stroke-linecap="round"/></g>`;
+const ART = {
+  countries: `<defs>${SEA("cSea")}</defs><rect width="320" height="200" fill="url(#cSea)"/>${WAVES(176)}${WAVES(32, "#cfe9ff", .3, "slow")}
+    <g stroke="#fff" stroke-width="2" stroke-linejoin="round"><path class="s-pop" d="M34 60l30-14 30 10 18-6 14 18-12 22-26 8-10 22-22-4-14-22-18-8z" fill="#7bd66b"/>
+    <path class="s-pop" style="animation-delay:-.9s" d="M134 50l40-12 34 8 26 18-8 26-34 8-18 18-26-12-8-26z" fill="#ffc94d"/>
+    <path class="s-pop" style="animation-delay:-1.8s" d="M196 118l30 4 18 22-12 26-26 4-14-22z" fill="#ff8a65"/><path class="s-pop" style="animation-delay:-2.7s" d="M80 128l26 8 8 26-18 14-22-12z" fill="#b39ddb"/>
+    <path class="s-pop" style="animation-delay:-1.3s" d="M250 56l34-6 18 18-8 22-30 4-14-16z" fill="#4fd1c5"/></g>
+    <g class="s-bob"><path d="M182 74c0-10 8-18 18-18s18 8 18 18c0 14-18 30-18 30s-18-16-18-30z" fill="#ff4d6d" stroke="#fff" stroke-width="2.5"/><circle cx="200" cy="74" r="6" fill="#fff"/></g>
+    <circle class="s-pulse" cx="200" cy="104" r="8" fill="none" stroke="#fff" stroke-width="2"/>`,
+  capitals: `<defs><linearGradient id="nSky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0a1440"/><stop offset="1" stop-color="#2b2f7a"/></linearGradient></defs><rect width="320" height="200" fill="url(#nSky)"/>
+    <g fill="#fff">${[[30, 24], [70, 40], [120, 18], [250, 30], [290, 50], [200, 22], [160, 44]].map(([x, y], i) => `<circle class="s-twinkle" style="animation-delay:-${i * .4}s" cx="${x}" cy="${y}" r="1.6"/>`).join("")}</g>
+    <circle cx="268" cy="44" r="16" fill="#fff4c2"/><circle cx="276" cy="38" r="14" fill="url(#nSky)"/>
+    <g fill="#1b2457"><rect x="10" y="96" width="34" height="104"/><rect x="48" y="70" width="28" height="130"/><rect x="240" y="80" width="34" height="120"/><rect x="278" y="104" width="34" height="96"/></g>
+    <g fill="#ffd166">${[[16, 106], [28, 120], [54, 82], [64, 100], [54, 128], [248, 92], [260, 112], [286, 116], [298, 136], [250, 140]].map(([x, y], i) => `<rect class="s-blink" style="animation-delay:-${i * .7}s" x="${x}" y="${y}" width="7" height="9" rx="1"/>`).join("")}</g>
+    <path d="M100 200v-62h120v62z" fill="#33408f"/><path d="M110 138c0-30 22-50 50-50s50 20 50 50z" fill="#4253b0"/><rect x="154" y="62" width="12" height="28" fill="#4253b0"/>
+    <g fill="#fff2c4"><rect x="112" y="150" width="10" height="34"/><rect x="132" y="150" width="10" height="34"/><rect x="152" y="150" width="16" height="50"/><rect x="178" y="150" width="10" height="34"/><rect x="198" y="150" width="10" height="34"/></g>
+    <path d="M100 140h120" stroke="#fff2c4" stroke-width="4"/><path class="s-flag" d="M166 46h22l-6 7 6 7h-22z" fill="#ff4d6d"/><path d="M166 46v20" stroke="#fff" stroke-width="2"/>
+    <circle class="s-glow" cx="160" cy="62" r="20" fill="#ffd166" opacity=".25"/>`,
+  flags: `<rect width="320" height="200" fill="#0f1b38"/>${[
+      [16, 22, `<rect width="80" height="52" fill="#e63946"/><rect width="80" height="17" fill="#fff"/>`],
+      [120, 22, `<rect width="80" height="52" fill="#2a9d8f"/><circle cx="40" cy="26" r="13" fill="#ffd166"/>`],
+      [224, 22, `<rect width="80" height="52" fill="#264653"/><rect width="27" height="52" fill="#f4a261"/><rect x="53" width="27" height="52" fill="#e9c46a"/>`],
+      [16, 110, `<rect width="80" height="52" fill="#ffd166"/><rect y="17" width="80" height="18" fill="#118ab2"/>`],
+      [120, 110, `<rect width="80" height="52" fill="#fff"/><circle cx="40" cy="26" r="15" fill="#e63946"/>`],
+      [224, 110, `<rect width="80" height="52" fill="#06d6a0"/><path d="M0 0l40 26L0 52z" fill="#073b4c"/><circle cx="14" cy="26" r="5" fill="#fff"/>`]].map(([x, y, inner], i) =>
+      `<path d="M${x - 2} ${y - 4}v84" stroke="#c9d4ea" stroke-width="3" stroke-linecap="round"/><g transform="translate(${x} ${y})"><g class="s-flag" style="animation-delay:-${i * .3}s">${inner}</g></g>`).join("")}`,
+  continents: `<defs>${SEA("ctSea", "#1e6fc7", "#0b2f5e")}</defs><rect width="320" height="200" fill="url(#ctSea)"/>${WAVES(186, "#cfe9ff", .3)}
+    <g stroke="rgba(255,255,255,.9)" stroke-width="1.5" class="s-bob"><path d="M30 40l40-14 28 14-6 26-24 12-12 22-16-12-14-30z" fill="#ff9f43"/><path d="M78 108l20 8 6 26-12 36-12-8-8-32z" fill="#ff6b81"/>
+    <path d="M140 38h26l8 18-18 10-16-6z" fill="#70a1ff"/><path d="M142 76l32-4 16 26-12 44-20 8-14-36z" fill="#feca57"/><path d="M178 30l70-4 32 28-16 30-36 4-28-16-20-14z" fill="#1dd1a1"/>
+    <path d="M238 128l36-4 12 24-24 16-24-12z" fill="#c56cf0"/><path d="M70 190h180v10H70z" fill="#eef4ff"/></g>
+    <path class="s-march" d="M138 70l40-6 20 30-14 52-26 10-18-44z" fill="none" stroke="#fff" stroke-width="2.5"/>`,
+  islands: `<defs><linearGradient id="iSky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffb88c"/><stop offset=".55" stop-color="#ffd9a8"/><stop offset=".56" stop-color="#2f8fd6"/><stop offset="1" stop-color="#0e4c8a"/></linearGradient></defs>
+    <rect width="320" height="200" fill="url(#iSky)"/><circle cx="250" cy="70" r="30" fill="#fff1c4" class="s-glow"/>
+    <g class="s-drift"><path d="M20 40c0-8 10-10 14-4 4-8 18-6 18 4 8 0 8 10 0 10H22c-6 0-8-10-2-10z" fill="#fff" opacity=".9"/></g>
+    <g class="s-fly"><path d="M40 60q6-6 12 0q6-6 12 0" fill="none" stroke="#3b3b5c" stroke-width="2"/></g>
+    <g class="s-bob"><ellipse cx="128" cy="150" rx="70" ry="18" fill="#ffd27a"/><path d="M80 146c20-26 64-30 92-6" fill="#3f9b4f"/>
+    <g class="s-sway"><path d="M132 140c-2-28 2-48 14-64" stroke="#7a4b28" stroke-width="6" fill="none" stroke-linecap="round"/>
+    <path d="M146 76c-22-8-38 2-46 14M146 76c18-12 38-4 46 8M146 76c-4-18 10-30 24-30M146 76c-14-14-34-12-42-4" stroke="#2fae55" stroke-width="8" fill="none" stroke-linecap="round"/></g></g>
+    ${WAVES(178, "#e6f6ff", .7)}${WAVES(192, "#e6f6ff", .4, "slow")}`,
+  archipelagos: `<defs>${SEA("aSea", "#25a3d9", "#0c4a7c")}</defs><rect width="320" height="200" fill="url(#aSea)"/>${WAVES(30, "#e6f6ff", .3)}${WAVES(186, "#e6f6ff", .3, "slow")}
+    <g fill="#5fb85a" stroke="#ffe0a0" stroke-width="3">${[[60, 60, 30, 16], [118, 96, 22, 12], [168, 60, 16, 10], [214, 110, 34, 16], [266, 66, 20, 11], [80, 146, 18, 9], [158, 156, 24, 11]].map(([x, y, rx, ry], i) =>
+      `<ellipse class="s-bob" style="animation-delay:-${i * .5}s" cx="${x}" cy="${y}" rx="${rx}" ry="${ry}"/>`).join("")}</g>
+    <ellipse class="s-march" cx="166" cy="104" rx="140" ry="78" fill="none" stroke="#fff" stroke-width="2.5"/>
+    <g class="s-sail"><path d="M30 120h26l-4 8H34z" fill="#fff"/><path d="M43 92v26M43 94l14 20H43z" stroke="#fff" fill="#ff6fae" stroke-width="1.5"/></g>`,
+  regions: `<defs>${SEA("rSea")}</defs><rect width="320" height="200" fill="url(#rSea)"/>
+    <path d="M0 20h120l20 30-12 50 26 40-20 60H0z" fill="#b8473a"/><path d="M180 0h140v200H190l16-40-20-36 14-44-14-40z" fill="#b8473a"/>
+    <path class="s-glow" d="M30 58l64-8 20 36-24 40-54-12z" fill="#ff8f70"/><path class="s-march" d="M30 58l64-8 20 36-24 40-54-12z" fill="none" stroke="#fff" stroke-width="3"/>
+    <path class="s-glow" style="animation-delay:-1s" d="M212 50l70 4 8 56-40 20-32-28z" fill="#ff8f70"/><path class="s-march" d="M212 50l70 4 8 56-40 20-32-28z" fill="none" stroke="#fff" stroke-width="3"/>
+    <circle class="s-pulse" cx="62" cy="88" r="10" fill="none" stroke="#fff" stroke-width="2"/><circle class="s-pulse" style="animation-delay:-1.2s" cx="248" cy="88" r="10" fill="none" stroke="#fff" stroke-width="2"/>`,
+  deserts: `<defs><linearGradient id="dSky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffa94d"/><stop offset="1" stop-color="#ffe3a3"/></linearGradient><linearGradient id="dSand" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffcf70"/><stop offset="1" stop-color="#e08a2e"/></linearGradient></defs>
+    <rect width="320" height="200" fill="url(#dSky)"/><circle class="s-glow" cx="240" cy="54" r="34" fill="#fff3c0"/><circle cx="240" cy="54" r="22" fill="#fff8de"/>
+    <g class="s-heat" stroke="#fff3c0" stroke-width="2" fill="none" opacity=".7"><path d="M40 92q8-5 16 0t16 0"/><path d="M200 104q8-5 16 0t16 0"/></g>
+    <path d="M0 140c50-30 110-30 170 0s100 10 150-6v66H0z" fill="url(#dSand)"/><path d="M0 168c70-18 130-12 190 4s90 0 130-10v38H0z" fill="#d97b25"/>
+    <g class="s-walk"><g fill="#5a3416"><path d="M20 138c4-14 20-16 28-6 6-10 20-8 22 4h6l4 8H66l-2 14h-4l-2-12H40l-2 12h-4l-2-14z"/><path d="M76 136l6-14 6 2-4 14z"/></g></g>
+    <g class="s-sway"><path d="M276 168v-46c0-10 12-10 12 0v46M276 144h-10v-14M288 138h10v-16" stroke="#2f8f3a" stroke-width="9" stroke-linecap="round" fill="none"/></g>`,
+  ranges: `<defs><linearGradient id="mSky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6db8ff"/><stop offset="1" stop-color="#d8efff"/></linearGradient></defs><rect width="320" height="200" fill="url(#mSky)"/>
+    <g class="s-drift d2"><path d="M20 50c0-8 10-10 14-4 4-8 18-6 18 4 8 0 8 10 0 10H22c-6 0-8-10-2-10z" fill="#fff"/></g>
+    <path d="M0 200l40-90 30 40 50-100 40 66 36-50 44 70 50-60 30 40v84z" fill="#5d6fa3"/><path d="M120 50l-20 40 14-6 10 10 12-10 16 6zM196 66l-14 22 10-4 8 6 8-6 10 4zM290 80l-10 16 8-2 6 4 6-4 8 2z" fill="#fff"/>
+    <path d="M0 200l30-50 40 34 50-56 50 60 40-40 50 52z" fill="#3d4f80"/><path d="M0 200l40-30 50 30z M170 200l60-40 60 40z" fill="#2f6b3a"/>
+    <g class="s-drift"><path d="M30 90c0-6 8-8 11-3 3-6 14-5 14 3 6 0 6 8 0 8H32c-5 0-6-8-2-8z" fill="#fff" opacity=".9"/></g>`,
+  mountains: `<defs><linearGradient id="pSky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3d7bd9"/><stop offset="1" stop-color="#bfe0ff"/></linearGradient><linearGradient id="peak" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#8fa2cc"/><stop offset="1" stop-color="#4b5d8c"/></linearGradient></defs>
+    <rect width="320" height="200" fill="url(#pSky)"/><path d="M20 200L160 24l140 176z" fill="url(#peak)"/><path d="M160 24l-40 50 22-8 18 16 18-16 22 8z" fill="#fff"/>
+    <g fill="#fff">${[[150, 50], [170, 62], [140, 66]].map(([x, y], i) => `<path class="s-twinkle" style="animation-delay:-${i * .8}s" d="M${x} ${y - 4}l1.5 4 4 1.5-4 1.5-1.5 4-1.5-4-4-1.5 4-1.5z"/>`).join("")}</g>
+    <path d="M160 24v-18" stroke="#fff" stroke-width="2"/><path class="s-flag" d="M160 6h20l-5 5 5 5h-20z" fill="#ff4d6d"/>
+    <g class="s-drift"><path d="M30 110c0-10 12-12 17-5 5-10 22-8 22 5 10 0 10 12 0 12H32c-8 0-9-12-2-12z" fill="#fff" opacity=".95"/></g>
+    <g class="s-drift d2"><path d="M30 80c0-8 10-10 14-4 4-8 18-6 18 4 8 0 8 10 0 10H32c-6 0-8-10-2-10z" fill="#fff" opacity=".8"/></g>
+    <path d="M0 200l40-30 40 30zM240 200l40-34 40 34z" fill="#2f6b3a"/><text x="196" y="44" font-family="Bricolage Grotesque, sans-serif" font-weight="800" font-size="18" fill="#fff">8,848 m</text>`,
+  oceans: `<defs>${SEA("oSea", "#1b6fd1", "#06224a")}<radialGradient id="oLight" cx=".5" cy="0" r=".8"><stop offset="0" stop-color="#7cd0ff" stop-opacity=".5"/><stop offset="1" stop-color="#7cd0ff" stop-opacity="0"/></radialGradient></defs>
+    <rect width="320" height="200" fill="url(#oSea)"/><rect width="320" height="200" fill="url(#oLight)"/>${WAVES(26, "#e6f6ff", .8)}${WAVES(40, "#e6f6ff", .45, "slow")}
+    <g class="s-walk" style="animation-duration:22s"><path d="M40 120c20-14 56-14 74 0-18 10-54 12-74 0z" fill="#2b4a7a"/><path d="M112 120l18-12-4 12 4 12z" fill="#2b4a7a"/><circle cx="56" cy="118" r="2" fill="#fff"/></g>
+    <g fill="#ffd166">${[[200, 150], [220, 160], [240, 148]].map(([x, y], i) => `<path class="s-bob" style="animation-delay:-${i * .6}s" d="M${x} ${y}q8-6 14 0q-6 6-14 0zM${x + 14} ${y}l6-4v8z"/>`).join("")}</g>
+    <g fill="none" stroke="#bfe6ff" stroke-width="1.5" opacity=".7"><circle class="s-rise" cx="90" cy="180" r="4"/><circle class="s-rise" style="animation-delay:-1.4s" cx="260" cy="190" r="3"/></g>
+    <g transform="translate(270 140)" opacity=".85"><circle r="20" fill="none" stroke="#e6f6ff" stroke-width="1.5"/><g class="s-spin"><path d="M0-18l4 18-4 18-4-18z" fill="#ff6fae"/></g></g>`,
+  seas: `<defs>${SEA("sSea", "#2b8fe0", "#0d3f78")}</defs><rect width="320" height="200" fill="#3f8a43"/>
+    <path d="M18 104c28-26 62-22 92-10s52 4 74-12 56-22 86-6 32 30 28 44-40 14-62 10-52 12-78 12-62-12-88-12-58 0-52-26z" fill="url(#sSea)"/>
+    <g opacity=".7">${WAVES(118, "#e6f6ff", .7)}</g>
+    <g class="s-sail"><path d="M90 116h30l-5 9H95z" fill="#fff"/><path d="M105 82v32M105 84l16 26h-16z" stroke="#fff" fill="#ffd166" stroke-width="1.5"/></g>
+    <g fill="#2f6b3a"><circle cx="40" cy="40" r="10"/><circle cx="56" cy="34" r="8"/><circle cx="270" cy="170" r="10"/><circle cx="250" cy="176" r="7"/></g>`,
+  straits: `<defs>${SEA("stSea")}</defs><rect width="320" height="200" fill="url(#stSea)"/>${WAVES(180, "#e6f6ff", .35)}
+    <path d="M0 0h140l-10 60 14 40H0z" fill="#3f8a43"/><path d="M180 0h140v200H172l14-60-12-44z" fill="#3f8a43"/><path d="M0 130h128l-14 70H0z" fill="#3f8a43"/>
+    <g class="s-glow"><path d="M232 52l60-30v16z" fill="#fff6b0" opacity=".6"/></g><rect x="224" y="52" width="14" height="40" fill="#fff"/><rect x="224" y="62" width="14" height="8" fill="#ff4d6d"/><path d="M222 52h18l-9-10z" fill="#ff4d6d"/>
+    <g class="s-sail" style="animation-duration:10s"><g transform="translate(110 100)"><path d="M0 0h40l-6 10H6z" fill="#e8eefb"/><rect x="10" y="-12" width="18" height="12" fill="#ff6fae"/></g></g>
+    <circle cx="156" cy="112" r="30" fill="none" stroke="#fff" stroke-width="2.5" class="s-march"/>`,
+  rivers: `<rect width="320" height="200" fill="#4c9a3f"/><path d="M0 0h320v200H0z" fill="url(#rvTex)"/><defs><pattern id="rvTex" width="20" height="20" patternUnits="userSpaceOnUse"><circle cx="4" cy="4" r="1.2" fill="#5fb050"/></pattern></defs>
+    <path d="M310 10c-40 26-30 60-70 68s-70-8-90 24-8 60-52 72-70 16-98 20" stroke="#2f8fe0" stroke-width="16" fill="none" stroke-linecap="round"/>
+    <path class="s-flow" d="M310 10c-40 26-30 60-70 68s-70-8-90 24-8 60-52 72-70 16-98 20" stroke="#bfe6ff" stroke-width="4" fill="none" stroke-linecap="round"/>
+    <path d="M240 78c8 28 34 40 60 44M150 102c-24-14-50-14-74-38" stroke="#2f8fe0" stroke-width="7" fill="none" stroke-linecap="round"/>
+    <path class="s-flow" d="M300 122c-26-4-52-16-60-44M76 64c24 24 50 24 74 38" stroke="#bfe6ff" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+    <g fill="#2e6b2a">${[[40, 30], [60, 24], [200, 160], [180, 170], [270, 160], [30, 120]].map(([x, y], i) => `<g class="s-sway" style="animation-delay:-${i * .5}s"><circle cx="${x}" cy="${y}" r="10"/><rect x="${x - 2}" y="${y + 8}" width="4" height="8" fill="#6b4226"/></g>`).join("")}</g>`,
+  lakes: `<defs><linearGradient id="lSky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8fd3ff"/><stop offset="1" stop-color="#e3f4ff"/></linearGradient>${SEA("lSea", "#3aa0e8", "#145a9e")}</defs>
+    <rect width="320" height="200" fill="url(#lSky)"/><path d="M0 110l60-60 40 36 50-56 60 70 40-40 70 60v80H0z" fill="#6b7fa8"/><path d="M150 30l-16 20 10-3 6 6 8-6 10 3z" fill="#fff"/>
+    <path d="M0 120h320v80H0z" fill="#4c9a3f"/><ellipse cx="160" cy="152" rx="120" ry="32" fill="url(#lSea)" stroke="#e3f4ff" stroke-width="3"/>
+    <g fill="none" stroke="#e6f6ff" stroke-width="2"><ellipse class="s-ripple" cx="130" cy="150" rx="22" ry="6"/><ellipse class="s-ripple" style="animation-delay:-1.5s" cx="200" cy="158" rx="22" ry="6"/></g>
+    <g class="s-sail" style="animation-duration:18s"><g transform="translate(80 140)"><path d="M0 0h22l-4 6H4z" fill="#fff"/><path d="M11 -18v18M11 -16l10 14H11z" fill="#ff6fae" stroke="#fff" stroke-width="1"/></g></g>`,
+  cities: `<defs>${SEA("ciSea", "#1d5fb0", "#0a2a55")}</defs><rect width="320" height="200" fill="#d9822b"/><path d="M0 120c60 10 80-40 140-28s70 40 120 28 60-20 60-20v100H0z" fill="url(#ciSea)"/>
+    <path class="s-march" d="M70 64Q130 10 196 52" fill="none" stroke="#fff" stroke-width="2" opacity=".85"/><path class="s-march" d="M196 52Q240 60 262 96" fill="none" stroke="#fff" stroke-width="2" opacity=".85"/>
+    <path class="s-march" d="M70 64Q90 110 120 96" fill="none" stroke="#fff" stroke-width="2" opacity=".85"/>
+    ${[[70, 64], [196, 52], [262, 96], [120, 96]].map(([x, y], i) => `<circle cx="${x}" cy="${y}" r="5" fill="#fff"/><circle class="s-pulse" style="animation-delay:-${i * .6}s" cx="${x}" cy="${y}" r="10" fill="none" stroke="#fff" stroke-width="2"/>`).join("")}
+    <g class="s-fly"><path d="M0 0l14 4-14 4 3-4z" fill="#fff" transform="translate(40 120) rotate(-12)"/></g>`,
+  latlong: `<defs><radialGradient id="llG" cx=".35" cy=".35" r=".8"><stop offset="0" stop-color="#6fd3ff"/><stop offset="1" stop-color="#0e3768"/></radialGradient></defs><rect width="320" height="200" fill="#081a3a"/>
+    <g fill="#fff">${[[30, 30], [280, 40], [40, 170], [290, 160], [250, 20]].map(([x, y], i) => `<circle class="s-twinkle" style="animation-delay:-${i * .5}s" cx="${x}" cy="${y}" r="1.5"/>`).join("")}</g>
+    <circle cx="160" cy="100" r="80" fill="url(#llG)"/><g fill="none" stroke="#e6f4ff" stroke-width="1.2" opacity=".5"><ellipse class="s-meridian" cx="160" cy="100" rx="80" ry="80"/><ellipse class="s-meridian" style="animation-delay:-2s" cx="160" cy="100" rx="80" ry="80"/><ellipse class="s-meridian" style="animation-delay:-4s" cx="160" cy="100" rx="80" ry="80"/>
+    <path d="M88 64h144M88 136h144M100 44h120M100 156h120"/></g><path d="M80 100h160" stroke="#ff6fae" stroke-width="3"/><path class="s-flow" d="M80 100h160" stroke="#fff" stroke-width="1.5"/>
+    <g class="s-bob"><path d="M196 58c0-8 6-14 14-14s14 6 14 14c0 11-14 24-14 24s-14-13-14-24z" fill="#ffb547" stroke="#fff" stroke-width="2"/></g><circle class="s-pulse" cx="210" cy="82" r="7" fill="none" stroke="#fff" stroke-width="2"/>
+    <text x="226" y="96" font-family="Bricolage Grotesque, sans-serif" font-weight="800" font-size="13" fill="#fff">30°N 45°E</text>`,
+  earth: `<rect width="320" height="200" fill="#0b1430"/><g fill="#fff">${[[30, 30], [290, 40], [40, 170], [280, 170]].map(([x, y], i) => `<circle class="s-twinkle" style="animation-delay:-${i * .6}s" cx="${x}" cy="${y}" r="1.5"/>`).join("")}</g>
+    <circle cx="160" cy="104" r="84" fill="#2c7fd6"/><path d="M110 60c20-14 40-10 50 4s-6 22 4 32 30 6 28 22-24 18-34 10" fill="#4aa04a"/>
+    <path d="M160 104V20a84 84 0 0 1 84 84z" fill="#0b1430"/><path d="M160 104V26a78 78 0 0 1 78 78z" fill="#a0522d"/><path d="M160 104V40a64 64 0 0 1 64 64z" fill="#e8743b"/>
+    <path d="M160 104V62a42 42 0 0 1 42 42z" fill="#ffb347"/><path class="s-glow" d="M160 104V80a24 24 0 0 1 24 24z" fill="#ffe066"/><circle class="s-pulse" cx="168" cy="96" r="10" fill="none" stroke="#fff3a0" stroke-width="2"/>`,
+  atmosphere: `<defs><linearGradient id="atG" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#7cc4ff"/><stop offset=".5" stop-color="#3a5fd9"/><stop offset="1" stop-color="#0b0f2e"/></linearGradient></defs><rect width="320" height="200" fill="url(#atG)"/>
+    ${[150, 112, 76, 42].map((y, i) => `<path class="s-glow" style="animation-delay:-${i * .5}s" d="M0 ${y}q160 -24 320 0" stroke="#fff" stroke-opacity=".4" stroke-dasharray="4 6" fill="none" stroke-width="1.5"/>`).join("")}
+    <path d="M-20 210q180 -60 360 0z" fill="#2f8f4a"/><g class="s-fly" style="animation-duration:12s"><path d="M0 0h22l6-4h4l-4 6 4 6h-4l-6-4H0z" fill="#fff" transform="translate(0 130)"/></g>
+    <g class="s-rise" style="animation-duration:9s"><circle cx="70" cy="150" r="10" fill="#ff6fae"/><path d="M64 160l6 8 6-8" stroke="#fff" fill="none"/></g>
+    <g transform="translate(250 30)"><g class="s-spin" style="animation-duration:20s"><rect x="-4" y="-4" width="8" height="8" fill="#ddd"/><rect x="-18" y="-2" width="12" height="4" fill="#5b9bff"/><rect x="6" y="-2" width="12" height="4" fill="#5b9bff"/></g></g>`,
+  watercycle: `<defs><linearGradient id="wcSky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7ec8ff"/><stop offset="1" stop-color="#dff1ff"/></linearGradient>${SEA("wcSea")}</defs><rect width="320" height="200" fill="url(#wcSky)"/>
+    <circle class="s-glow" cx="50" cy="40" r="22" fill="#ffd166"/><path d="M200 140l50-60 70 60z" fill="#6b7fa8"/><path d="M250 80l-12 14 8-2 4 4 6-4 8 2z" fill="#fff"/>
+    <path d="M0 150h320v50H0z" fill="url(#wcSea)"/>${WAVES(160, "#e6f6ff", .5)}
+    <g class="s-drift" style="animation-duration:30s;animation-delay:-14s"><path d="M150 40c0-12 14-16 20-8 6-12 28-10 28 6 12 0 12 16 0 16h-44c-10 0-12-14-4-14z" fill="#fff"/></g>
+    <g stroke="#2f7fd6" stroke-width="2.5" stroke-linecap="round">${[230, 244, 258, 272].map((x, i) => `<path class="s-rain" style="animation-delay:-${i * .22}s" d="M${x} 90l-4 10"/>`).join("")}</g>
+    <g stroke="#ff8a65" stroke-width="2.5" stroke-dasharray="4 4" fill="none">${[70, 100, 130].map((x, i) => `<path class="s-rise" style="animation-delay:-${i * .9}s" d="M${x} 150q-8 -20 0 -40"/>`).join("")}</g>`,
+  biomes: `<rect width="320" height="200" fill="#0f2a4a"/><g class="s-slide"><rect x="-20" y="0" width="360" height="40" fill="#e9f3ff"/><rect x="-20" y="40" width="360" height="40" fill="#2e6b3a"/><rect x="-20" y="80" width="360" height="40" fill="#8bd46a"/><rect x="-20" y="120" width="360" height="40" fill="#f2c26b"/><rect x="-20" y="160" width="360" height="40" fill="#1e8a4f"/></g>
+    <g fill="#fff"><path class="s-twinkle" d="M40 20l3 6 6 0-5 4 2 6-6-4-6 4 2-6-5-4h6z"/></g>
+    <g fill="#14422a">${[60, 110, 160, 210, 260].map((x, i) => `<path class="s-sway" style="animation-delay:-${i * .4}s" d="M${x} 74l10-26 10 26z"/>`).join("")}</g>
+    <g stroke="#3f8a2f" stroke-width="2">${[30, 80, 130, 180, 230, 280].map((x, i) => `<path class="s-sway" style="animation-delay:-${i * .3}s" d="M${x} 116v-12M${x + 4} 116v-9M${x - 4} 116v-8"/>`).join("")}</g>
+    <g class="s-sway"><path d="M150 156v-24c0-6 8-6 8 0v24M150 142h-6v-8M158 138h6v-8" stroke="#2f8f3a" stroke-width="5" stroke-linecap="round" fill="none"/></g>
+    <g class="s-sway" style="animation-delay:-1s"><path d="M240 196c0-14 2-22 8-30" stroke="#6b4226" stroke-width="3" fill="none"/><path d="M248 166c-10-4-18 0-22 6M248 166c8-6 18-2 22 4M248 166c-2-8 4-14 12-14" stroke="#36c26b" stroke-width="5" fill="none" stroke-linecap="round"/></g>`,
+  climate: `<defs><linearGradient id="clSky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffb070"/><stop offset="1" stop-color="#ffe0b8"/></linearGradient></defs><rect width="320" height="200" fill="url(#clSky)"/>
+    <circle class="s-glow" cx="262" cy="44" r="28" fill="#ff7b39"/><path d="M0 168h320v32H0z" fill="#8bbf6a"/>
+    <rect x="50" y="110" width="70" height="58" fill="#c0563b"/><rect x="68" y="72" width="14" height="40" fill="#6b6b6b"/><rect x="92" y="84" width="12" height="28" fill="#6b6b6b"/>
+    <g fill="#8a8a99">${[0, 1, 2].map((i) => `<circle class="s-rise" style="animation-delay:-${i * 1.1}s" cx="75" cy="66" r="10"/><circle class="s-rise" style="animation-delay:-${i * 1.1 + .5}s" cx="98" cy="78" r="8"/>`).join("")}</g>
+    <rect x="186" y="60" width="22" height="104" rx="11" fill="#fff" stroke="#c0563b" stroke-width="3"/><circle cx="197" cy="160" r="16" fill="#e63946"/><rect class="s-merc" x="192" y="74" width="10" height="84" rx="5" fill="#e63946"/>
+    <path d="M240 168l20-26 24 26z" fill="#e8f6ff"/><path class="s-rain" d="M262 170v8" stroke="#2f7fd6" stroke-width="3" stroke-linecap="round"/>`,
+  volcanoes: `<defs><linearGradient id="vSky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2a1d4a"/><stop offset="1" stop-color="#b8513a"/></linearGradient></defs><rect width="320" height="200" fill="url(#vSky)"/>
+    <path d="M40 200l90-110h60l90 110z" fill="#4a3528"/><path d="M130 90l14 26 16-14 16 18 14-30z" fill="#ff6b2a"/><path class="s-glow" d="M136 90h48l-6 8h-36z" fill="#ffd166"/>
+    <path d="M144 116l-10 40M176 120l14 44" stroke="#ff7a2a" stroke-width="5" stroke-linecap="round" class="s-glow"/>
+    <g fill="#7a6b78">${[0, 1, 2, 3].map((i) => `<circle class="s-rise" style="animation-delay:-${i * .85}s" cx="${152 + (i % 2) * 18}" cy="76" r="${12 + i * 2}"/>`).join("")}</g>
+    <g fill="#ffb347">${[[-22, 0], [24, .4], [-34, .8], [36, 1.2]].map(([lx, d]) => `<circle class="s-lava" style="--lx:${lx}px;animation-delay:-${d}s" cx="160" cy="88" r="4"/>`).join("")}</g>`,
+};
+
+// ---------- page ----------
+let lang = "en", filter = "all";
 try { const s = JSON.parse(localStorage.getItem("gq-lang")); if (T[s]) lang = s; else if (T[(navigator.language || "").slice(0, 2)]) lang = navigator.language.slice(0, 2); } catch {}
 const esc = (s) => String(s).replace(/[&<>"]/g, (m) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[m]));
+function bestFor(id, prefix) {
+  let best = 0;
+  try {
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      if ((prefix && k.startsWith(prefix)) || k.startsWith(`gq-xbest-${id}-`)) { const v = JSON.parse(localStorage.getItem(k)); if (v && v.score > best) best = v.score; }
+    }
+  } catch {}
+  return best;
+}
+const PLAY = `<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 2.5v11l9-5.5z" fill="currentColor"/></svg>`;
 function render() {
   const d = T[lang];
   document.documentElement.lang = lang; document.documentElement.dir = lang === "ar" ? "rtl" : "ltr";
   document.querySelectorAll("[data-t]").forEach((el) => { el.textContent = d[el.dataset.t]; });
   document.querySelectorAll("[data-lang]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.lang === lang)));
-  document.getElementById("sections").innerHTML = SECTIONS.map(([sec, color, tiles]) => `
-    <section class="section" style="--c: var(${color})"><h2><i></i>${esc(d.sec[sec])}</h2><div class="grid">
-    ${tiles.map(([id, href, n]) => {
+  const chips = [["all", "--text", SECTIONS.reduce((n, s) => n + s[2].length, 0)], ...SECTIONS.map(([sec, c, tiles]) => [sec, c, tiles.length])];
+  document.getElementById("filters").innerHTML = chips.map(([id, c, n]) =>
+    `<button class="chip" type="button" data-f="${id}" style="--c: var(${c})" aria-pressed="${filter === id}"><i></i>${esc(id === "all" ? d.all : d.sec[id].join(" ").trim())} <small>${n}</small></button>`).join("") +
+    `<button class="chip surprise" type="button" id="surprise2" style="--c: var(--land)"><i></i>${esc(d.surprise)}</button>`;
+  let i = 0;
+  document.getElementById("sections").innerHTML = SECTIONS.filter(([sec]) => filter === "all" || filter === sec).map(([sec, color, tiles]) => `
+    <section class="section" style="--c: var(${color})"><div class="section-head"><h2>${esc(d.sec[sec][0])} <span>${esc(d.sec[sec][1])}</span></h2><em>${tiles.length}</em></div><div class="grid">
+    ${tiles.map(([id, href, n, prefix]) => {
       const [name, desc] = d.t[id];
-      const art = `<svg viewBox="0 0 160 100" aria-hidden="true"><use href="#art-${id}"/></svg>`;
-      return href
-        ? `<a class="tile" style="--c: var(${color})" href="${href}">${art}<div><b>${esc(name)}</b><span>${esc(desc)}</span></div><em class="count">${esc(d.places.replace("{n}", n))}</em></a>`
-        : `<button class="tile soon" type="button" style="--c: var(${color})" aria-disabled="true">${art}<div><b>${esc(name)}</b><span>${esc(desc)}</span></div><em class="soonpill">${esc(d.soon)}</em></button>`;
+      const art = `<div class="art" dir="ltr"><svg viewBox="0 0 320 200" aria-hidden="true">${ART[id]}</svg><div class="shine"></div></div>`;
+      const idx = i++;
+      if (!href) return `<button class="card soon" type="button" style="--c: var(${color}); --i: ${idx}" aria-disabled="true">${art}<span class="ribbon">${esc(d.soon)}</span><div class="body"><b>${esc(name)}</b><p>${esc(desc)}</p></div></button>`;
+      const best = bestFor(id, prefix);
+      return `<a class="card" href="${href}" style="--c: var(${color}); --i: ${idx}">${art}<span class="play">${PLAY}</span><div class="body"><b>${esc(name)}</b><p>${esc(desc)}</p>
+        <div class="meta"><span class="count">${esc(d.toLearn.replace("{n}", n))}</span>${best ? `<span class="badge best">★ ${esc(d.best.replace("{n}", best))}</span>` : `<span class="badge">${esc(d.fresh)}</span>`}</div></div></a>`;
     }).join("")}</div></section>`).join("");
+  observeCards();
 }
-document.querySelector(".lang").addEventListener("click", (e) => { const b = e.target.closest("[data-lang]"); if (!b) return; lang = b.dataset.lang; try { localStorage.setItem("gq-lang", JSON.stringify(lang)); } catch {} render(); });
-document.getElementById("sections").addEventListener("click", (e) => { const b = e.target.closest(".tile.soon"); if (!b) return; b.classList.remove("shake"); void b.offsetWidth; b.classList.add("shake"); b.title = T[lang].soonMsg; });
-render();
+function surprise() {
+  const ready = SECTIONS.flatMap(([, , tiles]) => tiles.filter((t) => t[1]));
+  location.href = ready[Math.floor(Math.random() * ready.length)][1];
+}
+document.querySelector(".lang").addEventListener("click", (e) => { const b = e.target.closest("[data-lang]"); if (!b) return; lang = b.dataset.lang; try { localStorage.setItem("gq-lang", JSON.stringify(lang)); } catch {} render(); globeLabels(); });
+document.getElementById("filters").addEventListener("click", (e) => {
+  if (e.target.closest("#surprise2")) return surprise();
+  const b = e.target.closest("[data-f]"); if (!b) return; filter = b.dataset.f; render();
+  const top = document.getElementById("sections").getBoundingClientRect().top + scrollY - 70;
+  if (scrollY > top) scrollTo({ top, left: 0, behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
+});
+document.getElementById("surprise1").addEventListener("click", surprise);
+const sections = document.getElementById("sections");
+sections.addEventListener("click", (e) => { const b = e.target.closest(".card.soon"); if (!b) return; b.classList.remove("shake"); void b.offsetWidth; b.classList.add("shake"); b.title = T[lang].soonMsg; });
+// 3D tilt and light that follow the pointer
+const fine = matchMedia("(hover: hover) and (pointer: fine)").matches && !matchMedia("(prefers-reduced-motion: reduce)").matches;
+sections.addEventListener("pointermove", (e) => {
+  if (!fine) return; const c = e.target.closest(".card"); if (!c) return;
+  const r = c.getBoundingClientRect(), x = (e.clientX - r.left) / r.width, y = (e.clientY - r.top) / r.height;
+  c.style.setProperty("--ry", `${(x - .5) * 10}deg`); c.style.setProperty("--rx", `${(.5 - y) * 8}deg`);
+  c.style.setProperty("--mx", `${x * 100}%`); c.style.setProperty("--my", `${y * 100}%`);
+});
+sections.addEventListener("pointerout", (e) => { const c = e.target.closest(".card"); if (c && !c.contains(e.relatedTarget)) { c.style.setProperty("--rx", "0deg"); c.style.setProperty("--ry", "0deg"); } });
+// pause scenes that are off screen
+let io = null;
+function observeCards() {
+  if (!("IntersectionObserver" in window)) return;
+  io && io.disconnect();
+  io = new IntersectionObserver((es) => es.forEach((en) => en.target.classList.toggle("paused", !en.isIntersecting)), { rootMargin: "100px" });
+  document.querySelectorAll(".card .art").forEach((a) => io.observe(a));
+}
+// counters
+function countUp() {
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  document.querySelectorAll("[data-count]").forEach((el) => {
+    const to = +el.dataset.count, plus = el.dataset.plus ? "+" : "", t0 = performance.now(), dur = 1400;
+    if (reduce) { el.textContent = to + plus; return; }
+    (function step(t) { const k = Math.min(1, (t - t0) / dur), e = 1 - Math.pow(1 - k, 3); el.textContent = Math.round(to * e) + (k === 1 ? plus : ""); if (k < 1) requestAnimationFrame(step); })(t0);
+  });
+}
+render(); countUp();
+
+// ---------- starry sky with slow aurora and the odd shooting star ----------
+(function () {
+  const cv = document.getElementById("sky"), ctx = cv.getContext("2d"), reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let W, H, dpr, stars = [], shoot = null;
+  function resize() { dpr = Math.min(2, devicePixelRatio || 1); W = innerWidth; H = innerHeight; cv.width = W * dpr; cv.height = H * dpr;
+    stars = Array.from({ length: Math.round(W * H / 5000) }, () => ({ x: Math.random() * W, y: Math.random() * H, r: Math.random() * 1.3 + .2, p: Math.random() * 6.28, s: Math.random() * .02 + .005 })); }
+  addEventListener("resize", resize); resize();
+  const BLOBS = [["46,230,197", .18, .2], ["77,163,255", .82, .1], ["177,140,255", .7, .75], ["255,111,174", .15, .85]];
+  function frame(t) {
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.fillStyle = "#050811"; ctx.fillRect(0, 0, W, H);
+    ctx.globalCompositeOperation = "lighter";
+    BLOBS.forEach(([c, fx, fy], i) => { const x = W * (fx + Math.sin(t / 9000 + i) * .06), y = H * (fy + Math.cos(t / 11000 + i) * .06), r = Math.max(W, H) * .45;
+      const g = ctx.createRadialGradient(x, y, 0, x, y, r); g.addColorStop(0, `rgba(${c},.13)`); g.addColorStop(1, `rgba(${c},0)`); ctx.fillStyle = g; ctx.fillRect(0, 0, W, H); });
+    ctx.globalCompositeOperation = "source-over";
+    const sy = scrollY * .15;
+    for (const s of stars) { const a = .35 + .65 * Math.abs(Math.sin(s.p + t * s.s * .06)); ctx.globalAlpha = a; ctx.fillStyle = "#fff"; ctx.beginPath(); ctx.arc(s.x, (s.y - sy % H + H) % H, s.r, 0, 6.283); ctx.fill(); }
+    ctx.globalAlpha = 1;
+    if (!shoot && Math.random() < .004) shoot = { x: Math.random() * W, y: Math.random() * H * .4, k: 0 };
+    if (shoot) { shoot.k += .02; const x = shoot.x + shoot.k * 260, y = shoot.y + shoot.k * 110, g = ctx.createLinearGradient(x - 80, y - 34, x, y);
+      g.addColorStop(0, "rgba(255,255,255,0)"); g.addColorStop(1, "rgba(255,255,255,.9)"); ctx.strokeStyle = g; ctx.lineWidth = 1.6; ctx.beginPath(); ctx.moveTo(x - 80, y - 34); ctx.lineTo(x, y); ctx.stroke(); if (shoot.k > 1) shoot = null; }
+    if (!reduce) requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+})();
+
+// ---------- the big satellite Earth, with place names appearing as it turns ----------
+let globeLabels = () => {};
+(function () {
+  const cv = document.getElementById("bigGlobe"), ctx = cv.getContext("2d"), reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const PLACES = [
+    [27, 18, "Sahara", "الصحراء الكبرى", "Sahara", "#ffb547"], [27.99, 86.93, "Everest", "إفرست", "Everest", "#ffffff"], [17, 33.2, "Nile", "النيل", "Nil", "#4da3ff"],
+    [-3, -60, "Amazon", "الأمازون", "Amazone", "#4da3ff"], [64, -40, "Greenland", "جرينلاند", "Groenland", "#2ee6c5"], [38, 5, "Mediterranean", "المتوسط", "Méditerranée", "#4da3ff"],
+    [-20, 47, "Madagascar", "مدغشقر", "Madagascar", "#2ee6c5"], [35.68, 139.7, "Tokyo", "طوكيو", "Tokyo", "#ff6fae"], [-33, 147, "Australia", "أستراليا", "Australie", "#ffb547"],
+    [46, 10, "Alps", "الألب", "Alpes", "#ffffff"], [53, 108, "Baikal", "بايكال", "Baïkal", "#4da3ff"], 
+    [-13, -70, "Andes", "الأنديز", "Andes", "#ffffff"], [40.7, -74, "New York", "نيويورك", "New York", "#ff6fae"], [0, -30, "Atlantic", "الأطلسي", "Atlantique", "#4da3ff"],
+    [-20, 80, "Indian Ocean", "المحيط الهندي", "océan Indien", "#4da3ff"], [-23, 15, "Namib", "ناميب", "Namib", "#ffb547"], [33.9, 35.5, "Beirut", "بيروت", "Beyrouth", "#ff6fae"],
+  ];
+  let size = 0, dpr = 1, R = 0, D = 0, idx = [], row = [], ub = [], shade = [], out = null, off = null, octx = null, tex = null, TW = 0, TH = 0, rot = -0.4, last = performance.now(), drag = null, vel = 0.00022;
+  const TILT = 0.32, cosT = Math.cos(TILT), sinT = Math.sin(TILT), L = [-0.5, 0.42, 0.76];
+  function setup() {
+    const r = cv.getBoundingClientRect(); dpr = Math.min(1.5, devicePixelRatio || 1); size = Math.round(r.width * dpr); if (!size) return;
+    cv.width = size; cv.height = size; R = size * 0.42; D = Math.ceil(R * 2);
+    off = document.createElement("canvas"); off.width = D; off.height = D; octx = off.getContext("2d"); out = octx.createImageData(D, D);
+    idx = []; row = []; ub = []; shade = [];
+    for (let py = 0; py < D; py++) for (let px = 0; px < D; px++) {
+      const x = (px + .5 - R) / R, y = -(py + .5 - R) / R, rr = x * x + y * y; if (rr > 1) continue;
+      const z = Math.sqrt(1 - rr), gy = y * cosT + z * sinT, gz = -y * sinT + z * cosT, lat = Math.asin(Math.max(-1, Math.min(1, gy))), lon = Math.atan2(x, gz);
+      const diff = Math.max(0, x * L[0] + y * L[1] + z * L[2]), edge = rr * rr;
+      idx.push((py * D + px) * 4); row.push(Math.min(TH - 1, Math.floor((.5 - lat / Math.PI) * TH)) * TW); ub.push((lon + Math.PI) / (2 * Math.PI) * TW);
+      shade.push((0.3 + 1.05 * diff) * (1 - edge * .32));
+    }
+  }
+  const img = new Image();
+  img.onload = () => { const c = document.createElement("canvas"); c.width = img.width; c.height = img.height; const g = c.getContext("2d"); g.drawImage(img, 0, 0); tex = g.getImageData(0, 0, c.width, c.height).data; TW = c.width; TH = c.height; setup(); requestAnimationFrame(frame); };
+  img.src = "img/earth-1k.jpg";
+  addEventListener("resize", () => { if (tex) setup(); });
+  function project(lat, lon) {
+    const la = lat * Math.PI / 180, lo = lon * Math.PI / 180 + rot, gx = Math.cos(la) * Math.sin(lo), gy = Math.sin(la), gz = Math.cos(la) * Math.cos(lo);
+    return [gx, gy * cosT - gz * sinT, gy * sinT + gz * cosT];
+  }
+  let names = 2; globeLabels = () => { names = lang === "ar" ? 3 : lang === "fr" ? 4 : 2; };
+  globeLabels();
+  function frame(t) {
+    const dt = Math.min(64, t - last); last = t;
+    if (!drag && !reduce) { rot += dt * vel; vel += (0.00022 - vel) * 0.02; }
+    const shift = (rot / (2 * Math.PI)) * TW, px = out.data;
+    for (let i = 0; i < idx.length; i++) { let u = Math.floor(ub[i] - shift) % TW; if (u < 0) u += TW; const s4 = (row[i] + u) * 4, o = idx[i], k = shade[i];
+      px[o] = tex[s4] * k; px[o + 1] = tex[s4 + 1] * k; px[o + 2] = tex[s4 + 2] * k + 8; px[o + 3] = 255; }
+    octx.putImageData(out, 0, 0);
+    const c = size / 2; ctx.clearRect(0, 0, size, size);
+    const glow = ctx.createRadialGradient(c, c, R * .9, c, c, R * 1.18); glow.addColorStop(0, "rgba(110,190,255,.55)"); glow.addColorStop(1, "rgba(110,190,255,0)");
+    ctx.fillStyle = glow; ctx.beginPath(); ctx.arc(c, c, R * 1.18, 0, 6.283); ctx.fill();
+    ctx.drawImage(off, c - R, c - R);
+    ctx.strokeStyle = "rgba(170,220,255,.6)"; ctx.lineWidth = 1.2 * dpr; ctx.beginPath(); ctx.arc(c, c, R, 0, 6.283); ctx.stroke();
+    ctx.font = `700 ${Math.round(12.5 * dpr)}px "Bricolage Grotesque", "Tajawal", system-ui, sans-serif`; ctx.textBaseline = "middle"; ctx.textAlign = "left"; ctx.direction = "ltr";
+    const taken = [];   // label boxes already drawn this frame, so names never pile up
+    const order = PLACES.map((p) => [p, project(p[0], p[1])]).sort((a, b) => b[1][2] - a[1][2]);
+    for (const [p, [x, y, z]] of order) {
+      if (z < 0.25) continue;
+      const a = Math.min(1, (z - .25) * 2.2), sx = c + x * R, sy = c - y * R, label = p[names], pulse = ((t / 1400 + p[0]) % 1 + 1) % 1;
+      ctx.globalAlpha = a * (1 - pulse); ctx.strokeStyle = p[5]; ctx.lineWidth = 1.5 * dpr; ctx.beginPath(); ctx.arc(sx, sy, (3 + pulse * 10) * dpr, 0, 6.283); ctx.stroke();
+      ctx.globalAlpha = a; ctx.fillStyle = p[5]; ctx.beginPath(); ctx.arc(sx, sy, 3 * dpr, 0, 6.283); ctx.fill();
+      const w = ctx.measureText(label).width, bx = sx + 8 * dpr, by = sy - 10 * dpr, box = [bx - 4 * dpr, by - 2 * dpr, bx + w + 18 * dpr, by + 22 * dpr];
+      if (taken.some((q) => box[0] < q[2] && box[2] > q[0] && box[1] < q[3] && box[3] > q[1])) { ctx.globalAlpha = 1; continue; }
+      taken.push(box);
+      ctx.fillStyle = "rgba(6,10,22,.72)"; ctx.beginPath(); ctx.roundRect ? ctx.roundRect(bx, by, w + 14 * dpr, 20 * dpr, 6 * dpr) : ctx.rect(bx, by, w + 14 * dpr, 20 * dpr); ctx.fill();
+      ctx.fillStyle = "#fff"; ctx.fillText(label, bx + 7 * dpr, by + 10.5 * dpr);
+    }
+    ctx.globalAlpha = 1;
+    if (!reduce) requestAnimationFrame(frame);
+  }
+  // drag to spin, with a little momentum
+  cv.addEventListener("pointerdown", (e) => { drag = { x: e.clientX, t: performance.now() }; cv.setPointerCapture(e.pointerId); });
+  cv.addEventListener("pointermove", (e) => { if (!drag) return; const dx = e.clientX - drag.x, now = performance.now(); rot += dx / (R / dpr) ; vel = dx / (R / dpr) / Math.max(8, now - drag.t); drag = { x: e.clientX, t: now }; });
+  const up = () => { drag = null; vel = Math.max(-0.004, Math.min(0.004, vel)); };
+  cv.addEventListener("pointerup", up); cv.addEventListener("pointercancel", up);
+})();
 </script>
 </body>
 </html>
