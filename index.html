@@ -81,7 +81,6 @@ button { font: inherit; color: inherit; cursor: pointer; }
 
 .toast { position: fixed; left: 50%; bottom: calc(env(safe-area-inset-bottom, 0px) + 20px); transform: translate(-50%, 20px); opacity: 0; background: var(--panel-solid); border: 1px solid var(--line); border-radius: 14px; padding: 12px 16px; z-index: 5; width: max-content; max-width: calc(100% - 32px); transition: opacity .25s, transform .25s; pointer-events: none; box-shadow: 0 16px 40px rgba(0,0,0,.5); }
 .toast.show { opacity: 1; transform: translate(-50%, 0); }
-.footer { color: var(--muted); font-size: 13px; display: flex; gap: 12px; flex-wrap: wrap; justify-content: space-between; }
 
 /* illustrations */
 .spin { animation: spin 18s linear infinite; transform-origin: 50% 50%; transform-box: fill-box; }
@@ -213,7 +212,6 @@ html[lang="ar"] .cat-card h3 { line-height: 1.25; }
     </button>
   </section>
 
-  <footer class="footer"><span data-t="footB"></span></footer>
 </div>
 
 <div class="toast" id="toast" role="status"></div>
@@ -232,7 +230,7 @@ const T = {
     bio: "Biology", bioD: "Cells, the human body, animals and plants.",
     play: "Play", soon: "Coming soon",
     soonToast: "{name} is coming soon. Geography is ready to play now.",
-    footB: "English · العربية · Français",
+   
     cats: { geo: "Geography", chem: "Chemistry", phys: "Physics", math: "Math", bio: "Biology" },
     facts: [
       ["geo", "Russia is so wide that it covers 11 time zones."],
@@ -257,7 +255,7 @@ const T = {
     bio: "الأحياء", bioD: "الخلايا وجسم الإنسان والحيوانات والنباتات.",
     play: "العب", soon: "قريبًا",
     soonToast: "{name} قادمة قريبًا. الجغرافيا جاهزة للعب الآن.",
-    footB: "English · العربية · Français",
+   
     cats: { geo: "الجغرافيا", chem: "الكيمياء", phys: "الفيزياء", math: "الرياضيات", bio: "الأحياء" },
     facts: [
       ["geo", "روسيا واسعة جدًا لدرجة أنها تمتد على 11 منطقة زمنية."],
@@ -282,7 +280,7 @@ const T = {
     bio: "Biologie", bioD: "Les cellules, le corps humain, les animaux et les plantes.",
     play: "Jouer", soon: "Bientôt",
     soonToast: "{name} arrive bientôt. La géographie est déjà prête.",
-    footB: "English · العربية · Français",
+   
     cats: { geo: "Géographie", chem: "Chimie", phys: "Physique", math: "Maths", bio: "Biologie" },
     facts: [
       ["geo", "La Russie est si large qu'elle s'étend sur 11 fuseaux horaires."],
