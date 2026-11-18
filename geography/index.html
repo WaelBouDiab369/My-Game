@@ -3,149 +3,172 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="description" content="Learn world geography on a real satellite globe: 197 countries (plus 21 optional territories), flags, capitals and country names in English, Arabic and French.">
-<title>GeoQuest Globe · MindQuest</title>
+<meta name="description" content="Geography games on a real satellite globe: countries, capitals, flags, continents, oceans, seas, rivers, lakes, mountains, deserts, islands and more, in English, Arabic and French.">
+<title>Geography · MindQuest</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,800&family=Tajawal:wght@400;700;800&display=swap">
-<link rel="stylesheet" href="css/style.css">
+<style>
+/* Layout: a field atlas index. Header, then sections of equal tiles; each tile is a small original drawing of its topic. */
+:root {
+  --ink: #060912; --panel: rgba(12, 17, 32, 0.78); --text: #f1f4fb; --muted: #a3aec4; --line: rgba(200, 215, 245, 0.14);
+  --geo: #2ee6c5; --land: #b8f03a; --water: #4d8dff; --people: #ffb547; --earth: #ff5c9a;
+  --font-display: "Bricolage Grotesque", "Tajawal", "Segoe UI", system-ui, sans-serif;
+  --font-body: "Atkinson Hyperlegible", "Tajawal", "Segoe UI", system-ui, sans-serif;
+  color-scheme: dark;
+}
+[hidden] { display: none !important; }
+html, body { min-height: 100%; }
+body { margin: 0; background: radial-gradient(1200px 700px at 85% -10%, rgba(46,230,197,.14), transparent 60%), radial-gradient(900px 600px at -10% 30%, rgba(77,141,255,.12), transparent 60%), var(--ink); background-attachment: fixed; color: var(--text); font-family: var(--font-body); font-size: 16px; }
+.page { max-width: 1180px; margin: 0 auto; padding-block: 18px 48px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: grid; gap: 30px; }
+a { color: inherit; }
+button { font: inherit; color: inherit; cursor: pointer; }
+:focus-visible { outline: 3px solid var(--people); outline-offset: 3px; }
+.top { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.back { text-decoration: none; background: var(--panel); border: 1px solid var(--line); border-radius: 999px; padding: 7px 14px; font-size: 14px; }
+.back:hover { border-color: var(--text); }
+.lang { display: inline-flex; background: var(--panel); border: 1px solid var(--line); border-radius: 999px; padding: 3px; }
+.lang button { background: none; border: 0; border-radius: 999px; padding: 6px 12px; font-size: 14px; color: var(--muted); }
+.lang button[aria-pressed="true"] { background: var(--text); color: var(--ink); font-weight: 700; }
+.hero h1 { font-family: var(--font-display); font-weight: 800; font-size: clamp(40px, 7vw, 72px); line-height: .95; letter-spacing: -0.03em; margin: 0; }
+.hero h1 span { color: var(--geo); }
+.hero p { color: var(--muted); font-size: 17px; line-height: 1.5; margin: 12px 0 0; max-width: 60ch; }
+.section { display: grid; gap: 14px; }
+.section h2 { font-family: var(--font-display); font-weight: 800; font-size: 22px; margin: 0; display: flex; align-items: center; gap: 10px; }
+.section h2 i { width: 10px; height: 10px; border-radius: 50%; background: var(--c); box-shadow: 0 0 12px var(--c); }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 14px; }
+.tile { --c: var(--geo); position: relative; display: grid; grid-template-rows: auto 1fr; gap: 10px; text-decoration: none; text-align: start; background: linear-gradient(160deg, color-mix(in srgb, var(--c) 14%, transparent), transparent 60%), var(--panel); border: 1px solid var(--line); border-radius: 20px; padding: 14px; overflow: hidden; transition: transform .2s, border-color .2s, box-shadow .2s; min-height: 200px; }
+.tile:hover, .tile:focus-visible { transform: translateY(-3px); border-color: color-mix(in srgb, var(--c) 70%, transparent); box-shadow: 0 16px 40px -20px var(--c); }
+.tile svg { width: 100%; height: auto; aspect-ratio: 16 / 10; border-radius: 12px; background: color-mix(in srgb, var(--c) 10%, #0b1222); display: block; }
+.tile b { font-family: var(--font-display); font-size: 19px; line-height: 1.15; }
+.tile span { color: var(--muted); font-size: 13.5px; line-height: 1.4; display: block; margin-top: 4px; }
+.tile .count { position: absolute; top: 20px; inset-inline-start: 20px; background: rgba(6,9,18,.75); border-radius: 999px; padding: 2px 8px; font-size: 12px; color: var(--text); font-variant-numeric: tabular-nums; }
+.tile.soon { cursor: default; }
+.tile.soon svg { filter: saturate(.55) brightness(.8); }
+.tile .soonpill { position: absolute; top: 20px; inset-inline-end: 20px; border: 1px dashed var(--c); color: var(--c); border-radius: 999px; padding: 2px 8px; font-size: 12px; background: rgba(6,9,18,.75); }
+.tile.shake { animation: shake .4s; }
+@keyframes shake { 25% { translate: -5px 0; } 75% { translate: 5px 0; } }
+html[lang="ar"] * { letter-spacing: 0 !important; }
+html[lang="ar"] .hero h1 { line-height: 1.2; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+@media (max-width: 460px) { .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; } .tile { min-height: 0; padding: 10px; } .tile b { font-size: 16px; } .tile span { display: none; } }
+</style>
 </head>
 <body>
-<div id="globe" aria-label="Interactive globe"></div>
-<div class="loading" id="loading" data-i18n="loading">Loading the Earth…</div>
-
-<header class="hud">
-  <div class="brand">GeoQuest <small id="modeLabel"></small></div>
-  <div class="stats">
-    <a class="iconbtn" id="btnHome2" href="../" data-i18n="home"></a>
-    <div class="chip" id="chipScore" hidden><span data-i18n="score"></span> <b id="score">0</b></div>
-    <div class="chip streak" id="chipStreak" hidden><span data-i18n="streak"></span> <b id="streak">0</b></div>
-    <div class="chip lives" id="chipLives" hidden><b id="lives"></b></div>
-    <button class="iconbtn" id="btnView" type="button" hidden data-i18n="resetView"></button>
-    <button class="iconbtn" id="btnMenu" type="button" hidden data-i18n="menu"></button>
-    <div class="lang" id="langSwitch" role="group" aria-label="Language">
+<div class="page">
+  <header class="top">
+    <a class="back" href="../" data-t="home"></a>
+    <div class="lang" role="group" aria-label="Language">
       <button type="button" data-lang="en" lang="en">EN</button>
       <button type="button" data-lang="ar" lang="ar">عربي</button>
       <button type="button" data-lang="fr" lang="fr">FR</button>
     </div>
-  </div>
-</header>
-
-<div class="zoom" id="zoomBox" role="group" aria-label="Zoom" hidden>
-  <button type="button" id="zoomIn" aria-label="Zoom in" data-i18n-aria="zoomIn">+</button>
-  <button type="button" id="zoomOut" aria-label="Zoom out" data-i18n-aria="zoomOut">−</button>
+  </header>
+  <section class="hero">
+    <h1 data-t="title"></h1>
+    <p data-t="intro"></p>
+  </section>
+  <div id="sections"></div>
 </div>
 
-<!-- Question card (all quiz games) -->
-<section class="card" id="card" hidden aria-live="polite">
-  <div class="progress"><i id="bar"></i></div>
-  <div class="qlabel"><span id="qcount"></span><span id="qregion"></span></div>
-  <div class="timer" id="timer" hidden><i id="timerBar"></i></div>
-  <img class="flag-lg" id="qflag" alt="" hidden>
-  <div class="question" id="question"></div>
-  <div class="sub" id="qsub"></div>
-  <div class="hintline" id="hintline" hidden></div>
-  <form class="answer-row" id="answerForm" hidden autocomplete="off">
-    <input id="answer" type="text" autocomplete="off" autocapitalize="words" spellcheck="false" aria-label="Answer">
-    <button class="btn" id="btnSubmit" type="submit" data-i18n="check"></button>
-  </form>
-  <div id="feedback" class="feedback" hidden></div>
-  <div class="actions">
-    <button class="btn ghost" id="btnHint" type="button" data-i18n="hint"></button>
-    <button class="btn ghost" id="btnSkip" type="button" data-i18n="skip"></button>
-    <button class="btn" id="btnNext" type="button" hidden data-i18n="next"></button>
-  </div>
-</section>
+<!-- Drawings: one small original illustration per topic, sharing a 160×100 canvas. -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <linearGradient id="sea" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2a72c9"/><stop offset="1" stop-color="#123a73"/></linearGradient>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7cc4ff"/><stop offset="1" stop-color="#cfeaff"/></linearGradient>
+    <linearGradient id="sand" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffd27a"/><stop offset="1" stop-color="#e9a34a"/></linearGradient>
+    <radialGradient id="globeG" cx=".35" cy=".35" r=".8"><stop offset="0" stop-color="#6fd3ff"/><stop offset="1" stop-color="#14467f"/></radialGradient>
+    <symbol id="art-countries" viewBox="0 0 160 100"><rect width="160" height="100" fill="url(#sea)"/><path d="M20 30l18-8 16 6 10-4 8 10-6 12-14 4-6 12-12-2-8-12-10-4z" fill="#8bd46a" stroke="#fff" stroke-width="1.2"/><path d="M72 28l20-6 18 4 14 10-4 14-18 4-10 10-14-6-4-14z" fill="#f2c94c" stroke="#fff" stroke-width="1.2"/><path d="M96 58l16 2 10 12-6 14-14 2-8-12z" fill="#ff8a65" stroke="#fff" stroke-width="1.2"/><path d="M38 64l14 4 4 14-10 8-12-6z" fill="#b39ddb" stroke="#fff" stroke-width="1.2"/></symbol>
+    <symbol id="art-capitals" viewBox="0 0 160 100"><rect width="160" height="100" fill="#13213d"/><g fill="#2c4470"><rect x="14" y="44" width="16" height="56"/><rect x="34" y="30" width="14" height="70"/><rect x="112" y="36" width="18" height="64"/><rect x="134" y="50" width="14" height="50"/></g><path d="M58 100V58l22-18 22 18v42z" fill="#3c5b92"/><rect x="74" y="20" width="12" height="22" fill="#ffb547"/><path d="M80 6l4 10h-8z" fill="#ffb547"/><g fill="#ffe8b0"><rect x="64" y="66" width="6" height="10"/><rect x="77" y="66" width="6" height="10"/><rect x="90" y="66" width="6" height="10"/><rect x="18" y="52" width="4" height="5"/><rect x="38" y="40" width="4" height="5"/><rect x="118" y="44" width="4" height="5"/></g><circle cx="80" cy="88" r="5" fill="#ff5c9a" stroke="#fff" stroke-width="2"/></symbol>
+    <symbol id="art-flags" viewBox="0 0 160 100"><rect width="160" height="100" fill="#0f1a30"/><g stroke="#0f1a30" stroke-width="2"><rect x="8" y="10" width="44" height="28" fill="#e63946"/><rect x="8" y="10" width="44" height="9.3" fill="#fff"/><rect x="58" y="10" width="44" height="28" fill="#2a9d8f"/><circle cx="80" cy="24" r="7" fill="#ffd166"/><rect x="108" y="10" width="44" height="28" fill="#264653"/><rect x="108" y="10" width="14.7" height="28" fill="#f4a261"/><rect x="8" y="44" width="44" height="28" fill="#ffd166"/><rect x="8" y="53" width="44" height="10" fill="#118ab2"/><rect x="58" y="44" width="44" height="28" fill="#fff"/><circle cx="80" cy="58" r="8" fill="#e63946"/><rect x="108" y="44" width="44" height="28" fill="#06d6a0"/><path d="M108 44l22 14-22 14z" fill="#073b4c"/><rect x="33" y="78" width="44" height="18" fill="#7b2cbf"/><rect x="83" y="78" width="44" height="18" fill="#ef476f"/><rect x="83" y="84" width="44" height="6" fill="#fff"/></g></symbol>
+    <symbol id="art-continents" viewBox="0 0 160 100"><rect width="160" height="100" fill="url(#sea)"/><g stroke="#fff" stroke-width="1"><path d="M18 22l20-6 14 8-4 14-12 6-6 12-8-6-6-16z" fill="#ff9f43"/><path d="M42 56l10 4 4 14-6 18-6-4-4-16z" fill="#ff6b81"/><path d="M70 22h14l4 10-10 6-8-4z" fill="#70a1ff"/><path d="M72 42l16-2 8 14-6 22-10 4-8-18z" fill="#feca57"/><path d="M90 18l34-2 16 14-8 16-18 2-14-8-10-8z" fill="#1dd1a1"/><path d="M118 66l18-2 6 12-12 8-12-6z" fill="#c56cf0"/><path d="M40 94h80v6H40z" fill="#e8f1ff"/></g></symbol>
+    <symbol id="art-oceans" viewBox="0 0 160 100"><rect width="160" height="100" fill="url(#sea)"/><g fill="#2f5d3a" opacity=".85"><path d="M20 20l18-4 8 18-10 18 6 20-10 10-8-24z"/><path d="M78 16l20 2 6 20-8 30-12 8-8-30z"/><path d="M118 20l26 4-4 18-18 6z"/><path d="M124 66l18 4-6 12-14-4z"/></g><g fill="none" stroke="#bfe3ff" stroke-width="2" stroke-linecap="round" opacity=".8"><path d="M50 40q6-5 12 0t12 0"/><path d="M104 54q6-5 12 0t12 0"/><path d="M44 74q6-5 12 0t12 0"/><path d="M8 50q5-4 10 0"/></g></symbol>
+    <symbol id="art-seas" viewBox="0 0 160 100"><rect width="160" height="100" fill="#3c7a3f"/><path d="M14 52c14-12 30-10 44-4s24 2 34-6 26-10 40-2 16 14 14 20-18 6-28 4-24 6-36 6-28-6-40-6-30 0-28-12z" fill="url(#sea)"/><path d="M96 28c6 2 8 8 4 14" stroke="#2a72c9" stroke-width="6" fill="none" stroke-linecap="round"/><path d="M40 62q6-4 12 0t12 0M86 60q6-4 12 0" stroke="#bfe3ff" stroke-width="1.6" fill="none" stroke-linecap="round"/></symbol>
+    <symbol id="art-straits" viewBox="0 0 160 100"><rect width="160" height="100" fill="url(#sea)"/><path d="M0 0h70l-4 30 6 20-74 0z" fill="#3c7a3f"/><path d="M90 0h70v100H86l6-30-6-24z" fill="#3c7a3f"/><path d="M0 64h66l-6 36H0z" fill="#3c7a3f"/><circle cx="78" cy="56" r="16" fill="none" stroke="#fff" stroke-width="2.5" stroke-dasharray="4 3"/><path d="M60 82l10-10M96 30l-8 8" stroke="#ffb547" stroke-width="2.5" stroke-linecap="round"/></symbol>
+    <symbol id="art-rivers" viewBox="0 0 160 100"><rect width="160" height="100" fill="#4f8a3c"/><path d="M152 6c-20 14-14 30-34 34s-34-4-44 12-4 30-26 36-40 8-48 10" stroke="#69c3ff" stroke-width="7" fill="none" stroke-linecap="round"/><path d="M118 40c4 14 18 22 30 24M74 52c-12-8-26-8-38-20" stroke="#69c3ff" stroke-width="3.5" fill="none" stroke-linecap="round"/><g fill="#2e6b2a"><circle cx="30" cy="20" r="6"/><circle cx="42" cy="16" r="5"/><circle cx="130" cy="80" r="6"/><circle cx="96" cy="76" r="5"/></g></symbol>
+    <symbol id="art-lakes" viewBox="0 0 160 100"><rect width="160" height="100" fill="#5b9a44"/><path d="M30 44c8-18 34-22 52-14s30 2 40 10 10 26-6 32-34 2-50 6-38-4-38-16 2-12 2-18z" fill="url(#sea)" stroke="#d7f1ff" stroke-width="2"/><path d="M58 50q6-4 12 0t12 0M78 62q6-4 12 0" stroke="#bfe3ff" stroke-width="1.6" fill="none" stroke-linecap="round"/><path d="M10 92l20-26 18 26zM120 92l18-22 16 22z" fill="#2e6b2a"/></symbol>
+    <symbol id="art-islands" viewBox="0 0 160 100"><rect width="160" height="100" fill="url(#sea)"/><ellipse cx="62" cy="66" rx="36" ry="12" fill="#ffd27a"/><path d="M40 64c8-16 30-20 44-6" fill="#4f8a3c"/><path d="M66 60c0-16 2-26 8-34" stroke="#7a4b28" stroke-width="4" fill="none"/><path d="M74 26c-12-4-20 2-24 8M74 26c10-6 20-2 24 4M74 26c-2-10 6-16 12-16M74 26c-8-8-18-6-22-2" stroke="#2fae55" stroke-width="5" fill="none" stroke-linecap="round"/><ellipse cx="128" cy="40" rx="16" ry="6" fill="#ffd27a"/><path d="M118 38c4-8 14-8 20 0" fill="#4f8a3c"/></symbol>
+    <symbol id="art-archipelagos" viewBox="0 0 160 100"><rect width="160" height="100" fill="url(#sea)"/><g fill="#4f8a3c" stroke="#ffd27a" stroke-width="2"><ellipse cx="34" cy="30" rx="16" ry="9"/><ellipse cx="64" cy="48" rx="12" ry="7"/><ellipse cx="88" cy="30" rx="9" ry="6"/><ellipse cx="110" cy="56" rx="18" ry="9"/><ellipse cx="136" cy="34" rx="10" ry="6"/><ellipse cx="44" cy="74" rx="9" ry="5"/><ellipse cx="82" cy="80" rx="12" ry="6"/></g><ellipse cx="84" cy="54" rx="72" ry="40" fill="none" stroke="#fff" stroke-width="1.6" stroke-dasharray="5 4"/></symbol>
+    <symbol id="art-deserts" viewBox="0 0 160 100"><rect width="160" height="100" fill="url(#sky)"/><circle cx="128" cy="24" r="12" fill="#ffd166"/><path d="M0 70c30-16 60-16 90 0s50 6 70-4v34H0z" fill="url(#sand)"/><path d="M0 84c40-10 70-6 100 2s46 0 60-6v20H0z" fill="#e39a3e"/><path d="M44 74V46c0-6 8-6 8 0v28M44 58h-6v-8M52 54h6v-8" stroke="#3f9b3f" stroke-width="6" stroke-linecap="round" fill="none"/></symbol>
+    <symbol id="art-ranges" viewBox="0 0 160 100"><rect width="160" height="100" fill="url(#sky)"/><path d="M0 100l26-50 18 22 26-52 22 34 18-26 22 30 28-30v72z" fill="#4a5f87"/><path d="M70 20l-10 20 8-4 6 6 6-6zM110 28l-7 10 6-2 5 4 4-4z" fill="#fff"/><path d="M0 100l20-30 22 20 24-26 30 36z" fill="#2e6b2a"/><path d="M96 100l26-30 38 30z" fill="#3c7a3f"/></symbol>
+    <symbol id="art-mountains" viewBox="0 0 160 100"><rect width="160" height="100" fill="url(#sky)"/><path d="M14 100L80 12l66 88z" fill="#6b7fa8"/><path d="M80 12l-18 24 10-4 8 8 8-8 10 4z" fill="#fff"/><path d="M80 12v-6l12 3-12 3" fill="#ff5c9a"/><path d="M0 100l26-26 20 26zM120 100l24-22 16 22z" fill="#2e6b2a"/><text x="120" y="40" font-family="Bricolage Grotesque, sans-serif" font-weight="800" font-size="13" fill="#123a73">8848 m</text></symbol>
+    <symbol id="art-regions" viewBox="0 0 160 100"><rect width="160" height="100" fill="url(#sea)"/><path d="M10 16h60l10 14-6 26 14 20-10 18H10z" fill="#c0392b"/><path d="M90 10h62v84H96l8-20-10-18 6-22z" fill="#c0392b"/><path d="M26 30l30-4 10 18-12 20-26-6z" fill="#e8705f" stroke="#fff" stroke-width="2" stroke-dasharray="4 3"/><path d="M106 26l34 2 4 28-20 10-16-14z" fill="#e8705f" stroke="#fff" stroke-width="2" stroke-dasharray="4 3"/></symbol>
+    <symbol id="art-cities" viewBox="0 0 160 100"><rect width="160" height="100" fill="#d9822b"/><path d="M0 60c30 4 40-20 70-14s36 20 60 14 30-10 30-10v50H0z" fill="url(#sea)" opacity=".9"/><g fill="#fff"><circle cx="40" cy="32" r="3"/><circle cx="96" cy="26" r="3"/><circle cx="128" cy="44" r="3"/><circle cx="62" cy="48" r="3"/></g><g fill="none" stroke="#fff" stroke-width="1.2" opacity=".7"><circle cx="96" cy="26" r="8"/><circle cx="96" cy="26" r="14"/><circle cx="40" cy="32" r="8"/><circle cx="128" cy="44" r="8"/></g></symbol>
+    <symbol id="art-latlong" viewBox="0 0 160 100"><rect width="160" height="100" fill="#0b2a52"/><circle cx="80" cy="50" r="42" fill="url(#globeG)"/><g fill="none" stroke="#e6f4ff" stroke-width="1" opacity=".55"><ellipse cx="80" cy="50" rx="42" ry="14"/><ellipse cx="80" cy="50" rx="14" ry="42"/><ellipse cx="80" cy="50" rx="30" ry="42"/><path d="M42 32h76M42 68h76"/></g><path d="M38 50h84" stroke="#ff5c9a" stroke-width="2.5"/><path d="M80 8v84" stroke="#ffb547" stroke-width="2.5"/><circle cx="104" cy="36" r="4" fill="#fff" stroke="#ff5c9a" stroke-width="2"/></symbol>
+    <symbol id="art-earth" viewBox="0 0 160 100"><rect width="160" height="100" fill="#0e1d38"/><circle cx="80" cy="52" r="42" fill="#2a72c9"/><path d="M80 52V10a42 42 0 0 1 42 42z" fill="#0e1d38"/><circle cx="80" cy="52" r="42" fill="none"/><path d="M80 52V14a38 38 0 0 1 38 38z" fill="#d9822b"/><path d="M80 52V24a28 28 0 0 1 28 28z" fill="#f0a73a"/><path d="M80 52V36a16 16 0 0 1 16 16z" fill="#ffd166"/><path d="M80 52V44a8 8 0 0 1 8 8z" fill="#ff5c3a"/></symbol>
+    <symbol id="art-atmosphere" viewBox="0 0 160 100"><rect width="160" height="100" fill="#0b1630"/><path d="M0 100a120 60 0 0 1 160 0z" fill="#2a72c9"/><path d="M-10 100a130 70 0 0 1 180 0" stroke="#7cc4ff" stroke-width="8" fill="none" opacity=".7"/><path d="M-20 100a140 82 0 0 1 200 0" stroke="#4d8dff" stroke-width="8" fill="none" opacity=".5"/><path d="M-30 100a150 94 0 0 1 220 0" stroke="#7b5cff" stroke-width="8" fill="none" opacity=".4"/><circle cx="50" cy="40" r="4" fill="#ffd166"/><path d="M104 52l10-4 2 4-10 4z" fill="#fff"/></symbol>
+    <symbol id="art-watercycle" viewBox="0 0 160 100"><rect width="160" height="100" fill="url(#sky)"/><circle cx="26" cy="22" r="10" fill="#ffd166"/><path d="M96 26a10 10 0 0 1 18-6 12 12 0 0 1 20 8 8 8 0 0 1-2 16H98a9 9 0 0 1-2-18z" fill="#fff"/><g stroke="#2a72c9" stroke-width="2" stroke-linecap="round"><path d="M104 50l-3 8M114 50l-3 8M124 50l-3 8"/></g><path d="M0 78h160v22H0z" fill="url(#sea)"/><path d="M110 60l30 20H70z" fill="#6b7fa8"/><path d="M40 74c0-10 4-20 8-26M52 74c0-12 4-22 10-28" stroke="#ff8a65" stroke-width="2" stroke-dasharray="3 3" fill="none"/></symbol>
+    <symbol id="art-biomes" viewBox="0 0 160 100"><rect width="160" height="100" fill="url(#sea)"/><path d="M8 10h144v20H8z" fill="#e8f1ff"/><path d="M8 30h144v16H8z" fill="#2e6b2a"/><path d="M8 46h144v14H8z" fill="#8bd46a"/><path d="M8 60h144v14H8z" fill="url(#sand)"/><path d="M8 74h144v16H8z" fill="#1d8f4e"/></symbol>
+    <symbol id="art-climate" viewBox="0 0 160 100"><rect width="160" height="100" fill="url(#sky)"/><circle cx="130" cy="22" r="12" fill="#ffb547"/><path d="M0 84h160v16H0z" fill="#7fb069"/><rect x="34" y="50" width="34" height="34" fill="#c0563b"/><rect x="44" y="30" width="8" height="22" fill="#6b6b6b"/><path d="M48 28c-6-8 4-12 0-20M48 28c8-6 14 0 12-8" stroke="#9aa8bd" stroke-width="5" fill="none" stroke-linecap="round"/><rect x="96" y="40" width="10" height="44" rx="5" fill="#fff" stroke="#c0563b" stroke-width="2"/><circle cx="101" cy="80" r="8" fill="#e63946"/><rect x="99" y="52" width="4" height="26" fill="#e63946"/></symbol>
+    <symbol id="art-volcanoes" viewBox="0 0 160 100"><rect width="160" height="100" fill="#2a3f6b"/><path d="M20 100l44-56h32l44 56z" fill="#5a4636"/><path d="M64 44l8 14 8-8 8 10 8-16z" fill="#ff6b3a"/><path d="M80 40c-10-10-6-22 4-26M80 40c8-12 22-10 24-20" stroke="#ff8a3a" stroke-width="5" fill="none" stroke-linecap="round"/><circle cx="60" cy="18" r="8" fill="#9aa8bd" opacity=".7"/><circle cx="100" cy="12" r="10" fill="#9aa8bd" opacity=".6"/></symbol>
+  </defs>
+</svg>
 
-<!-- Study card -->
-<section class="card" id="studyCard" hidden aria-live="polite">
-  <div id="studyEmpty">
-    <div class="question" data-i18n="studyTitle"></div>
-    <div class="sub" data-i18n="studySub"></div>
-  </div>
-  <div id="studyInfo" hidden>
-    <div class="study-head"><img class="flag-lg" id="sFlag" alt=""><div class="question" id="sName"></div></div>
-    <dl class="facts">
-      <dt data-i18n="capitalLabel"></dt><dd id="sCapital"></dd>
-      <dt data-i18n="regionLabel"></dt><dd id="sRegion"></dd>
-      <dt data-i18n="areaLabel"></dt><dd id="sArea"></dd>
-      <dt data-i18n="statusLabel"></dt><dd id="sStatus"></dd>
-    </dl>
-    <p class="sub" id="sNote" hidden></p>
-    <div class="actions">
-      <button class="btn ghost" id="btnListen" type="button" data-i18n="listen"></button>
-      <button class="btn ghost" id="btnQuizRegion" type="button"></button>
-    </div>
-  </div>
-  <div class="search">
-    <div class="results" id="results" hidden></div>
-    <input id="search" type="search" autocomplete="off" spellcheck="false" aria-label="Search">
-  </div>
-</section>
-
-<div class="sheet" id="startSheet">
-  <div class="menu">
-    <h1><span data-i18n="heroA" style="color:inherit"></span> <span data-i18n="heroB"></span></h1>
-    <p data-i18n="intro"></p>
-    <div class="group">
-      <label data-i18n="labelGame"></label>
-      <div class="modes" id="modes"></div>
-    </div>
-    <div class="group">
-      <label data-i18n="labelRegion"></label>
-      <div class="opts" id="regions"></div>
-    </div>
-    <div class="group" data-quiz-only>
-      <label data-i18n="labelQuestions"></label>
-      <div class="opts" id="lengths">
-        <button class="opt" type="button" data-len="10" aria-pressed="true">10</button>
-        <button class="opt" type="button" data-len="25" aria-pressed="false">25</button>
-        <button class="opt" type="button" data-len="0" aria-pressed="false" data-i18n="all"></button>
-      </div>
-    </div>
-    <div class="group" data-quiz-only>
-      <label data-i18n="labelLevel"></label>
-      <div class="opts" id="levels">
-        <button class="opt" type="button" data-level="easy" aria-pressed="false" data-i18n="levelEasy"></button>
-        <button class="opt" type="button" data-level="normal" aria-pressed="true" data-i18n="levelNormal"></button>
-      </div>
-      <div class="level-hint" data-i18n="levelEasyHint"></div>
-    </div>
-    <div class="group" data-quiz-only>
-      <label data-i18n="labelChallenge"></label>
-      <div class="opts">
-        <button class="opt" type="button" id="optTimer" aria-pressed="false" data-i18n="optTimer"></button>
-        <button class="opt" type="button" id="optLives" aria-pressed="false" data-i18n="optLives"></button>
-        <button class="opt" type="button" id="optTerr" aria-pressed="false" data-i18n="optTerr"></button>
-      </div>
-    </div>
-    <p class="notice" id="glNotice" hidden data-i18n-html="glNotice"></p>
-    <div class="best" id="bestLine"></div>
-    <button class="btn" id="btnStart" type="button"></button>
-  </div>
-</div>
-
-<div class="sheet" id="endSheet" hidden>
-  <div class="menu">
-    <div class="group"><label id="endTitle"></label><div class="bigscore" id="endScore">0</div><div class="best" id="endBest"></div></div>
-    <div class="summary">
-      <div><b id="endRight">0</b><span data-i18n="correct"></span></div>
-      <div><b id="endAcc">0%</b><span data-i18n="accuracy"></span></div>
-      <div><b id="endTime">0:00</b><span data-i18n="time"></span></div>
-    </div>
-    <div class="group" id="mistakeGroup"><label data-i18n="practiseThese"></label><div class="mistakes" id="mistakeList"></div></div>
-    <div class="actions">
-      <button class="btn" id="btnPractice" type="button" data-i18n="practiseMistakes"></button>
-      <button class="btn ghost" id="btnAgain" type="button" data-i18n="playAgain"></button>
-      <button class="btn ghost" id="btnHome" type="button" data-i18n="changeGame"></button>
-    </div>
-  </div>
-</div>
-
-<script src="vendor/globe.gl.min.js"></script>
-<script src="vendor/topojson-client.min.js"></script>
-<script src="vendor/d3-array.min.js"></script>
-<script src="vendor/d3-geo.min.js"></script>
-<script src="js/strings.js"></script>
-<script src="js/game.js"></script>
+<script>
+const T = {
+  en: { home: "← Home", title: "Geography", intro: "Explore the Earth on a real satellite globe. Every topic has a study map and games to test yourself.", soon: "Coming soon",
+    soonMsg: "This topic is being built.", places: "{n} to learn",
+    sec: { world: "Countries of the world", land: "Land", water: "Water", people: "People and places", earth: "How the Earth works" },
+    t: { countries: ["Countries", "Find the 197 countries on the globe."], capitals: ["Capitals", "Write the capital of every country."], flags: ["Flags", "Match each flag to its country."],
+      continents: ["Continents", "The seven continents."], islands: ["Islands", "The biggest and best-known islands."], archipelagos: ["Archipelagos", "Groups of islands."],
+      regions: ["Regions", "Peninsulas, plains, plateaus and famous areas."], deserts: ["Deserts", "Hot and cold deserts."], ranges: ["Mountain ranges", "The great chains of mountains."],
+      mountains: ["Mountains", "The highest and most famous peaks."], oceans: ["Oceans", "The five oceans."], seas: ["Seas", "Seas, gulfs and bays."], straits: ["Straits", "Narrow passages between seas."],
+      rivers: ["Rivers", "The great rivers of the world."], lakes: ["Lakes", "The biggest and most famous lakes."], cities: ["Cities", "The biggest cities on Earth."],
+      latlong: ["Latitude and longitude", "Lines on the globe and finding places by coordinates."], earth: ["Inside the Earth", "Crust, mantle and core."],
+      atmosphere: ["Atmosphere", "The layers of air around the Earth."], watercycle: ["The water cycle", "How water moves around the planet."], biomes: ["Biomes", "Forests, grasslands, deserts and tundra."],
+      climate: ["Climate change", "Why the Earth is warming and what we can do."], volcanoes: ["Volcanoes", "Famous volcanoes and how they work."] } },
+  ar: { home: "→ الرئيسية", title: "الجغرافيا", intro: "استكشف الأرض على كرة حقيقية بصور الأقمار الصناعية. لكل موضوع خريطة للتعلّم وألعاب لاختبار نفسك.", soon: "قريبًا",
+    soonMsg: "هذا الموضوع قيد الإنشاء.", places: "{n} للتعلّم",
+    sec: { world: "دول العالم", land: "اليابسة", water: "المياه", people: "الناس والأماكن", earth: "كيف تعمل الأرض" },
+    t: { countries: ["الدول", "جِد دول العالم الـ197 على الكرة."], capitals: ["العواصم", "اكتب عاصمة كل دولة."], flags: ["الأعلام", "طابق كل علم مع دولته."],
+      continents: ["القارات", "القارات السبع."], islands: ["الجزر", "أكبر الجزر وأشهرها."], archipelagos: ["الأرخبيلات", "مجموعات الجزر."],
+      regions: ["المناطق", "أشباه الجزر والسهول والهضاب والمناطق الشهيرة."], deserts: ["الصحاري", "الصحاري الحارة والباردة."], ranges: ["السلاسل الجبلية", "أعظم سلاسل الجبال."],
+      mountains: ["الجبال", "أعلى القمم وأشهرها."], oceans: ["المحيطات", "المحيطات الخمسة."], seas: ["البحار", "البحار والخلجان."], straits: ["المضائق", "الممرات الضيقة بين البحار."],
+      rivers: ["الأنهار", "أعظم أنهار العالم."], lakes: ["البحيرات", "أكبر البحيرات وأشهرها."], cities: ["المدن", "أكبر مدن العالم."],
+      latlong: ["خطوط الطول والعرض", "خطوط على الكرة وإيجاد الأماكن بالإحداثيات."], earth: ["باطن الأرض", "القشرة والوشاح واللب."],
+      atmosphere: ["الغلاف الجوي", "طبقات الهواء حول الأرض."], watercycle: ["دورة الماء", "كيف ينتقل الماء حول الكوكب."], biomes: ["المناطق الحيوية", "الغابات والمراعي والصحاري والتندرا."],
+      climate: ["تغيّر المناخ", "لماذا ترتفع حرارة الأرض وماذا يمكننا أن نفعل."], volcanoes: ["البراكين", "أشهر البراكين وكيف تعمل."] } },
+  fr: { home: "← Accueil", title: "Géographie", intro: "Explore la Terre sur un vrai globe satellite. Chaque thème a une carte pour apprendre et des jeux pour te tester.", soon: "Bientôt",
+    soonMsg: "Ce thème est en préparation.", places: "{n} à apprendre",
+    sec: { world: "Pays du monde", land: "Terres", water: "Eaux", people: "Villes et repères", earth: "Comment fonctionne la Terre" },
+    t: { countries: ["Pays", "Trouve les 197 pays sur le globe."], capitals: ["Capitales", "Écris la capitale de chaque pays."], flags: ["Drapeaux", "Associe chaque drapeau à son pays."],
+      continents: ["Continents", "Les sept continents."], islands: ["Îles", "Les îles les plus grandes et les plus connues."], archipelagos: ["Archipels", "Les groupes d'îles."],
+      regions: ["Régions", "Péninsules, plaines, plateaux et régions célèbres."], deserts: ["Déserts", "Déserts chauds et froids."], ranges: ["Chaînes de montagnes", "Les grandes chaînes de montagnes."],
+      mountains: ["Montagnes", "Les sommets les plus hauts et les plus célèbres."], oceans: ["Océans", "Les cinq océans."], seas: ["Mers", "Mers, golfes et baies."], straits: ["Détroits", "Les passages étroits entre les mers."],
+      rivers: ["Fleuves", "Les grands fleuves du monde."], lakes: ["Lacs", "Les lacs les plus grands et les plus connus."], cities: ["Villes", "Les plus grandes villes du monde."],
+      latlong: ["Latitude et longitude", "Les lignes du globe et les coordonnées."], earth: ["L'intérieur de la Terre", "Croûte, manteau et noyau."],
+      atmosphere: ["Atmosphère", "Les couches d'air autour de la Terre."], watercycle: ["Le cycle de l'eau", "Comment l'eau circule sur la planète."], biomes: ["Biomes", "Forêts, prairies, déserts et toundra."],
+      climate: ["Changement climatique", "Pourquoi la Terre se réchauffe et ce que l'on peut faire."], volcanoes: ["Volcans", "Les volcans célèbres et leur fonctionnement."] } },
+};
+// href: where the tile goes; n: how many things to learn (shown on the tile)
+const SECTIONS = [
+  ["world", "--geo", [["countries", "world/?mode=find", 197], ["capitals", "world/?mode=capital", 197], ["flags", "world/?mode=flag", 197]]],
+  ["land", "--land", [["continents", "explore/?t=continents", 7], ["islands", "explore/?t=islands", 41], ["archipelagos", "explore/?t=archipelagos", 40], ["regions", "explore/?t=regions", 40],
+    ["deserts", "explore/?t=deserts", 22], ["ranges", "explore/?t=ranges", 37], ["mountains", "explore/?t=mountains", 34]]],
+  ["water", "--water", [["oceans", "explore/?t=oceans", 5], ["seas", "explore/?t=seas", 52], ["straits", "explore/?t=straits", 27], ["rivers", "explore/?t=rivers", 52], ["lakes", "explore/?t=lakes", 41]]],
+  ["people", "--people", [["cities", "explore/?t=cities", 79], ["latlong", "explore/?t=latlong", 7]]],
+  ["earth", "--earth", [["earth"], ["atmosphere"], ["watercycle"], ["biomes"], ["climate"], ["volcanoes"]]],
+];
+let lang = "en";
+try { const s = JSON.parse(localStorage.getItem("gq-lang")); if (T[s]) lang = s; else if (T[(navigator.language || "").slice(0, 2)]) lang = navigator.language.slice(0, 2); } catch {}
+const esc = (s) => String(s).replace(/[&<>"]/g, (m) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[m]));
+function render() {
+  const d = T[lang];
+  document.documentElement.lang = lang; document.documentElement.dir = lang === "ar" ? "rtl" : "ltr";
+  document.querySelectorAll("[data-t]").forEach((el) => { el.textContent = d[el.dataset.t]; });
+  document.querySelectorAll("[data-lang]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.lang === lang)));
+  document.getElementById("sections").innerHTML = SECTIONS.map(([sec, color, tiles]) => `
+    <section class="section" style="--c: var(${color})"><h2><i></i>${esc(d.sec[sec])}</h2><div class="grid">
+    ${tiles.map(([id, href, n]) => {
+      const [name, desc] = d.t[id];
+      const art = `<svg viewBox="0 0 160 100" aria-hidden="true"><use href="#art-${id}"/></svg>`;
+      return href
+        ? `<a class="tile" style="--c: var(${color})" href="${href}">${art}<div><b>${esc(name)}</b><span>${esc(desc)}</span></div><em class="count">${esc(d.places.replace("{n}", n))}</em></a>`
+        : `<button class="tile soon" type="button" style="--c: var(${color})" aria-disabled="true">${art}<div><b>${esc(name)}</b><span>${esc(desc)}</span></div><em class="soonpill">${esc(d.soon)}</em></button>`;
+    }).join("")}</div></section>`).join("");
+}
+document.querySelector(".lang").addEventListener("click", (e) => { const b = e.target.closest("[data-lang]"); if (!b) return; lang = b.dataset.lang; try { localStorage.setItem("gq-lang", JSON.stringify(lang)); } catch {} render(); });
+document.getElementById("sections").addEventListener("click", (e) => { const b = e.target.closest(".tile.soon"); if (!b) return; b.classList.remove("shake"); void b.offsetWidth; b.classList.add("shake"); b.title = T[lang].soonMsg; });
+render();
+</script>
 </body>
 </html>

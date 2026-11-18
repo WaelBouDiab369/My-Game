@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Learn world geography on a real satellite globe: 197 countries (plus 21 optional territories), flags, capitals and country names in English, Arabic and French.">
+<title>GeoQuest Globe · MindQuest</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,800&family=Tajawal:wght@400;700;800&display=swap">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="globe" aria-label="Interactive globe"></div>
+<div class="loading" id="loading" data-i18n="loading">Loading the Earth…</div>
+
+<header class="hud">
+  <div class="brand">GeoQuest <small id="modeLabel"></small></div>
+  <div class="stats">
+    <a class="iconbtn" id="btnHome2" href="../" data-i18n="home"></a>
+    <div class="chip" id="chipScore" hidden><span data-i18n="score"></span> <b id="score">0</b></div>
+    <div class="chip streak" id="chipStreak" hidden><span data-i18n="streak"></span> <b id="streak">0</b></div>
+    <div class="chip lives" id="chipLives" hidden><b id="lives"></b></div>
+    <button class="iconbtn" id="btnView" type="button" hidden data-i18n="resetView"></button>
+    <button class="iconbtn" id="btnMenu" type="button" hidden data-i18n="menu"></button>
+    <div class="lang" id="langSwitch" role="group" aria-label="Language">
+      <button type="button" data-lang="en" lang="en">EN</button>
+      <button type="button" data-lang="ar" lang="ar">عربي</button>
+      <button type="button" data-lang="fr" lang="fr">FR</button>
+    </div>
+  </div>
+</header>
+
+<div class="zoom" id="zoomBox" role="group" aria-label="Zoom" hidden>
+  <button type="button" id="zoomIn" aria-label="Zoom in" data-i18n-aria="zoomIn">+</button>
+  <button type="button" id="zoomOut" aria-label="Zoom out" data-i18n-aria="zoomOut">−</button>
+</div>
+
+<!-- Question card (all quiz games) -->
+<section class="card" id="card" hidden aria-live="polite">
+  <div class="progress"><i id="bar"></i></div>
+  <div class="qlabel"><span id="qcount"></span><span id="qregion"></span></div>
+  <div class="timer" id="timer" hidden><i id="timerBar"></i></div>
+  <img class="flag-lg" id="qflag" alt="" hidden>
+  <div class="question" id="question"></div>
+  <div class="sub" id="qsub"></div>
+  <div class="hintline" id="hintline" hidden></div>
+  <form class="answer-row" id="answerForm" hidden autocomplete="off">
+    <input id="answer" type="text" autocomplete="off" autocapitalize="words" spellcheck="false" aria-label="Answer">
+    <button class="btn" id="btnSubmit" type="submit" data-i18n="check"></button>
+  </form>
+  <div id="feedback" class="feedback" hidden></div>
+  <div class="actions">
+    <button class="btn ghost" id="btnHint" type="button" data-i18n="hint"></button>
+    <button class="btn ghost" id="btnSkip" type="button" data-i18n="skip"></button>
+    <button class="btn" id="btnNext" type="button" hidden data-i18n="next"></button>
+  </div>
+</section>
+
+<!-- Study card -->
+<section class="card" id="studyCard" hidden aria-live="polite">
+  <div id="studyEmpty">
+    <div class="question" data-i18n="studyTitle"></div>
+    <div class="sub" data-i18n="studySub"></div>
+  </div>
+  <div id="studyInfo" hidden>
+    <div class="study-head"><img class="flag-lg" id="sFlag" alt=""><div class="question" id="sName"></div></div>
+    <dl class="facts">
+      <dt data-i18n="capitalLabel"></dt><dd id="sCapital"></dd>
+      <dt data-i18n="regionLabel"></dt><dd id="sRegion"></dd>
+      <dt data-i18n="areaLabel"></dt><dd id="sArea"></dd>
+      <dt data-i18n="statusLabel"></dt><dd id="sStatus"></dd>
+    </dl>
+    <p class="sub" id="sNote" hidden></p>
+    <div class="actions">
+      <button class="btn ghost" id="btnListen" type="button" data-i18n="listen"></button>
+      <button class="btn ghost" id="btnQuizRegion" type="button"></button>
+    </div>
+  </div>
+  <div class="search">
+    <div class="results" id="results" hidden></div>
+    <input id="search" type="search" autocomplete="off" spellcheck="false" aria-label="Search">
+  </div>
+</section>
+
+<div class="sheet" id="startSheet">
+  <div class="menu">
+    <h1><span data-i18n="heroA" style="color:inherit"></span> <span data-i18n="heroB"></span></h1>
+    <p data-i18n="intro"></p>
+    <div class="group">
+      <label data-i18n="labelGame"></label>
+      <div class="modes" id="modes"></div>
+    </div>
+    <div class="group">
+      <label data-i18n="labelRegion"></label>
+      <div class="opts" id="regions"></div>
+    </div>
+    <div class="group" data-quiz-only>
+      <label data-i18n="labelQuestions"></label>
+      <div class="opts" id="lengths">
+        <button class="opt" type="button" data-len="10" aria-pressed="true">10</button>
+        <button class="opt" type="button" data-len="25" aria-pressed="false">25</button>
+        <button class="opt" type="button" data-len="0" aria-pressed="false" data-i18n="all"></button>
+      </div>
+    </div>
+    <div class="group" data-quiz-only>
+      <label data-i18n="labelLevel"></label>
+      <div class="opts" id="levels">
+        <button class="opt" type="button" data-level="easy" aria-pressed="false" data-i18n="levelEasy"></button>
+        <button class="opt" type="button" data-level="normal" aria-pressed="true" data-i18n="levelNormal"></button>
+      </div>
+      <div class="level-hint" data-i18n="levelEasyHint"></div>
+    </div>
+    <div class="group" data-quiz-only>
+      <label data-i18n="labelChallenge"></label>
+      <div class="opts">
+        <button class="opt" type="button" id="optTimer" aria-pressed="false" data-i18n="optTimer"></button>
+        <button class="opt" type="button" id="optLives" aria-pressed="false" data-i18n="optLives"></button>
+        <button class="opt" type="button" id="optTerr" aria-pressed="false" data-i18n="optTerr"></button>
+      </div>
+    </div>
+    <p class="notice" id="glNotice" hidden data-i18n-html="glNotice"></p>
+    <div class="best" id="bestLine"></div>
+    <button class="btn" id="btnStart" type="button"></button>
+  </div>
+</div>
+
+<div class="sheet" id="endSheet" hidden>
+  <div class="menu">
+    <div class="group"><label id="endTitle"></label><div class="bigscore" id="endScore">0</div><div class="best" id="endBest"></div></div>
+    <div class="summary">
+      <div><b id="endRight">0</b><span data-i18n="correct"></span></div>
+      <div><b id="endAcc">0%</b><span data-i18n="accuracy"></span></div>
+      <div><b id="endTime">0:00</b><span data-i18n="time"></span></div>
+    </div>
+    <div class="group" id="mistakeGroup"><label data-i18n="practiseThese"></label><div class="mistakes" id="mistakeList"></div></div>
+    <div class="actions">
+      <button class="btn" id="btnPractice" type="button" data-i18n="practiseMistakes"></button>
+      <button class="btn ghost" id="btnAgain" type="button" data-i18n="playAgain"></button>
+      <button class="btn ghost" id="btnHome" type="button" data-i18n="changeGame"></button>
+    </div>
+  </div>
+</div>
+
+<script src="vendor/globe.gl.min.js"></script>
+<script src="vendor/topojson-client.min.js"></script>
+<script src="vendor/d3-array.min.js"></script>
+<script src="vendor/d3-geo.min.js"></script>
+<script src="js/strings.js"></script>
+<script src="js/game.js"></script>
+</body>
+</html>

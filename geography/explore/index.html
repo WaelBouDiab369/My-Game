@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Geography topic games on a real satellite globe, in English, Arabic and French.">
+<title>Explore · MindQuest Geography</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,800&family=Tajawal:wght@400;700;800&display=swap">
+<link rel="stylesheet" href="../world/css/style.css">
+<style>
+.facts dd .tiny { color: var(--muted); font-weight: 400; font-size: 13px; }
+.langs-line { color: var(--muted); font-size: 14px; }
+.langs-line b { color: var(--ink); font-weight: 700; }
+.xmark { width: 20px; height: 20px; margin: -10px 0 0 -10px; padding: 0; border-radius: 50%; border: 2.5px solid rgba(255,255,255,.95); background: rgba(9,14,26,.3); box-shadow: 0 0 0 1px rgba(0,0,0,.5), 0 0 10px rgba(0,0,0,.6); cursor: pointer; transition: transform .15s; }
+.xmark::after { content: ""; display: block; width: 6px; height: 6px; margin: auto; border-radius: 50%; background: currentColor; color: #fff; }
+.xmark:hover, .xmark[data-state="hover"] { transform: scale(1.25); }
+.xmark[data-state="target"], .xmark[data-state="hint"], .xmark[data-state="sel"], .xmark[data-state="close"] { border-color: var(--amber); color: var(--amber); }
+.xmark[data-state="good"] { border-color: var(--good); color: var(--good); }
+.xmark[data-state="bad"] { border-color: var(--bad); color: var(--bad); }
+.pin { pointer-events: none; width: 16px; height: 16px; margin: -8px 0 0 -8px; border-radius: 50%; background: #fff; box-shadow: 0 0 0 4px var(--pin, #ff5c9a), 0 0 14px rgba(0,0,0,.8); }
+.topic-intro { color: var(--muted); }
+</style>
+</head>
+<body>
+<div id="globe" aria-label="Interactive globe"></div>
+<div class="loading" id="loading">…</div>
+
+<header class="hud">
+  <div class="brand">GeoQuest <small id="modeLabel"></small></div>
+  <div class="stats">
+    <a class="iconbtn" href="../" data-i18n="back"></a>
+    <div class="chip" id="chipScore" hidden><span data-i18n="score"></span> <b id="score">0</b></div>
+    <div class="chip streak" id="chipStreak" hidden><span data-i18n="streak"></span> <b id="streak">0</b></div>
+    <button class="iconbtn" id="btnView" type="button" hidden data-i18n="resetView"></button>
+    <button class="iconbtn" id="btnMenu" type="button" hidden data-i18n="menu"></button>
+    <div class="lang" id="langSwitch" role="group" aria-label="Language">
+      <button type="button" data-lang="en" lang="en">EN</button>
+      <button type="button" data-lang="ar" lang="ar">عربي</button>
+      <button type="button" data-lang="fr" lang="fr">FR</button>
+    </div>
+  </div>
+</header>
+
+<div class="zoom" id="zoomBox" role="group" aria-label="Zoom" hidden>
+  <button type="button" id="zoomIn" data-i18n-aria="zoomIn">+</button>
+  <button type="button" id="zoomOut" data-i18n-aria="zoomOut">−</button>
+</div>
+
+<section class="card" id="card" hidden aria-live="polite">
+  <div class="progress"><i id="bar"></i></div>
+  <div class="qlabel"><span id="qcount"></span><span id="qtopic"></span></div>
+  <div class="question" id="question"></div>
+  <div class="sub" id="qsub"></div>
+  <div class="hintline" id="hintline" hidden></div>
+  <form class="answer-row" id="answerForm" hidden autocomplete="off">
+    <input id="answer" type="text" autocomplete="off" autocapitalize="words" spellcheck="false" aria-label="Answer">
+    <button class="btn" id="btnSubmit" type="submit" data-i18n="check"></button>
+  </form>
+  <div id="feedback" class="feedback" hidden></div>
+  <div class="actions">
+    <button class="btn ghost" id="btnHint" type="button" data-i18n="hint"></button>
+    <button class="btn ghost" id="btnSkip" type="button" data-i18n="skip"></button>
+    <button class="btn" id="btnNext" type="button" hidden data-i18n="next"></button>
+  </div>
+</section>
+
+<section class="card" id="studyCard" hidden aria-live="polite">
+  <div id="studyEmpty"><div class="question" id="studyTitle"></div><div class="sub" data-i18n="tooltipHint"></div></div>
+  <div id="studyInfo" hidden>
+    <div class="question" id="sName" dir="auto"></div>
+    <div class="langs-line" id="sLangs"></div>
+    <dl class="facts" id="sFacts"></dl>
+    <div class="actions"><button class="btn ghost" id="btnListen" type="button" data-i18n="listen"></button></div>
+  </div>
+  <div class="search">
+    <div class="results" id="results" hidden></div>
+    <input id="search" type="search" autocomplete="off" spellcheck="false" aria-label="Search">
+  </div>
+</section>
+
+<div class="sheet" id="startSheet">
+  <div class="menu">
+    <h1 id="topicTitle"></h1>
+    <p class="topic-intro" id="topicIntro"></p>
+    <div class="group"><label data-i18n="labelGame"></label><div class="modes" id="modes"></div></div>
+    <div class="group" data-quiz-only>
+      <label data-i18n="labelQuestions"></label>
+      <div class="opts" id="lengths">
+        <button class="opt" type="button" data-len="10" aria-pressed="true">10</button>
+        <button class="opt" type="button" data-len="0" aria-pressed="false" data-i18n="all"></button>
+      </div>
+    </div>
+    <div class="group" data-quiz-only>
+      <label data-i18n="labelLevel"></label>
+      <div class="opts" id="levels">
+        <button class="opt" type="button" data-level="easy" aria-pressed="false" data-i18n="levelEasy"></button>
+        <button class="opt" type="button" data-level="normal" aria-pressed="true" data-i18n="levelNormal"></button>
+      </div>
+    </div>
+    <p class="notice" id="glNotice" hidden data-i18n-html="glNotice"></p>
+    <div class="best" id="bestLine"></div>
+    <button class="btn" id="btnStart" type="button"></button>
+  </div>
+</div>
+
+<div class="sheet" id="endSheet" hidden>
+  <div class="menu">
+    <div class="group"><label id="endTitle"></label><div class="bigscore" id="endScore">0</div><div class="best" id="endBest"></div></div>
+    <div class="summary">
+      <div><b id="endRight">0</b><span data-i18n="correct"></span></div>
+      <div><b id="endAcc">0%</b><span data-i18n="accuracy"></span></div>
+      <div><b id="endTime">0:00</b><span data-i18n="time"></span></div>
+    </div>
+    <div class="group" id="mistakeGroup"><label data-i18n="practiseThese"></label><div class="mistakes" id="mistakeList"></div></div>
+    <div class="actions">
+      <button class="btn" id="btnPractice" type="button" data-i18n="practiseMistakes"></button>
+      <button class="btn ghost" id="btnAgain" type="button" data-i18n="playAgain"></button>
+      <button class="btn ghost" id="btnHome" type="button" data-i18n="changeGame"></button>
+    </div>
+  </div>
+</div>
+
+<script src="../world/vendor/globe.gl.min.js"></script>
+<script src="../world/vendor/topojson-client.min.js"></script>
+<script src="../world/vendor/d3-array.min.js"></script>
+<script src="../world/vendor/d3-geo.min.js"></script>
+<script src="../world/js/strings.js"></script>
+<script src="strings.js"></script>
+<script src="explore.js"></script>
+</body>
+</html>

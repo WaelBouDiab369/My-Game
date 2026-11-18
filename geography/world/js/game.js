@@ -90,8 +90,10 @@ setTimeout(hideLoader, 8000);
 
   // ---------- state ----------
   const saved = store.get("gq-settings") || {};
+  // The Geography page can open the game on a chosen mode: world/?mode=capital
+  const askedMode = new URLSearchParams(location.search).get("mode");
   const S = {
-    mode: MODES.includes(saved.mode) ? saved.mode : "find", region: REGIONS[saved.region] ? saved.region : "World",
+    mode: MODES.includes(askedMode) ? askedMode : MODES.includes(saved.mode) ? saved.mode : "find", region: REGIONS[saved.region] ? saved.region : "World",
     len: [10, 25, 0].includes(saved.len) ? saved.len : 10, level: saved.level === "easy" ? "easy" : "normal",
     timer: !!saved.timer, lives: !!saved.lives, terr: !!saved.terr,
     queue: [], i: 0, score: 0, streak: 0, right: 0, mistakes: [], phase: "idle", attempts: 0, hints: 0,

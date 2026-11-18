@@ -3,12 +3,14 @@
 Science games for curious kids and adults, in English, Arabic and French.
 
 - Home page: `index.html` (category cards, fact of the day, animated background). `img/earth-mini.jpg` is the spinning Earth on the Geography card.
-- Geography: `geography/`, the GeoQuest game below.
+- Geography hub: `geography/index.html`, with 17 playable topics and 6 coming soon.
+  - `geography/world/`: countries, capitals and flags (the GeoQuest game below).
+  - `geography/explore/`: one engine for 14 map topics (continents, oceans, seas, straits, rivers, lakes, islands, archipelagos, deserts, mountain ranges, mountains, regions, cities, latitude and longitude), opened as `explore/?t=<topic>`. Data in `explore/data/`, built by `tools/build-topics.js` from Natural Earth.
 - Chemistry, Physics, Math, Biology: coming soon.
 
 Play: https://waelboudiab369.github.io/My-Game/
 
-## GeoQuest (geography/)
+## GeoQuest (geography/world/)
 
 A geography game on a real satellite globe: the 197 countries of the world (193 UN members + Vatican City, Palestine, Kosovo and Taiwan), plus 21 territories players can add, in English, Arabic and French.
 
@@ -21,9 +23,9 @@ A geography game on a real satellite globe: the 197 countries of the world (193 
 Options: region, number of questions, Easy level (larger countries, a free first letter, an extra try), a 20-second timer, and 3 lives.
 After each answer the capital city is marked on the globe.
 
-Play: https://waelboudiab369.github.io/My-Game/geography/
+Play: https://waelboudiab369.github.io/My-Game/geography/world/
 
-## Files (inside geography/)
+## Files (inside geography/world/)
 - `index.html`: the page layout.
 - `css/style.css`: the look.
 - `js/strings.js`: every piece of interface text in English, Arabic and French. Edit here to change wording.
@@ -37,4 +39,4 @@ Play: https://waelboudiab369.github.io/My-Game/geography/
 - `tools/check-data.js` (at the top level): cross-checks the data against five independent sources and lists anything to review.
 - `tools/build-data.js` (at the top level): rebuilds `geography/data/` and `geography/flags/` from npm packages; the tables at its top control which places are included, capitals and translations.
 
-Data: world-countries (ODbL), Natural Earth via world-atlas (public domain), country-state-city (capital coordinates), Unicode CLDR (Arabic and French city names), flag-icons (MIT), NASA Blue Marble imagery (public domain). Globe: globe.gl.
+Data: Natural Earth (public domain) for the map topics, world-countries (ODbL), Natural Earth via world-atlas (public domain), country-state-city (capital coordinates), Unicode CLDR (Arabic and French city names), flag-icons (MIT), NASA Blue Marble imagery (public domain). Globe: globe.gl.

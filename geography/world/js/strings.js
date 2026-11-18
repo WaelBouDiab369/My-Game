@@ -2,7 +2,7 @@
 // {name} style placeholders are filled in by the game. Keep the same placeholders in every language.
 window.STRINGS = {
   en: {
-    tagline: "197 countries", home: "← Home",
+    tagline: "197 countries", home: "← Geography",
     loading: "Loading the Earth…",
     heroA: "Learn the world,", heroB: "one place at a time",
     intro: "A real satellite globe with all 197 countries of the world. Spin it, zoom in, and type answers to learn the spelling.",
@@ -51,7 +51,7 @@ window.STRINGS = {
   },
 
   ar: {
-    tagline: "197 دولة", home: "→ الرئيسية",
+    tagline: "197 دولة", home: "→ الجغرافيا",
     loading: "جارٍ تحميل الأرض…",
     heroA: "تعلّم العالم،", heroB: "مكانًا تلو الآخر",
     intro: "كرة أرضية حقيقية بصور الأقمار الصناعية فيها دول العالم الـ197 كلها. دوّرها وكبّرها واكتب الإجابات لتتعلّم كتابتها.",
@@ -107,7 +107,7 @@ window.STRINGS = {
   },
 
   fr: {
-    tagline: "197 pays", home: "← Accueil",
+    tagline: "197 pays", home: "← Géographie",
     loading: "Chargement de la Terre…",
     heroA: "Découvre le monde,", heroB: "un pays à la fois",
     intro: "Un vrai globe vu par satellite avec les 197 pays du monde. Fais-le tourner, zoome et écris les réponses pour apprendre l'orthographe.",

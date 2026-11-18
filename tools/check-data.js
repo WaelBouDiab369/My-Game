@@ -15,9 +15,9 @@ const [, , PK, OUT] = process.argv;
 const pkg = (p) => path.join(PK, p);
 const ROOT = path.join(__dirname, "..");
 
-const ours = require(path.join(ROOT, "geography/data/countries.json"));
-const borders = require(path.join(ROOT, "geography/data/borders.json"));
-const small = require(path.join(ROOT, "geography/data/borders-small.json"));
+const ours = require(path.join(ROOT, "geography/world/data/countries.json"));
+const borders = require(path.join(ROOT, "geography/world/data/borders.json"));
+const small = require(path.join(ROOT, "geography/world/data/borders-small.json"));
 const buildSrc = fs.readFileSync(path.join(__dirname, "build-data.js"), "utf8");
 const topojson = require(pkg("topojson-client-3.1.0/package/dist/topojson-client.js"));
 const wc = require(pkg("world-countries-5.1.0/package/countries.json"));
