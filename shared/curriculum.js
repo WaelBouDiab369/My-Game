@@ -375,22 +375,23 @@
     11: ["The world of work|عالم العمل|Le monde du travail", "The international world|العالم الدولي|Le monde international", "Writing tasks|مهام الكتابة|Les tâches d'expression écrite", "Speaking practice|التدريب على المحادثة|Entraînement à l'oral"],
     12: ["Current affairs and society|القضايا الراهنة والمجتمع|L'actualité et la société", "French-speaking cultures|الثقافات الناطقة بالفرنسية|Les cultures francophones", "Advanced grammar: the subjunctive|القواعد المتقدمة: صيغة الشرط والتمني|Grammaire avancée : le subjonctif", "Essay writing|كتابة المقالة|La dissertation"],
   };
-  // ---------------------------------------------------------------- WORLD GEOGRAPHY (our globe games, from simple to advanced)
-  const GEO = {
-    1: [["The continents|القارات|Les continents", "geo:continents"], ["The oceans|المحيطات|Les océans", "geo:oceans"]],
-    2: [["Continents and oceans|القارات والمحيطات|Continents et océans", "geo:continents", "geo:oceans"], ["Islands|الجزر|Les îles", "geo:islands"]],
-    3: [["Countries of the world|دول العالم|Les pays du monde", "geo:study", "geo:countries"], ["Rivers|الأنهار|Les fleuves", "geo:rivers"], ["Mountains|الجبال|Les montagnes", "geo:mountains"]],
-    4: [["Capitals|العواصم|Les capitales", "geo:capitals"], ["Flags|الأعلام|Les drapeaux", "geo:flags"], ["Deserts|الصحاري|Les déserts", "geo:deserts"], ["Lakes|البحيرات|Les lacs", "geo:lakes"]],
-    5: [["Seas, gulfs and bays|البحار والخلجان|Mers, golfes et baies", "geo:seas"], ["Mountain ranges|السلاسل الجبلية|Les chaînes de montagnes", "geo:ranges"], ["Archipelagos|الأرخبيلات|Les archipels", "geo:archipelagos"]],
-    6: [["Latitude and longitude|خطوط الطول والعرض|Latitude et longitude", "geo:latlong"], ["Straits|المضائق|Les détroits", "geo:straits"], ["Countries and capitals|الدول والعواصم|Pays et capitales", "geo:countries", "geo:capitals"]],
-    7: [["Regions of the world|مناطق العالم|Les régions du monde", "geo:regions"], ["Great cities|المدن الكبرى|Les grandes villes", "geo:cities"]],
-  };
+  // ---------------------------------------------------------------- WORLD GEOGRAPHY: the same full set of globe games for every grade
+  const GEO_ALL = [
+    ["Countries of the world|دول العالم|Les pays du monde", "geo:study", "geo:countries"],
+    ["Capitals and flags|العواصم والأعلام|Capitales et drapeaux", "geo:capitals", "geo:flags"],
+    ["Continents and oceans|القارات والمحيطات|Continents et océans", "geo:continents", "geo:oceans"],
+    ["Seas and straits|البحار والمضائق|Mers et détroits", "geo:seas", "geo:straits"],
+    ["Rivers and lakes|الأنهار والبحيرات|Fleuves et lacs", "geo:rivers", "geo:lakes"],
+    ["Islands and archipelagos|الجزر والأرخبيلات|Îles et archipels", "geo:islands", "geo:archipelagos"],
+    ["Deserts, mountains and mountain ranges|الصحاري والجبال والسلاسل الجبلية|Déserts, montagnes et chaînes de montagnes", "geo:deserts", "geo:mountains", "geo:ranges"],
+    ["Regions and great cities|المناطق والمدن الكبرى|Régions et grandes villes", "geo:regions", "geo:cities"],
+    ["Latitude and longitude|خطوط الطول والعرض|Latitude et longitude", "geo:latlong"],
+  ];
   for (let g = 1; g <= 12; g++) {
     G[g].english = EN[g].map((x) => U(x));
     G[g].arabic = AR[g].map((x) => U(x));
     G[g].french = FR[g].map((x) => U(x));
-    const geo = GEO[g] || [["World geography review|مراجعة جغرافيا العالم|Révision de géographie du monde", "geo:countries", "geo:capitals", "geo:flags", "geo:regions", "geo:cities", "geo:latlong"]];
-    G[g].geography = geo.map(([t, ...games]) => U(t, ...games));
+    G[g].geography = GEO_ALL.map(([t, ...games]) => U(t, ...games));
   }
 
   window.ZV_CURRICULUM = { SUBJECTS, STAGES, grades: G, order: ["math", "science", "biology", "chemistry", "physics", "english", "arabic", "french", "geography"] };
