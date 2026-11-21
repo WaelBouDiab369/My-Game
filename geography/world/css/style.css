@@ -39,6 +39,12 @@ a.iconbtn { text-decoration: none; color: var(--ink); }
 .progress { height: 4px; border-radius: 4px; background: var(--line); overflow: hidden; }
 .progress i { display: block; height: 100%; width: 0; background: var(--amber); transition: width .4s; }
 .qlabel { font-size: 12px; text-transform: uppercase; letter-spacing: .12em; color: var(--muted); display: flex; justify-content: space-between; gap: 8px; }
+.qlabel > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.qlabel > span:first-child { flex: none; }
+/* cards include their padding in their width, so nothing sticks out on small phones */
+.card { box-sizing: border-box; }
+.card > * { min-width: 0; }
+.card .question { overflow-wrap: break-word; }
 .question { font-family: var(--font-display); font-weight: 800; font-size: clamp(24px, 5vw, 34px); line-height: 1.1; text-wrap: balance; }
 .question .tgt { color: var(--amber); }
 .sub { color: var(--muted); font-size: 14px; }
@@ -76,6 +82,12 @@ a.iconbtn { text-decoration: none; color: var(--ink); }
 .mode span { color: var(--muted); font-size: 14px; }
 .mode[aria-pressed="true"] { border-color: var(--amber); background: rgba(255,181,71,.1); }
 .mode[aria-pressed="true"] strong { color: var(--amber); }
+.mode-hint { display: none; }
+.menu-head, .menu-opts, .menu-foot { display: grid; gap: inherit; align-content: start; }
+/* The start screen never runs off the bottom: it scrolls inside, and the Start button stays pinned at the bottom. */
+#startSheet { grid-template-rows: minmax(0, 1fr); }
+#startSheet .menu { box-sizing: border-box; width: min(568px, 100%); max-height: calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 80px); overflow-y: auto; overscroll-behavior: contain; }
+#startSheet .menu-foot { position: sticky; bottom: -24px; margin-bottom: -24px; padding: 10px 0 24px; background: linear-gradient(to bottom, transparent, var(--menu-bg, #0c1324) 14px); z-index: 1; }
 .menu p.notice { font-size: 14px; color: var(--ink); background: rgba(255,181,71,.1); border: 1px solid rgba(255,181,71,.35); border-radius: 12px; padding: 10px 12px; }
 .best { font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
 .bigscore { font-family: var(--font-display); font-weight: 800; font-size: 64px; line-height: 1; color: var(--amber); font-variant-numeric: tabular-nums; }
@@ -137,4 +149,38 @@ html[dir="rtl"] .timer i { transform-origin: right; }
 html[lang="ar"] body { font-size: 17px; }
 html[lang="ar"] * { letter-spacing: 0 !important; text-transform: none !important; }
 html[lang="ar"] .menu h1 { line-height: 1.25; }
+.linkbtn { justify-self: center; background: none; border: 0; color: var(--muted); font: inherit; font-size: 14px; text-decoration: underline; text-underline-offset: 3px; padding: 8px 12px; cursor: pointer; }
+.linkbtn:hover { color: var(--text); }
+/* Phones: the start screen fits on one screen without scrolling. */
+@media (max-height: 820px), (max-width: 480px) {
+  .sheet { padding-block: calc(env(safe-area-inset-top, 0px) + 56px) calc(env(safe-area-inset-bottom, 0px) + 10px); }
+  .menu { padding: 16px; gap: 12px; }
+  #startSheet .menu-foot { bottom: -16px; margin-bottom: -16px; padding-bottom: 16px; }
+  #startSheet .menu { max-height: calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 66px); }
+  .menu h1 { font-size: clamp(26px, 7vw, 36px); }
+  .menu p { font-size: 14px; line-height: 1.4; }
+  .menu .group { gap: 6px; }
+  .level-hint { font-size: 12.5px; }
+  /* compact game list: names in a grid, the chosen game's description underneath */
+  .modes { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+  .mode { padding: 10px 12px; }
+  .mode strong { font-size: 15px; line-height: 1.2; }
+  .mode span { display: none; }
+  .mode-hint { display: block; }
+  .full-list #menuIntro { display: none; }
+}
+/* Phones: the top bar keeps to one line (the game name is already on the screen). */
+@media (max-width: 480px) {
+  .brand { display: none; }
+  .hud { justify-content: flex-end; }
+}
+/* Phones held sideways: title and Start on the left, options on the right. */
+@media (orientation: landscape) and (max-height: 520px) {
+  .sheet { padding-block: calc(env(safe-area-inset-top, 0px) + 52px) 8px; }
+  .menu, #startSheet .menu { width: min(940px, 100%); grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr); grid-template-areas: "head opts" "foot opts"; column-gap: 22px; row-gap: 10px; align-items: start; padding: 14px 18px; }
+  #startSheet .menu { max-height: calc(100dvh - env(safe-area-inset-top, 0px) - 60px); }
+  .menu-head { grid-area: head; } .menu-opts { grid-area: opts; } .menu-foot { grid-area: foot; align-self: end; }
+  .menu .opt { padding: 6px 11px; }
+  .menu .group { gap: 4px; }
+}
 html[lang="ar"] .question { line-height: 1.35; }

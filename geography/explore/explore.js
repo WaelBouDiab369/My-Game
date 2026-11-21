@@ -65,7 +65,7 @@ setTimeout(hideLoader, 8000);
   const saved = store.get("gq-x-" + topic) || {};
   const MODES = topic === "latlong" ? ["study", "find", "name", "coords"] : ["study", "find", "name"];
   const S = {
-    mode: MODES.includes(saved.mode) ? saved.mode : "find", len: saved.len === 0 ? 0 : 10, level: saved.level === "easy" ? "easy" : "normal",
+    mode: MODES.includes(saved.mode) ? saved.mode : "find", len: saved.len === 0 ? 0 : 10, level: ["easy", "normal", "hard"].includes(saved.level) ? saved.level : "normal",
     queue: [], i: 0, score: 0, streak: 0, right: 0, mistakes: [], phase: "idle", attempts: 0, hints: 0, hover: null, flash: {}, sel: null,
     started: 0, active: false, fb: null, pins: [], label: null, practice: false, end: null,
   };
@@ -110,10 +110,11 @@ setTimeout(hideLoader, 8000);
       .htmlElement((d) => (d.el || (d.el = makeHtml(d))))
       .onGlobeReady(hideLoader);
     const ctrl = g.controls(); ctrl.autoRotate = true; ctrl.autoRotateSpeed = 0.35;
-    const resize = () => g.width(window.innerWidth).height(window.innerHeight);
-    window.addEventListener("resize", resize); resize();
     const rect = () => el.getBoundingClientRect();
     function tapAt(ev) { const r = rect(); onTap(ev.clientX - r.left, ev.clientY - r.top); }
+    const sm = window.smoothGlobe ? window.smoothGlobe(g, el, tapAt) : { wake() {}, setAuto() {} };
+    const resize = () => { g.width(window.innerWidth).height(window.innerHeight); sm.wake(600); };
+    window.addEventListener("resize", resize); resize();
     let pending = null;
     el.addEventListener("pointermove", (ev) => {
       if (ev.pointerType !== "mouse" || ev.buttons || pending) return;
@@ -127,11 +128,12 @@ setTimeout(hideLoader, 8000);
         const next = [...(canTap() || S.mode === "study" ? marks : marks.filter((m) => isTarget(m.id) || S.flash[m.id])), ...S.pins, ...(S.label ? [S.label] : [])];
         if (next.length !== html.length || next.some((d, i) => d !== html[i])) { html = next; g.htmlElementsData(html); }
         for (const m of marks) if (m.el) m.el.dataset.state = stateOf(m.id);
+        sm.wake(500);
       },
-      pointOfView(p, ms) { g.pointOfView(p, ms); },
+      pointOfView(p, ms) { g.pointOfView(p, ms); sm.wake((ms || 0) + 500); },
       pov() { return g.pointOfView(); },
-      setAutoRotate(on) { ctrl.autoRotate = on; },
-      zoomBy(f) { const p = g.pointOfView(); g.pointOfView({ ...p, altitude: Math.min(4, Math.max(0.03, p.altitude * f)) }, 450); },
+      setAutoRotate(on) { ctrl.autoRotate = on; sm.setAuto(on); },
+      zoomBy(f) { const p = g.pointOfView(); g.pointOfView({ ...p, altitude: Math.min(4, Math.max(0.03, p.altitude * f)) }, 450); sm.wake(1000); },
       project(lat, lng) {
         const p = g.pointOfView(), horizon = Math.acos(1 / (1 + p.altitude));
         if (d3.geoDistance([lng, lat], [p.lng, p.lat]) > horizon - 0.01) return null;
@@ -333,7 +335,7 @@ setTimeout(hideLoader, 8000);
     for (const a of accepted(it)) if (norm(a) === x) return { kind: "good" };
     const o = owner.get(x); if (o && o !== it.id) return { kind: "bad" };
     let best = { kind: "bad", dist: 99 };
-    for (const a of accepted(it)) { const y = norm(a); if (y.length < 4) continue; const d = lev(x, y), tol = (y.length > 7 ? 2 : 1) + (S.level === "easy" ? 1 : 0); if (d <= tol && d < best.dist) best = { kind: "close", dist: d, match: a }; }
+    for (const a of accepted(it)) { const y = norm(a); if (y.length < 4) continue; const d = lev(x, y), tol = S.level === "hard" ? 0 : (y.length > 7 ? 2 : 1) + (S.level === "easy" ? 1 : 0); if (d && d <= tol && d < best.dist) best = { kind: "close", dist: d, match: a }; }
     return best;
   }
   function diffSpell(input, target) {
@@ -345,9 +347,10 @@ setTimeout(hideLoader, 8000);
   // ---------- quiz ----------
   function pool() { const n = items.length; return S.level === "easy" ? items.slice(0, Math.max(5, Math.ceil(n * 0.6))) : items.slice(); }
   const shuffle = (a) => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
-  const maxTries = () => (S.level === "easy" ? 4 : 3);
+  const maxTries = () => (S.level === "easy" ? 4 : S.level === "hard" ? 1 : 3);
+  const HARD_TIME = 15;   // seconds per question on Hard
   function coordsQuestion() {
-    const step = S.level === "easy" ? 15 : 5;
+    const step = S.level === "easy" ? 15 : S.level === "hard" ? 1 : 5;
     const lat = (Math.floor(Math.random() * (Math.floor(150 / step) + 1)) * step) - 70, lng = (Math.floor(Math.random() * Math.floor(360 / step)) * step) - 180;
     return { id: `c${lat}_${lng}`, coords: [Math.max(-70, Math.min(75, lat)), lng] };
   }
@@ -379,9 +382,9 @@ setTimeout(hideLoader, 8000);
   function ask() {
     const it = current();
     Object.assign(S, { phase: "ask", attempts: 0, hints: 0, flash: {}, hover: null, fb: null, pins: [], label: null });
-    $("feedback").hidden = true; $("btnNext").hidden = true; $("btnSkip").hidden = false; $("btnHint").hidden = false; $("hintline").hidden = true;
+    $("feedback").hidden = true; $("btnNext").hidden = true; $("btnSkip").hidden = false; $("btnHint").hidden = S.level === "hard"; $("hintline").hidden = true;
     $("bar").style.width = (S.i / S.queue.length * 100) + "%";
-    renderAsk();
+    renderAsk(); startTimer();
     if (S.mode === "name") {
       $("answerForm").hidden = false; const inp = $("answer"); inp.value = "";
       setTimeout(() => inp.focus({ preventScroll: true }), 50);
@@ -399,7 +402,23 @@ setTimeout(hideLoader, 8000);
     if (!$("hintline").hidden && S.mode === "name") renderHint();
     renderFeedback();
   }
-  function points(base) { return Math.round(base * Math.pow(0.7, S.hints)) + Math.min(S.streak, 5) * 10; }
+  function points(base) {
+    let p = Math.round(base * Math.pow(0.7, S.hints)) + Math.min(S.streak, 5) * 10;
+    if (S.level === "hard") p = Math.round((p + Math.round(Math.max(0, S.deadline - performance.now()) / (HARD_TIME * 1000) * 30)) * 1.5);
+    return p;
+  }
+  // ---------- timer (Hard only) ----------
+  let timerId = null;
+  function startTimer() {
+    stopTimer(); $("timer").hidden = S.level !== "hard"; if (S.level !== "hard") return;
+    S.deadline = performance.now() + HARD_TIME * 1000; tickTimer(); timerId = setInterval(tickTimer, 100);
+  }
+  function tickTimer() {
+    const left = Math.max(0, S.deadline - performance.now()), f = left / (HARD_TIME * 1000);
+    $("timerBar").style.transform = `scaleX(${f})`; $("timer").classList.toggle("warn", f < 0.25);
+    if (left <= 0) { stopTimer(); giveUp(); }
+  }
+  function stopTimer() { clearInterval(timerId); timerId = null; }
   function win(base) { S.score += points(base); S.streak++; S.right++; updateHud(); }
   function lose(it) { S.streak = 0; if (!S.mistakes.includes(it)) S.mistakes.push(it); updateHud(); }
   function setFb(kind, html) { S.fb = { kind, html }; renderFeedback(); }
@@ -424,7 +443,7 @@ setTimeout(hideLoader, 8000);
   function guessCoords([lat, lng]) {
     if (S.phase !== "ask") return;
     const it = current(), km = Math.round(d3.geoDistance([lng, lat], [it.coords[1], it.coords[0]]) * 6371);
-    const base = km < 300 ? 100 : km < 800 ? 70 : km < 1500 ? 40 : km < 2500 ? 15 : 0;
+    const base = S.level === "hard" ? (km < 150 ? 100 : km < 400 ? 70 : km < 800 ? 40 : 0) : km < 300 ? 100 : km < 800 ? 70 : km < 1500 ? 40 : km < 2500 ? 15 : 0;
     if (base > 0) win(base); else lose(it);
     S.pins = [{ kind: "pin", lat: it.coords[0], lng: it.coords[1], color: "#4ade80" }, { kind: "pin", lat, lng, color: base >= 70 ? "#4ade80" : "#fb7185" }];
     setFb(base >= 70 ? "good" : base > 0 ? "close" : "bad", () => (km < 300 ? t("coordsPerfect", { km: km.toLocaleString(LOCALE[lang]) }) : t("coordsResult", { km: km.toLocaleString(LOCALE[lang]) })));
@@ -443,13 +462,13 @@ setTimeout(hideLoader, 8000);
     refresh();
   }
   function startRetype(lead) {
-    S.phase = "retype"; const it = current();
+    S.phase = "retype"; stopTimer(); const it = current();
     setFb("bad", () => `${lead}<span class="spell" dir="auto">${esc(nm(it))}</span>${t("typeOnce")}`);
     const inp = $("answer"); inp.value = ""; inp.placeholder = t("phRetype", { w: nm(it) }); inp.focus({ preventScroll: true });
     $("btnHint").hidden = true; $("hintline").hidden = true;
   }
   function finishQuestion() {
-    S.phase = "done"; $("btnHint").hidden = true; $("btnSkip").hidden = true; $("btnNext").hidden = false; $("answerForm").hidden = true; $("hintline").hidden = true;
+    S.phase = "done"; stopTimer(); $("btnHint").hidden = true; $("btnSkip").hidden = true; $("btnNext").hidden = false; $("answerForm").hidden = true; $("hintline").hidden = true;
     $("bar").style.width = ((S.i + 1) / S.queue.length * 100) + "%";
     setTimeout(() => $("btnNext").focus({ preventScroll: true }), 30); refresh();
   }
@@ -479,6 +498,7 @@ setTimeout(hideLoader, 8000);
   }
 
   function endRound() {
+    stopTimer();
     const total = S.queue.length, secs = Math.round((Date.now() - S.started) / 1000);
     const key = `gq-xbest-${topic}-${S.mode}-${S.len}-${S.level}`, prev = S.practice ? null : store.get(key);
     const isBest = !S.practice && (!prev || S.score > prev.score);
@@ -544,7 +564,7 @@ setTimeout(hideLoader, 8000);
 
   // ---------- menu ----------
   function toMenu() {
-    Object.assign(S, { active: false, phase: "idle", flash: {}, sel: null, hover: null, pins: [], label: null }); refresh();
+    stopTimer(); Object.assign(S, { active: false, phase: "idle", flash: {}, sel: null, hover: null, pins: [], label: null }); refresh();
     $("card").hidden = true; $("studyCard").hidden = true; $("endSheet").hidden = true; $("startSheet").hidden = false;
     showHud(false); globe.setAutoRotate(true); renderMenu();
   }
@@ -555,7 +575,9 @@ setTimeout(hideLoader, 8000);
     document.title = `${topicName()} · GeoQuest`;
     $("topicTitle").textContent = topicName(); $("topicIntro").textContent = STR[lang].intros[topic] || STR.en.intros[topic];
     modeWrap.querySelectorAll("[data-mode]").forEach((b) => { b.querySelector("strong").textContent = t("xmode_" + b.dataset.mode); b.querySelector("span").textContent = t("xmode_" + b.dataset.mode + "_d"); });
+    $("modeHint").textContent = t("xmode_" + S.mode + "_d");
     pick2(modeWrap, "mode", S.mode); pick2($("lengths"), "len", S.len); pick2($("levels"), "level", S.level);
+    $("levelHint").textContent = t({ easy: "levelEasyHint", normal: "levelNormalHint", hard: "levelHardHint" }[S.level]);
     document.querySelectorAll("[data-quiz-only]").forEach((g) => (g.hidden = S.mode === "study"));
     $("btnStart").textContent = S.mode === "study" ? t("studyBtn") : t("play");
     const b = store.get(`gq-xbest-${topic}-${S.mode}-${S.len}-${S.level}`);

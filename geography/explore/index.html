@@ -50,6 +50,7 @@
 <section class="card" id="card" hidden aria-live="polite">
   <div class="progress"><i id="bar"></i></div>
   <div class="qlabel"><span id="qcount"></span><span id="qtopic"></span></div>
+  <div class="timer" id="timer" hidden><i id="timerBar"></i></div>
   <div class="question" id="question"></div>
   <div class="sub" id="qsub"></div>
   <div class="hintline" id="hintline" hidden></div>
@@ -81,9 +82,12 @@
 
 <div class="sheet" id="startSheet">
   <div class="menu">
+    <div class="menu-head">
     <h1 id="topicTitle"></h1>
     <p class="topic-intro" id="topicIntro"></p>
-    <div class="group"><label data-i18n="labelGame"></label><div class="modes" id="modes"></div></div>
+    <div class="group" id="modeGroup"><label data-i18n="labelGame"></label><div class="modes" id="modes"></div><div class="level-hint mode-hint" id="modeHint"></div></div>
+    </div>
+    <div class="menu-opts">
     <div class="group" data-quiz-only>
       <label data-i18n="labelQuestions"></label>
       <div class="opts" id="lengths">
@@ -96,11 +100,16 @@
       <div class="opts" id="levels">
         <button class="opt" type="button" data-level="easy" aria-pressed="false" data-i18n="levelEasy"></button>
         <button class="opt" type="button" data-level="normal" aria-pressed="true" data-i18n="levelNormal"></button>
+        <button class="opt" type="button" data-level="hard" aria-pressed="false" data-i18n="levelHard"></button>
       </div>
+      <div class="level-hint" id="levelHint"></div>
     </div>
+    </div>
+    <div class="menu-foot">
     <p class="notice" id="glNotice" hidden data-i18n-html="glNotice"></p>
     <div class="best" id="bestLine"></div>
     <button class="btn" id="btnStart" type="button"></button>
+    </div>
   </div>
 </div>
 
@@ -127,6 +136,7 @@
 <script src="../world/vendor/d3-geo.min.js"></script>
 <script src="../world/js/strings.js"></script>
 <script src="strings.js"></script>
+<script src="../world/js/smooth.js"></script>
 <script src="explore.js"></script>
 <script src="../../shared/app.js"></script>
 </body>

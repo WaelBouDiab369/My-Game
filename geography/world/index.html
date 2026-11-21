@@ -84,12 +84,16 @@
 
 <div class="sheet" id="startSheet">
   <div class="menu">
-    <h1><span data-i18n="heroA" style="color:inherit"></span> <span data-i18n="heroB"></span></h1>
-    <p data-i18n="intro"></p>
-    <div class="group">
+    <div class="menu-head">
+    <h1 id="menuTitle"><span data-i18n="heroA" style="color:inherit"></span> <span data-i18n="heroB"></span></h1>
+    <p id="menuIntro" data-i18n="intro"></p>
+    <div class="group" id="modeGroup">
       <label data-i18n="labelGame"></label>
       <div class="modes" id="modes"></div>
+      <div class="level-hint mode-hint" id="modeHint"></div>
     </div>
+    </div>
+    <div class="menu-opts">
     <div class="group">
       <label data-i18n="labelRegion"></label>
       <div class="opts" id="regions"></div>
@@ -107,8 +111,9 @@
       <div class="opts" id="levels">
         <button class="opt" type="button" data-level="easy" aria-pressed="false" data-i18n="levelEasy"></button>
         <button class="opt" type="button" data-level="normal" aria-pressed="true" data-i18n="levelNormal"></button>
+        <button class="opt" type="button" data-level="hard" aria-pressed="false" data-i18n="levelHard"></button>
       </div>
-      <div class="level-hint" data-i18n="levelEasyHint"></div>
+      <div class="level-hint" id="levelHint"></div>
     </div>
     <div class="group" data-quiz-only>
       <label data-i18n="labelChallenge"></label>
@@ -118,9 +123,13 @@
         <button class="opt" type="button" id="optTerr" aria-pressed="false" data-i18n="optTerr"></button>
       </div>
     </div>
+    </div>
+    <div class="menu-foot">
     <p class="notice" id="glNotice" hidden data-i18n-html="glNotice"></p>
     <div class="best" id="bestLine"></div>
     <button class="btn" id="btnStart" type="button"></button>
+    <button class="linkbtn" id="btnChangeGame" type="button" hidden data-i18n="changeGame"></button>
+    </div>
   </div>
 </div>
 
@@ -146,6 +155,7 @@
 <script src="vendor/d3-array.min.js"></script>
 <script src="vendor/d3-geo.min.js"></script>
 <script src="js/strings.js"></script>
+<script src="js/smooth.js"></script>
 <script src="js/game.js"></script>
 <script src="../../shared/app.js"></script>
 </body>

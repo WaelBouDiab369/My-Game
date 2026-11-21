@@ -59,7 +59,8 @@ button { font: inherit; color: inherit; cursor: pointer; }
 @media (hover: hover) { .cta.alt:hover { border-color: var(--land); } }
 .cta svg { width: 18px; height: 18px; }
 .globe-wrap { position: relative; aspect-ratio: 1; width: min(100%, 520px); justify-self: center; }
-.globe-wrap canvas { width: 100%; height: 100%; display: block; touch-action: pan-y; cursor: grab; }
+.globe-wrap canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: pan-y; cursor: grab; }
+.globe-wrap #bigGlobeGL { pointer-events: none; }
 .globe-wrap .ring { position: absolute; inset: 4%; border-radius: 50%; border: 1px dashed rgba(46,230,197,.25); animation: spin 60s linear infinite; pointer-events: none; }
 .globe-wrap .ring.r2 { inset: -2%; border-color: rgba(177,140,255,.18); animation-duration: 90s; animation-direction: reverse; }
 @keyframes spin { to { transform: rotate(360deg); } }
@@ -211,7 +212,7 @@ html[lang="ar"] .hero h1 { line-height: 1.15; }
         <button class="cta alt" type="button" id="surprise1"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 4h3l6 8h3M2 12h3l2-2.7M10 6.7 11 4h3M12 2l2 2-2 2M12 10l2 2-2 2" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg><span data-t="surprise"></span></button>
       </div>
     </div>
-    <div class="globe-wrap" aria-hidden="true"><div class="ring"></div><div class="ring r2"></div><canvas id="bigGlobe"></canvas></div>
+    <div class="globe-wrap" aria-hidden="true"><div class="ring"></div><div class="ring r2"></div><canvas id="bigGlobeGL"></canvas><canvas id="bigGlobe"></canvas></div>
   </section>
 
   <nav class="filters" id="filters" aria-label="Filter topics"></nav>
@@ -533,9 +534,48 @@ let globeLabels = () => {};
   ];
   let size = 0, dpr = 1, R = 0, D = 0, idx = [], row = [], ub = [], shade = [], out = null, off = null, octx = null, tex = null, TW = 0, TH = 0, rot = -0.4, last = performance.now(), drag = null, vel = 0.00022;
   const TILT = 0.32, cosT = Math.cos(TILT), sinT = Math.sin(TILT), L = [-0.5, 0.42, 0.76];
+  // The Earth itself is drawn by the graphics chip when the device has one (same picture, same maths, much lighter);
+  // otherwise it is drawn pixel by pixel as before. Glow, outline and place names are drawn on top.
+  const glc = document.getElementById("bigGlobeGL"), GL = makeGL(glc);
+  function makeGL(c) {
+    let gl = null; try { gl = c.getContext("webgl", { alpha: true, premultipliedAlpha: true, antialias: false }); } catch (e) {}
+    if (!gl) return null;
+    const vs = "attribute vec2 p; void main(){ gl_Position = vec4(p, 0.0, 1.0); }";
+    const fs = `precision highp float;
+      uniform sampler2D tex; uniform vec2 res; uniform float R, rot, cosT, sinT;
+      const float PI = 3.14159265358979;
+      void main() {
+        vec2 c = res * 0.5; float x = (gl_FragCoord.x - c.x) / R, y = (gl_FragCoord.y - c.y) / R, rr = x * x + y * y;
+        if (rr > 1.0) { gl_FragColor = vec4(0.0); return; }
+        float z = sqrt(1.0 - rr), gy = y * cosT + z * sinT, gz = -y * sinT + z * cosT;
+        float lat = asin(clamp(gy, -1.0, 1.0)), lon = atan(x, gz);
+        float diff = max(0.0, x * -0.5 + y * 0.42 + z * 0.76), edge = rr * rr, shade = (0.3 + 1.05 * diff) * (1.0 - edge * 0.32);
+        vec2 uv = vec2(fract((lon + PI) / (2.0 * PI) - rot / (2.0 * PI)), 0.5 - lat / PI);
+        vec3 col = texture2D(tex, uv).rgb * shade + vec3(0.0, 0.0, 8.0 / 255.0);
+        float a = clamp((1.0 - sqrt(rr)) * R, 0.0, 1.0);
+        gl_FragColor = vec4(min(col, 1.0) * a, a);
+      }`;
+    const sh = (type, src) => { const o = gl.createShader(type); gl.shaderSource(o, src); gl.compileShader(o); return gl.getShaderParameter(o, gl.COMPILE_STATUS) ? o : null; };
+    const v = sh(gl.VERTEX_SHADER, vs), f = sh(gl.FRAGMENT_SHADER, fs); if (!v || !f) return null;
+    const pr = gl.createProgram(); gl.attachShader(pr, v); gl.attachShader(pr, f); gl.linkProgram(pr); if (!gl.getProgramParameter(pr, gl.LINK_STATUS)) return null;
+    gl.useProgram(pr);
+    const buf = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, buf); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
+    const loc = gl.getAttribLocation(pr, "p"); gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+    const U = (n) => gl.getUniformLocation(pr, n), uRes = U("res"), uR = U("R"), uRot = U("rot");
+    gl.uniform1f(U("cosT"), Math.cos(0.32)); gl.uniform1f(U("sinT"), Math.sin(0.32));
+    let ready = false;
+    return {
+      texture(image) { const t = gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D, t); gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, image);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE); ready = true; },
+      size(n, r) { c.width = n; c.height = n; gl.viewport(0, 0, n, n); gl.uniform2f(uRes, n, n); gl.uniform1f(uR, r); },
+      draw(a) { if (!ready) return; gl.uniform1f(uRot, a); gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT); gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4); },
+    };
+  }
   function setup() {
-    const r = cv.getBoundingClientRect(); dpr = document.documentElement.classList.contains("touch") ? 1 : Math.min(1.5, devicePixelRatio || 1); size = Math.round(r.width * dpr); if (!size) return;
+    const r = cv.getBoundingClientRect(); dpr = GL ? Math.min(document.documentElement.classList.contains("touch") ? 1.5 : 2, devicePixelRatio || 1) : document.documentElement.classList.contains("touch") ? 1 : Math.min(1.5, devicePixelRatio || 1); size = Math.round(r.width * dpr); if (!size) return;
     cv.width = size; cv.height = size; R = size * 0.42; D = Math.ceil(R * 2);
+    if (GL) { GL.size(size, R); return; }
     off = document.createElement("canvas"); off.width = D; off.height = D; octx = off.getContext("2d"); out = octx.createImageData(D, D);
     idx = []; row = []; ub = []; shade = [];
     for (let py = 0; py < D; py++) for (let px = 0; px < D; px++) {
@@ -547,7 +587,7 @@ let globeLabels = () => {};
     }
   }
   const img = new Image();
-  img.onload = () => { const c = document.createElement("canvas"); c.width = img.width; c.height = img.height; const g = c.getContext("2d"); g.drawImage(img, 0, 0); tex = g.getImageData(0, 0, c.width, c.height).data; TW = c.width; TH = c.height; setup(); requestAnimationFrame(frame); };
+  img.onload = () => { if (GL) { GL.texture(img); TW = img.width; TH = img.height; tex = true; setup(); requestAnimationFrame(frame); return; } const c = document.createElement("canvas"); c.width = img.width; c.height = img.height; const g = c.getContext("2d"); g.drawImage(img, 0, 0); tex = g.getImageData(0, 0, c.width, c.height).data; TW = c.width; TH = c.height; setup(); requestAnimationFrame(frame); };
   img.src = "img/earth-1k.jpg";
   addEventListener("resize", () => { if (tex) setup(); });
   function project(lat, lon) {
@@ -561,17 +601,18 @@ let globeLabels = () => {};
   if ("IntersectionObserver" in window) new IntersectionObserver((es) => { const was = shown; shown = es[0].isIntersecting; if (shown && !was && !reduce) { last = performance.now(); requestAnimationFrame(frame); } }).observe(cv);
   function frame(t) {
     if (!shown) return;   // paused while scrolled out of view
-    if (SLOWG && ((t - last < 66 && t > last) || t - scrolledAt < 300)) { requestAnimationFrame(frame); return; }   // phones: 15 pictures a second, paused while scrolling
+    if (!GL && SLOWG && ((t - last < 66 && t > last) || t - scrolledAt < 300)) { requestAnimationFrame(frame); return; }   // phones: 15 pictures a second, paused while scrolling
     const dt = Math.min(90, t - last); last = t;
     if (!drag && !reduce) { rot += dt * vel; vel += (0.00022 - vel) * 0.02; }
-    const shift = (rot / (2 * Math.PI)) * TW, px = out.data;
-    for (let i = 0; i < idx.length; i++) { let u = Math.floor(ub[i] - shift) % TW; if (u < 0) u += TW; const s4 = (row[i] + u) * 4, o = idx[i], k = shade[i];
+    if (GL) GL.draw(rot);
+    const shift = (rot / (2 * Math.PI)) * TW, px = GL ? null : out.data;
+    if (!GL) for (let i = 0; i < idx.length; i++) { let u = Math.floor(ub[i] - shift) % TW; if (u < 0) u += TW; const s4 = (row[i] + u) * 4, o = idx[i], k = shade[i];
       px[o] = tex[s4] * k; px[o + 1] = tex[s4 + 1] * k; px[o + 2] = tex[s4 + 2] * k + 8; px[o + 3] = 255; }
-    octx.putImageData(out, 0, 0);
+    if (!GL) octx.putImageData(out, 0, 0);
     const c = size / 2; ctx.clearRect(0, 0, size, size);
     const glow = ctx.createRadialGradient(c, c, R * .9, c, c, R * 1.18); glow.addColorStop(0, "rgba(110,190,255,.55)"); glow.addColorStop(1, "rgba(110,190,255,0)");
-    ctx.fillStyle = glow; ctx.beginPath(); ctx.arc(c, c, R * 1.18, 0, 6.283); ctx.fill();
-    ctx.drawImage(off, c - R, c - R);
+    ctx.fillStyle = glow; ctx.beginPath(); ctx.arc(c, c, R * 1.18, 0, 6.283); if (GL) { ctx.moveTo(c + R, c); ctx.arc(c, c, R, Math.PI * 2, 0, true); } ctx.fill();
+    if (!GL) ctx.drawImage(off, c - R, c - R);
     ctx.strokeStyle = "rgba(170,220,255,.6)"; ctx.lineWidth = 1.2 * dpr; ctx.beginPath(); ctx.arc(c, c, R, 0, 6.283); ctx.stroke();
     ctx.font = `700 ${Math.round(12.5 * dpr)}px "Bricolage Grotesque", "Tajawal", system-ui, sans-serif`; ctx.textBaseline = "middle"; ctx.textAlign = "left"; ctx.direction = "ltr";
     const taken = [];   // label boxes already drawn this frame, so names never pile up

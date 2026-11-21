@@ -92,9 +92,11 @@ setTimeout(hideLoader, 8000);
   const saved = store.get("gq-settings") || {};
   // The Geography page can open the game on a chosen mode: world/?mode=capital
   const askedMode = new URLSearchParams(location.search).get("mode");
+  // Opened from a game card: the game is already chosen, so the start screen shows only that game.
+  let fromCard = MODES.includes(askedMode);
   const S = {
     mode: MODES.includes(askedMode) ? askedMode : MODES.includes(saved.mode) ? saved.mode : "find", region: REGIONS[saved.region] ? saved.region : "World",
-    len: [10, 25, 0].includes(saved.len) ? saved.len : 10, level: saved.level === "easy" ? "easy" : "normal",
+    len: [10, 25, 0].includes(saved.len) ? saved.len : 10, level: ["easy", "normal", "hard"].includes(saved.level) ? saved.level : "normal",
     timer: !!saved.timer, lives: !!saved.lives, terr: !!saved.terr,
     queue: [], i: 0, score: 0, streak: 0, right: 0, mistakes: [], phase: "idle", attempts: 0, hints: 0,
     hover: null, flash: {}, started: 0, active: false, livesLeft: 3, deadline: 0, fb: null, cap: null, sel: null, end: null,
@@ -159,18 +161,19 @@ setTimeout(hideLoader, 8000);
     const pushHtml = () => g.htmlElementsData([...shownMarks, ...(cap ? [cap] : [])]);
     const ctrl = g.controls();
     ctrl.autoRotate = true; ctrl.autoRotateSpeed = 0.35;
-    const resize = () => g.width(window.innerWidth).height(window.innerHeight);
+    const sm = window.smoothGlobe ? window.smoothGlobe(g, el, tapAt) : { wake() {}, setAuto() {} };
+    const resize = () => { g.width(window.innerWidth).height(window.innerHeight); sm.wake(600); };
     window.addEventListener("resize", resize); resize();
     return {
       update(points) {
         g.polygonsData(features);
         if (points.length !== shownMarks.length || points.some((m, i) => m !== shownMarks[i])) { shownMarks = points; pushHtml(); }
-        styleMarks();
+        styleMarks(); sm.wake(500);
       },
-      pointOfView(pov, ms) { g.pointOfView(pov, ms); },
-      setAutoRotate(on) { ctrl.autoRotate = on; },
-      setCapital(m) { const next = m ? { kind: "cap", ...m } : null; if (JSON.stringify(next) !== JSON.stringify(cap)) { cap = next; pushHtml(); } },
-      zoomBy(f) { const p = g.pointOfView(); g.pointOfView({ ...p, altitude: Math.min(4, Math.max(0.03, p.altitude * f)) }, 450); },
+      pointOfView(pov, ms) { g.pointOfView(pov, ms); sm.wake((ms || 0) + 500); },
+      setAutoRotate(on) { ctrl.autoRotate = on; sm.setAuto(on); },
+      setCapital(m) { const next = m ? { kind: "cap", ...m } : null; if (JSON.stringify(next) !== JSON.stringify(cap)) { cap = next; pushHtml(); sm.wake(500); } },
+      zoomBy(f) { const p = g.pointOfView(); g.pointOfView({ ...p, altitude: Math.min(4, Math.max(0.03, p.altitude * f)) }, 450); sm.wake(1000); },
     };
   }
 
@@ -400,8 +403,8 @@ setTimeout(hideLoader, 8000);
     if (owner && owner !== c.id) return { kind: "bad" };
     let best = { kind: "bad", dist: 99 };
     for (const a of accepted(c)) {
-      const y = norm(a), d = lev(x, y), tol = (y.length > 7 ? 2 : 1) + (S.level === "easy" ? 1 : 0);
-      if (d <= tol && d < best.dist && y.length > 3) best = { kind: "close", dist: d, match: a };
+      const y = norm(a), d = lev(x, y), tol = S.level === "hard" ? 0 : (y.length > 7 ? 2 : 1) + (S.level === "easy" ? 1 : 0);
+      if (d && d <= tol && d < best.dist && y.length > 3) best = { kind: "close", dist: d, match: a };
     }
     return best;
   }
@@ -429,7 +432,10 @@ setTimeout(hideLoader, 8000);
     return p;
   }
   function shuffle(a) { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
-  const maxTries = () => (S.level === "easy" ? 4 : 3);
+  const maxTries = () => (S.level === "easy" ? 4 : S.level === "hard" ? 1 : 3);
+  // Hard: the timer is always on, with 15 seconds per question, and points count 1.5 times.
+  const timerOn = () => S.timer || S.level === "hard";
+  const timeLimit = () => (S.level === "hard" ? 15 : TIME_LIMIT);
 
   function showHud(on) {
     $("chipScore").hidden = !on || S.mode === "study"; $("chipStreak").hidden = !on || S.mode === "study";
@@ -456,7 +462,7 @@ setTimeout(hideLoader, 8000);
   function ask() {
     const c = current();
     Object.assign(S, { phase: "ask", attempts: 0, hints: 0, flash: {}, hover: null, cap: null, fb: null });
-    $("feedback").hidden = true; $("btnNext").hidden = true; $("btnSkip").hidden = false; $("btnHint").hidden = false; $("hintline").hidden = true;
+    $("feedback").hidden = true; $("btnNext").hidden = true; $("btnSkip").hidden = false; $("btnHint").hidden = S.level === "hard"; $("hintline").hidden = true;
     $("bar").style.width = (S.i / S.queue.length * 100) + "%";
     renderAsk();
     if (TYPE_MODES.has(S.mode)) {
@@ -495,8 +501,8 @@ setTimeout(hideLoader, 8000);
 
   function points(base) {
     let p = Math.round(base * Math.pow(0.7, S.hints)) + Math.min(S.streak, 5) * 10;
-    if (S.timer) p += Math.round(Math.max(0, S.deadline - performance.now()) / (TIME_LIMIT * 1000) * 30);
-    return p;
+    if (timerOn()) p += Math.round(Math.max(0, S.deadline - performance.now()) / (timeLimit() * 1000) * 30);
+    return S.level === "hard" ? Math.round(p * 1.5) : p;
   }
   function win(base) { S.score += points(base); S.streak++; S.right++; updateHud(); }
   function lose(c) {
@@ -630,13 +636,13 @@ setTimeout(hideLoader, 8000);
   let timerId = null;
   function startTimer() {
     stopTimer();
-    $("timer").hidden = !S.timer;
-    if (!S.timer) return;
-    S.deadline = performance.now() + TIME_LIMIT * 1000;
+    $("timer").hidden = !timerOn();
+    if (!timerOn()) return;
+    S.deadline = performance.now() + timeLimit() * 1000;
     tickTimer(); timerId = setInterval(tickTimer, 100);
   }
   function tickTimer() {
-    const left = Math.max(0, S.deadline - performance.now()), f = left / (TIME_LIMIT * 1000);
+    const left = Math.max(0, S.deadline - performance.now()), f = left / (timeLimit() * 1000);
     $("timerBar").style.transform = `scaleX(${f})`;
     $("timer").classList.toggle("warn", f < 0.25);
     if (left <= 0) { stopTimer(); giveUp(true); }
@@ -758,10 +764,18 @@ setTimeout(hideLoader, 8000);
   });
   function pick(wrap, attr, val) { wrap.querySelectorAll("[data-" + attr + "]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset[attr] === String(val)))); }
   function renderMenu() {
+    $("modeGroup").hidden = fromCard; $("btnChangeGame").hidden = !fromCard;
+    $("startSheet").classList.toggle("full-list", !fromCard);
+    if (fromCard) { $("menuTitle").textContent = t("mode_" + S.mode); $("menuIntro").textContent = t("mode_" + S.mode + "_d"); }
+    else { $("menuTitle").innerHTML = `<span style="color:inherit">${esc(t("heroA"))}</span> <span>${esc(t("heroB"))}</span>`; $("menuIntro").textContent = t("intro"); }
     modeWrap.querySelectorAll("[data-mode]").forEach((b) => { b.querySelector("strong").textContent = t("mode_" + b.dataset.mode); b.querySelector("span").textContent = t("mode_" + b.dataset.mode + "_d"); });
     regionWrap.querySelectorAll("[data-region]").forEach((b) => { b.textContent = regionName(b.dataset.region); });
+    $("modeHint").textContent = t("mode_" + S.mode + "_d");
+    $("optTimer").textContent = S.level === "hard" ? t("optTimerHard") : t("optTimer");
     pick(modeWrap, "mode", S.mode); pick(regionWrap, "region", S.region); pick($("lengths"), "len", S.len); pick($("levels"), "level", S.level);
-    $("optTimer").setAttribute("aria-pressed", String(S.timer)); $("optLives").setAttribute("aria-pressed", String(S.lives)); $("optTerr").setAttribute("aria-pressed", String(S.terr));
+    $("levelHint").textContent = t({ easy: "levelEasyHint", normal: "levelNormalHint", hard: "levelHardHint" }[S.level]);
+    $("optTimer").setAttribute("aria-pressed", String(timerOn())); $("optTimer").disabled = S.level === "hard";
+    $("optLives").setAttribute("aria-pressed", String(S.lives)); $("optTerr").setAttribute("aria-pressed", String(S.terr));
     document.querySelectorAll("[data-quiz-only]").forEach((g) => (g.hidden = S.mode === "study"));
     $("btnStart").textContent = S.mode === "study" ? t("startStudy") : t("start");
     const n = S.mode === "study" ? countries.filter((c) => S.region === "World" || c.region === S.region).length : pool().length;
@@ -796,6 +810,7 @@ setTimeout(hideLoader, 8000);
   $("optLives").addEventListener("click", () => { S.lives = !S.lives; saveSettings(); renderMenu(); });
   $("optTerr").addEventListener("click", () => { S.terr = !S.terr; saveSettings(); renderMenu(); refresh(); });
   $("btnStart").addEventListener("click", () => startRound());
+  $("btnChangeGame").addEventListener("click", () => { fromCard = false; renderMenu(); $("modeGroup").scrollIntoView({ block: "nearest" }); });
   $("btnAgain").addEventListener("click", () => startRound());
   $("btnPractice").addEventListener("click", () => startRound(S.mistakes));
   $("btnHome").addEventListener("click", toMenu);

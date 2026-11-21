@@ -81,5 +81,9 @@
       },
     },
   };
+  // Level descriptions for the topic games.
+  Object.assign(X.en, { levelEasyHint: "Easy: the best-known places, 4 tries, a free first letter and forgiving spelling.", levelNormalHint: "Normal: every place, 3 tries, hints if you need them.", levelHardHint: "Hard: every place, 1 try, no hints, exact spelling, 15-second timer, ×1.5 points." });
+  Object.assign(X.ar, { levelEasyHint: "سهل: الأماكن الأشهر، 4 محاولات، الحرف الأول مجانًا وتهجئة متسامحة.", levelNormalHint: "عادي: كل الأماكن، 3 محاولات، وتلميحات عند الحاجة.", levelHardHint: "صعب: كل الأماكن، محاولة واحدة، بلا تلميحات، تهجئة دقيقة، مؤقّت 15 ثانية، والنقاط ×1.5." });
+  Object.assign(X.fr, { levelEasyHint: "Facile : les lieux les plus connus, 4 essais, la première lettre offerte et une orthographe tolérante.", levelNormalHint: "Normal : tous les lieux, 3 essais, des indices si besoin.", levelHardHint: "Difficile : tous les lieux, 1 essai, sans indice, orthographe exacte, chrono de 15 s, points ×1,5." });
   for (const l in X) Object.assign(window.STRINGS[l], X[l]);
 })();
