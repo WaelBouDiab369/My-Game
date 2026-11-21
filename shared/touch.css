@@ -1,0 +1,5 @@
+/* Zoyverse: phones and tablets. No tap flash, and no glass blur (it makes scrolling stutter on phones). */
+html { -webkit-tap-highlight-color: transparent; }
+@media (pointer: coarse) {
+  *, *::before, *::after { -webkit-backdrop-filter: none !important; backdrop-filter: none !important; }
+}

@@ -116,8 +116,7 @@
     const cv = document.getElementById("sky"); if (!cv) return;
     const ctx = cv.getContext("2d"); let W, H, dpr, stars = [];
     const resize = () => { dpr = Math.min(2, devicePixelRatio || 1); W = innerWidth; H = innerHeight; cv.width = W * dpr; cv.height = H * dpr; stars = Array.from({ length: Math.round(W * H / 6000) }, () => ({ x: Math.random() * W, y: Math.random() * H, r: Math.random() * 1.2 + 0.2, p: Math.random() * 6.3 })); };
-    addEventListener("resize", resize); resize();
-    (function frame(t) {
+    const frame = function (t) {
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.fillStyle = "#050811"; ctx.fillRect(0, 0, W, H);
       ctx.globalCompositeOperation = "lighter";
       [[rgb, 0.85, 0.12], ["77,163,255", 0.1, 0.8], ["177,140,255", 0.6, 0.95]].forEach(([c, fx, fy], i) => {
@@ -127,10 +126,15 @@
       ctx.globalCompositeOperation = "source-over"; ctx.fillStyle = "#fff";
       for (const s of stars) { ctx.globalAlpha = 0.35 + 0.6 * Math.abs(Math.sin(s.p + t / 2400)); ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, 6.283); ctx.fill(); }
       ctx.globalAlpha = 1;
-      if (!reduce) requestAnimationFrame(frame);
-    })(0);
+      // phones and tablets: draw the sky once and keep it still, so scrolling stays smooth
+      if (!reduce && !document.documentElement.classList.contains("touch")) requestAnimationFrame(frame);
+    };
+    addEventListener("resize", () => { resize(); if (reduce || document.documentElement.classList.contains("touch")) frame(0); }); resize(); frame(0);
   };
   // Run a game's thumbnail on a canvas while it is on screen.
+  // phones: card pictures pause while the page scrolls, so scrolling stays smooth
+  const TOUCHUI = document.documentElement.classList.contains("touch"); MQ.scrolledAt = -1e9;
+  if (TOUCHUI) addEventListener("scroll", () => (MQ.scrolledAt = performance.now()), { passive: true });
   MQ.thumb = (canvas, fn) => {
     const ctx = canvas.getContext("2d"); let on = true, W = 0, H = 0, dpr = 1;
     const size = () => { const r = canvas.getBoundingClientRect(); dpr = Math.min(2, devicePixelRatio || 1); W = r.width; H = r.height; canvas.width = Math.max(2, W * dpr); canvas.height = Math.max(2, H * dpr); };
@@ -139,7 +143,7 @@
     let last = 0; const t0 = performance.now() - Math.random() * 4000;
     (function loop(now) {
       if (!document.body.contains(canvas)) return;
-      if (on && now - last > 30) { last = now; ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, W, H); try { fn(ctx, reduce ? 2000 : now - t0, W, H); } catch (e) { console.error(e); } }
+      if (on && now - last > (TOUCHUI ? 50 : 30) && now - MQ.scrolledAt > 300) { last = now; ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, W, H); try { fn(ctx, reduce ? 2000 : now - t0, W, H); } catch (e) { console.error(e); } }
       requestAnimationFrame(loop);
     })(t0);
   };

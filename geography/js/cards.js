@@ -245,7 +245,7 @@
     Promise.all([cam.ready(), spec.data()]).then(([, d]) => { card.data = d; card.ready = true; size(card); el.classList.add("is-live"); }).catch((e) => console.warn("card", id, e));
   }
   function size(c) {
-    const r = c.el.getBoundingClientRect(), dpr = Math.min(1.75, devicePixelRatio || 1);
+    const r = c.el.getBoundingClientRect(), dpr = TOUCH ? 1 : Math.min(1.75, devicePixelRatio || 1);
     c.W = Math.max(2, Math.round(r.width * dpr)); c.H = Math.max(2, Math.round(r.height * dpr)); c.s = dpr * (r.width / 300);
     c.canvas.width = c.W; c.canvas.height = c.H; c.img = c.ctx.createImageData(c.W, c.H);
     c.cam.layout(c.W, c.H); c.path = d3.geoPath(c.cam.proj, c.ctx);
@@ -259,9 +259,12 @@
     c.spec.draw(ctx, c.path, c.data, t, c.s, c.cam, c.W, c.H);
     if (c.spec.cam.type === "view") vignette(ctx, c.W, c.H);
   }
-  let last = 0;
+  let last = 0; const TOUCH = document.documentElement.classList.contains("touch");
+  // phones: pause the pictures while the page is scrolling, and pick up again a moment after it stops
+  let scrolledAt = -1e9; if (TOUCH) addEventListener("scroll", () => (scrolledAt = performance.now()), { passive: true });
   function loop(now) {
-    if (now - last > 32) { last = now; for (const c of live) if (c.on) drawCard(c, now); }
+    // phones: 10 pictures a second is plenty for slowly turning globes and keeps scrolling smooth
+    if (now - last > (TOUCH ? 100 : 32) && now - scrolledAt > 300) { last = now; for (const c of live) if (c.on) drawCard(c, now); }
     if (!reduce) requestAnimationFrame(loop);
   }
   const io = "IntersectionObserver" in window ? new IntersectionObserver((es) => es.forEach((e) => { const c = live.find((x) => x.el === e.target); if (c) { c.on = e.isIntersecting; if (c.on && c.ready && reduce) drawCard(c, performance.now()); } }), { rootMargin: "120px" }) : null;

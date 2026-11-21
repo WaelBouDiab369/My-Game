@@ -19,14 +19,14 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .top .left, .top .right { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; min-width: 0; }
 .top .right { justify-content: flex-end; margin-inline-start: auto; }
 .pillbtn { text-decoration: none; background: var(--panel); border: 1px solid var(--line); border-radius: 999px; padding: 8px 14px; font-size: 14px; backdrop-filter: blur(10px); }
-.pillbtn:hover { border-color: var(--text); }
+@media (hover: hover) { .pillbtn:hover { border-color: var(--text); } }
 .lang { display: inline-flex; background: var(--panel); border: 1px solid var(--line); border-radius: 999px; padding: 3px; backdrop-filter: blur(10px); }
 .lang button { background: none; border: 0; border-radius: 999px; padding: 6px 12px; font-size: 14px; color: var(--muted); }
 .lang button[aria-pressed="true"] { background: var(--text); color: var(--ink); font-weight: 700; }
 .chip { background: var(--panel); border: 1px solid var(--line); border-radius: 999px; padding: 7px 12px; font-size: 14px; font-variant-numeric: tabular-nums; backdrop-filter: blur(10px); white-space: nowrap; }
 .chip b { font-family: var(--font-display); font-weight: 800; color: var(--c); }
 .btn { border: 0; border-radius: 14px; padding: 12px 18px; font-weight: 700; background: var(--c); color: #061018; font-size: 16px; box-shadow: 0 10px 26px -12px var(--c); }
-.btn:hover { filter: brightness(1.08); }
+@media (hover: hover) { .btn:hover { filter: brightness(1.08); } }
 .btn.ghost { background: var(--panel); color: var(--text); border: 1px solid var(--line); box-shadow: none; }
 .btn.small { padding: 8px 12px; font-size: 14px; border-radius: 10px; }
 .btn:disabled { opacity: .45; cursor: default; }
@@ -81,7 +81,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .slider input[type=range] { width: 100%; accent-color: var(--c); }
 .choice-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px; }
 .choice { background: rgba(255,255,255,.05); border: 1px solid var(--line); border-radius: 14px; padding: 12px; text-align: center; font-size: 15px; font-weight: 700; transition: border-color .15s, background .15s, transform .1s; }
-.choice:hover { border-color: var(--c); }
+@media (hover: hover) { .choice:hover { border-color: var(--c); } }
 .choice:active { transform: scale(.98); }
 .choice.right { background: rgba(74,222,128,.18); border-color: var(--good); }
 .choice.wrong { background: rgba(251,113,133,.18); border-color: var(--bad); }
@@ -90,7 +90,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .bins { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
 .bin { min-height: 120px; border: 2px dashed var(--line); border-radius: 16px; padding: 10px; display: flex; flex-wrap: wrap; gap: 6px; align-content: flex-start; transition: border-color .15s, background .15s; }
 .bin h4 { width: 100%; margin: 0 0 4px; font-family: var(--font-display); font-size: 15px; }
-.bin.over, .bin:hover { border-color: var(--c); background: color-mix(in srgb, var(--c) 8%, transparent); }
+@media (hover: hover) { .bin.over, .bin:hover { border-color: var(--c); background: color-mix(in srgb, var(--c) 8%, transparent); } }
 .token { display: inline-flex; align-items: center; gap: 6px; background: var(--panel-2); border: 1px solid var(--line); border-radius: 999px; padding: 8px 12px; font-weight: 700; font-size: 15px; user-select: none; touch-action: none; }
 .token.sel { border-color: var(--c); box-shadow: 0 0 0 3px color-mix(in srgb, var(--c) 30%, transparent); }
 .token.right { border-color: var(--good); } .token.wrong { border-color: var(--bad); }
@@ -140,8 +140,8 @@ html[lang="ar"] * { letter-spacing: 0 !important; text-transform: none !importan
 .gcard::after { content: ""; position: absolute; inset: -1px; border-radius: inherit; background: conic-gradient(from var(--a, 0deg), transparent 0 70%, var(--c) 80%, transparent 90%); opacity: 0; transition: opacity .3s; z-index: -1; filter: blur(6px); animation: orbit 3s linear infinite; }
 @property --a { syntax: "<angle>"; initial-value: 0deg; inherits: false; }
 @keyframes orbit { to { --a: 360deg; } }
-.gcard:hover { box-shadow: 0 24px 60px -26px var(--c); }
-.gcard:hover::after { opacity: .9; }
+@media (hover: hover) { .gcard:hover { box-shadow: 0 24px 60px -26px var(--c); } }
+@media (hover: hover) { .gcard:hover::after { opacity: .9; } }
 .gcard .gart { margin: 10px 10px 0; border-radius: 16px; overflow: hidden; aspect-ratio: 16 / 10; background: #0b1325; position: relative; }
 .gcard .gart canvas { width: 100%; height: 100%; display: block; }
 .gcard .gbody { padding: 12px 16px 14px; display: grid; gap: 4px; align-content: start; }
