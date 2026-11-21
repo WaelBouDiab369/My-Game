@@ -63,6 +63,18 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .section-title { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: -16px; }
 .section-title h2 { font-family: var(--font-display); font-weight: 800; font-size: 24px; margin: 0; }
 .section-title span { color: var(--muted); font-size: 14px; }
+.gradepick { display: grid; gap: 16px; }
+.gp-title { margin-bottom: 0; }
+.stages { display: grid; grid-template-columns: 2fr 1fr 0.75fr 0.5fr; gap: 12px; }
+.stage { background: var(--panel); border: 1px solid var(--line); border-radius: 22px; padding: 14px; display: grid; gap: 10px; align-content: start; }
+.stage b { font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+.stage .gl { display: flex; flex-wrap: wrap; gap: 8px; }
+.gbtn { --g: #2ee6c5; text-decoration: none; display: grid; place-items: center; align-content: center; width: 60px; height: 60px; border-radius: 16px; font-family: var(--font-display); font-weight: 800; font-size: 26px; line-height: 1;
+  background: linear-gradient(150deg, color-mix(in srgb, var(--g) 30%, transparent), color-mix(in srgb, var(--g) 8%, transparent)); border: 1px solid color-mix(in srgb, var(--g) 45%, transparent); color: var(--text); transition: transform .15s; }
+@media (hover: hover) { .gbtn:hover { transform: translateY(-2px); } }
+.continue { justify-self: start; text-decoration: none; display: inline-flex; gap: 10px; align-items: center; padding: 12px 18px; border-radius: 999px; font-weight: 800; background: linear-gradient(90deg, #2ee6c5, #4d8dff); color: #04110d; }
+.gp-note { margin: 0; color: var(--muted); font-size: 13px; }
+@media (max-width: 860px) { .stages { grid-template-columns: 1fr 1fr; } .stage:first-child { grid-column: 1 / -1; } }
 .site-foot { display: flex; justify-content: center; align-items: center; gap: 10px; flex-wrap: wrap; color: var(--muted); font-size: 14px; padding: 8px 0 4px; }
 .site-foot a { color: var(--muted); text-decoration: none; padding: 8px 4px; }
 @media (hover: hover) { .site-foot a:hover { color: var(--text); } }
@@ -148,6 +160,13 @@ html[lang="ar"] .cat-card h3 { line-height: 1.25; }
     </aside>
   </section>
 
+  <section class="gradepick" aria-labelledby="gpTitle">
+    <div class="section-title gp-title"><h2 id="gpTitle" data-t="gradeTitle"></h2><span data-t="gradeSub"></span></div>
+    <a class="continue" id="continueGrade" hidden href="learn.html"></a>
+    <div class="stages" id="stages"></div>
+    <p class="gp-note" data-t="gradeNote"></p>
+  </section>
+
   <section>
     <div class="section-title"><h2 data-t="pick"></h2><span data-t="pickSub"></span></div>
   </section>
@@ -227,9 +246,10 @@ html[lang="ar"] .cat-card h3 { line-height: 1.25; }
 const T = {
   en: {
     heroA: "What will you", heroB: "discover today?",
-    heroSub: "Pick a science and play. Every game teaches you something real, for curious kids and grown-ups alike.",
+    heroSub: "Choose a grade and play. Every game teaches something real from the school curriculum, for curious kids and grown-ups alike.",
     didYouKnow: "Did you know?", nextFact: "Another fact",
-    pick: "Choose a science", pickSub: "50+ games to learn by playing",
+    pick: "Or explore by science", pickSub: "50+ games to learn by playing",
+    gradeTitle: "Choose your grade", gradeSub: "Parents and teachers: pick the student's grade", gradeNote: "Games follow the Cambridge International curriculum, Grades 1 to 12: Math, Science, English, Arabic, French and World Geography.", continueGrade: "Continue Grade {n} →", stages: ["Primary", "Lower Secondary", "IGCSE", "A Level"],
     geo: "Geography", geoD: "Countries, capitals and flags on a real satellite globe.", geoMeta: "17 topics · 197 countries",
     chem: "Chemistry", chemD: "Elements, the periodic table and reactions you can mix.",
     phys: "Physics", physD: "Forces, light, energy and motion you can play with.",
@@ -252,9 +272,10 @@ const T = {
   },
   ar: {
     heroA: "ماذا ستكتشف", heroB: "اليوم؟",
-    heroSub: "اختر علمًا وابدأ اللعب. كل لعبة تعلّمك شيئًا حقيقيًا، للصغار والكبار الفضوليين.",
+    heroSub: "اختر الصف وابدأ اللعب. كل لعبة تعلّمك شيئًا حقيقيًا من المنهاج المدرسي، للصغار والكبار الفضوليين.",
     didYouKnow: "هل تعلم؟", nextFact: "معلومة أخرى",
-    pick: "اختر علمًا", pickSub: "أكثر من 50 لعبة للتعلّم باللعب",
+    pick: "أو استكشف حسب العلم", pickSub: "أكثر من 50 لعبة للتعلّم باللعب",
+    gradeTitle: "اختر صفّك", gradeSub: "أيها الأهل والمعلمون: اختاروا صف الطالب", gradeNote: "الألعاب تتبع منهاج كامبريدج الدولي من الصف الأول حتى الثاني عشر: الرياضيات والعلوم والإنجليزية والعربية والفرنسية وجغرافيا العالم.", continueGrade: "تابع الصف {n} ←", stages: ["المرحلة الابتدائية", "المرحلة المتوسطة", "IGCSE", "A Level"],
     geo: "الجغرافيا", geoD: "الدول والعواصم والأعلام على كرة أرضية حقيقية بصور الأقمار الصناعية.", geoMeta: "17 موضوعًا · 197 دولة",
     chem: "الكيمياء", chemD: "العناصر والجدول الدوري وتفاعلات يمكنك مزجها.",
     phys: "الفيزياء", physD: "القوى والضوء والطاقة والحركة بين يديك.",
@@ -277,9 +298,10 @@ const T = {
   },
   fr: {
     heroA: "Que vas-tu", heroB: "découvrir aujourd'hui ?",
-    heroSub: "Choisis une science et joue. Chaque jeu t'apprend quelque chose de vrai, pour les enfants curieux comme pour les grands.",
+    heroSub: "Choisis un niveau et joue. Chaque jeu t'apprend quelque chose de vrai du programme scolaire, pour les enfants curieux comme pour les grands.",
     didYouKnow: "Le savais-tu ?", nextFact: "Un autre",
-    pick: "Choisis une science", pickSub: "Plus de 50 jeux pour apprendre en jouant",
+    pick: "Ou explore par science", pickSub: "Plus de 50 jeux pour apprendre en jouant",
+    gradeTitle: "Choisis ton niveau", gradeSub: "Parents et enseignants : choisissez le niveau de l'élève", gradeNote: "Les jeux suivent le programme Cambridge International, du niveau 1 au niveau 12 : maths, sciences, anglais, arabe, français et géographie du monde.", continueGrade: "Continuer le niveau {n} →", stages: ["Primaire", "Collège", "IGCSE", "A Level"],
     geo: "Géographie", geoD: "Pays, capitales et drapeaux sur un vrai globe satellite.", geoMeta: "17 thèmes · 197 pays",
     chem: "Chimie", chemD: "Les éléments, le tableau périodique et des réactions à mélanger.",
     phys: "Physique", physD: "Forces, lumière, énergie et mouvement à manipuler.",
@@ -312,7 +334,17 @@ function applyLang() {
   document.documentElement.dir = lang === "ar" ? "rtl" : "ltr";
   document.querySelectorAll("[data-t]").forEach((el) => { el.textContent = d[el.dataset.t]; });
   document.querySelectorAll("[data-lang]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.lang === lang)));
+  renderGrades();
   showFact(false);
+}
+// Grade picker: Primary 1-6, Lower Secondary 7-9, IGCSE 10-11, A Level 12. Each grade opens its subjects.
+const STAGE_GRADES = [[1, 2, 3, 4, 5, 6], [7, 8, 9], [10, 11], [12]], STAGE_COLORS = ["#2ee6c5", "#4d8dff", "#b18cff", "#ff5c9a"];
+function renderGrades() {
+  const d = T[lang];
+  document.getElementById("stages").innerHTML = STAGE_GRADES.map((gs, i) => `<div class="stage"><b>${d.stages[i]}</b><div class="gl">${gs.map((g) => `<a class="gbtn" style="--g:${STAGE_COLORS[i]}" href="learn.html?g=${g}" aria-label="${d.stages[i]} ${g}">${g}</a>`).join("")}</div></div>`).join("");
+  let last = null; try { last = JSON.parse(localStorage.getItem("zv-grade")); } catch {}
+  const c = document.getElementById("continueGrade");
+  if (last >= 1 && last <= 12) { c.hidden = false; c.href = "learn.html?g=" + last; c.textContent = d.continueGrade.replace("{n}", last); } else c.hidden = true;
 }
 function showFact(animate) {
   const d = T[lang], [cat, text] = d.facts[factIndex], box = document.getElementById("fact"), el = document.getElementById("factText");

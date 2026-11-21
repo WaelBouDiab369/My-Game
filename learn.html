@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<script src="shared/perf.js"></script>
+<meta name="description" content="Zoyverse: games for every grade, aligned with the Cambridge International curriculum.">
+<title>Zoyverse</title>
+<link rel="stylesheet" href="shared/fonts/fonts.css">
+<style>
+:root { --ink: #050811; --panel: rgba(13, 19, 36, 0.82); --panel-2: rgba(22, 30, 56, 0.92); --text: #f2f5fc; --muted: #a6b2c9; --line: rgba(200, 215, 245, 0.14); --c: #2ee6c5;
+  --font-display: "Bricolage Grotesque", "Tajawal", system-ui, sans-serif; --font-body: "Atkinson Hyperlegible", "Tajawal", system-ui, sans-serif; color-scheme: dark; }
+* { box-sizing: border-box; }
+html, body { overflow-x: clip; }
+body { margin: 0; min-height: 100vh; color: var(--text); font-family: var(--font-body); font-size: 16px;
+  background: radial-gradient(1000px 520px at 85% -10%, color-mix(in srgb, var(--c) 22%, transparent), transparent 62%), radial-gradient(800px 480px at -10% 30%, rgba(124, 92, 255, .12), transparent 60%), var(--ink); }
+html[lang="ar"] body { font-family: "Tajawal", system-ui, sans-serif; }
+a { color: inherit; }
+.page { max-width: 1100px; margin: 0 auto; padding: calc(env(safe-area-inset-top, 0px) + 16px) max(16px, env(safe-area-inset-right)) calc(env(safe-area-inset-bottom, 0px) + 48px) max(16px, env(safe-area-inset-left)); display: grid; gap: 22px; }
+.top { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.pill { text-decoration: none; background: var(--panel); border: 1px solid var(--line); border-radius: 999px; padding: 9px 14px; font-size: 14px; display: inline-flex; gap: 6px; align-items: center; }
+.lang { display: inline-flex; background: var(--panel); border: 1px solid var(--line); border-radius: 999px; padding: 3px; }
+.lang button { font: inherit; background: none; border: 0; border-radius: 999px; padding: 8px 12px; min-height: 38px; font-size: 14px; color: var(--muted); cursor: pointer; }
+.lang button[aria-pressed="true"] { background: var(--text); color: var(--ink); font-weight: 700; }
+.kicker { font-size: 13px; letter-spacing: .14em; text-transform: uppercase; color: var(--c); font-weight: 700; }
+h1 { font-family: var(--font-display); font-weight: 800; font-size: clamp(34px, 7vw, 60px); line-height: 1; letter-spacing: -0.03em; margin: 6px 0 0; }
+h1 .spark { color: var(--c); }
+.lead { color: var(--muted); font-size: 17px; line-height: 1.5; margin: 10px 0 0; max-width: 62ch; }
+.draft { display: inline-flex; gap: 8px; align-items: center; font-size: 13px; color: #ffd38a; background: rgba(255, 181, 71, .08); border: 1px dashed rgba(255, 181, 71, .4); border-radius: 999px; padding: 6px 12px; }
+/* grade switcher */
+.grades { display: flex; gap: 6px; flex-wrap: wrap; }
+.grades a { text-decoration: none; min-width: 44px; text-align: center; padding: 9px 10px; border-radius: 12px; background: var(--panel); border: 1px solid var(--line); font-weight: 700; font-variant-numeric: tabular-nums; }
+.grades a[aria-current="true"] { background: var(--c); color: #04110d; border-color: transparent; }
+/* subject cards */
+.subjects { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 14px; }
+.subj { --s: var(--c); position: relative; overflow: hidden; text-decoration: none; display: grid; gap: 10px; padding: 18px; border-radius: 22px; background: linear-gradient(155deg, color-mix(in srgb, var(--s) 18%, transparent), transparent 60%), var(--panel); border: 1px solid var(--line); min-height: 170px; transition: transform .2s, border-color .2s; }
+@media (hover: hover) { .subj:hover { transform: translateY(-3px); border-color: color-mix(in srgb, var(--s) 70%, transparent); } }
+.subj .ic { width: 52px; height: 52px; border-radius: 16px; display: grid; place-items: center; font-family: var(--font-display); font-weight: 800; font-size: 24px; background: color-mix(in srgb, var(--s) 22%, transparent); color: var(--s); }
+.subj h3 { font-family: var(--font-display); font-weight: 800; font-size: 22px; margin: 0; }
+.subj .meta { color: var(--muted); font-size: 14px; }
+.bar { height: 6px; border-radius: 99px; background: rgba(255, 255, 255, .08); overflow: hidden; }
+.bar i { display: block; height: 100%; background: var(--s); border-radius: 99px; }
+/* units */
+.units { display: grid; gap: 10px; counter-reset: u; }
+.unit { counter-increment: u; display: grid; grid-template-columns: auto 1fr; gap: 6px 14px; align-items: start; padding: 14px 16px; border-radius: 18px; background: var(--panel); border: 1px solid var(--line); }
+.unit::before { content: counter(u); grid-row: span 2; width: 34px; height: 34px; border-radius: 11px; display: grid; place-items: center; font-weight: 800; font-family: var(--font-display); background: color-mix(in srgb, var(--c) 18%, transparent); color: var(--c); }
+.unit h3 { margin: 0; font-size: 17px; line-height: 1.35; font-family: var(--font-display); font-weight: 700; }
+.unit.soon { opacity: .62; }
+.unit.soon::before { background: rgba(255, 255, 255, .06); color: var(--muted); }
+.games { display: flex; flex-wrap: wrap; gap: 8px; }
+.game { text-decoration: none; display: inline-flex; gap: 8px; align-items: center; padding: 8px 12px 8px 10px; border-radius: 12px; background: color-mix(in srgb, var(--c) 14%, rgba(255, 255, 255, .03)); border: 1px solid color-mix(in srgb, var(--c) 40%, transparent); font-size: 14px; font-weight: 700; min-height: 40px; }
+.game .play { width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; background: var(--c); color: #04110d; font-size: 10px; flex: none; }
+@media (hover: hover) { .game:hover { background: color-mix(in srgb, var(--c) 26%, transparent); } }
+.soon-tag { font-size: 13px; color: var(--muted); }
+.legend { display: flex; gap: 16px; flex-wrap: wrap; color: var(--muted); font-size: 14px; }
+footer { color: var(--muted); font-size: 13px; text-align: center; padding-top: 10px; }
+@media (max-width: 520px) { .subjects { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; } .subj { min-height: 150px; padding: 14px; } .subj h3 { font-size: 18px; } .subj .ic { width: 44px; height: 44px; font-size: 20px; } }
+</style>
+<link rel="stylesheet" href="shared/touch.css">
+</head>
+<body>
+<div class="page" id="app"></div>
+<script src="shared/games-index.js"></script>
+<script src="shared/curriculum.js"></script>
+<script>
+const UI = {
+  en: { home: "← Home", grade: "Grade {n}", gradeShort: "G{n}", subjectsFor: "Subjects for Grade {n}", choose: "Choose a subject", units: "{n} units", ready: "{n} with games", soon: "Coming soon",
+    draft: "Draft curriculum map · for teacher review", aligned: "Aligned with the Cambridge International curriculum", unitsTitle: "{subject} · Grade {n}",
+    legendReady: "Units with games to play", legendSoon: "Planned units (coming soon)", changeGrade: "Change grade", allSubjects: "← All subjects", play: "Play" },
+  ar: { home: "→ الرئيسية", grade: "الصف {n}", gradeShort: "ص{n}", subjectsFor: "مواد الصف {n}", choose: "اختر مادة", units: "{n} وحدات", ready: "{n} فيها ألعاب", soon: "قريبًا",
+    draft: "خريطة منهاج تجريبية · للمراجعة من قبل المعلمين", aligned: "متوافق مع منهاج كامبريدج الدولي", unitsTitle: "{subject} · الصف {n}",
+    legendReady: "وحدات فيها ألعاب", legendSoon: "وحدات مخطط لها (قريبًا)", changeGrade: "غيّر الصف", allSubjects: "→ كل المواد", play: "العب" },
+  fr: { home: "← Accueil", grade: "Niveau {n}", gradeShort: "N{n}", subjectsFor: "Matières du niveau {n}", choose: "Choisis une matière", units: "{n} unités", ready: "{n} avec des jeux", soon: "Bientôt",
+    draft: "Programme provisoire · à relire par les enseignants", aligned: "Aligné sur le programme Cambridge International", unitsTitle: "{subject} · Niveau {n}",
+    legendReady: "Unités avec des jeux", legendSoon: "Unités prévues (bientôt)", changeGrade: "Changer de niveau", allSubjects: "← Toutes les matières", play: "Jouer" },
+};
+const C = window.ZV_CURRICULUM, GAMES = window.ZV_GAMES;
+let lang = "en";
+try { const s = JSON.parse(localStorage.getItem("gq-lang")); if (UI[s]) lang = s; } catch {}
+const q = new URLSearchParams(location.search);
+let grade = Math.min(12, Math.max(1, parseInt(q.get("g"), 10) || 1)), subject = q.get("s");
+if (subject && !(C.grades[grade] || {})[subject]) subject = null;
+try { localStorage.setItem("zv-grade", JSON.stringify(grade)); } catch {}
+const t = (k, v = {}) => UI[lang][k].replace(/\{(\w+)\}/g, (_, x) => v[x]);
+const tr = (o) => (o && (o[lang] || o.en)) || "";
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+const stageOf = (g) => C.STAGES.find((s) => s.grades.includes(g));
+const subjectsOf = (g) => C.order.filter((s) => C.grades[g][s]);
+const langSwitch = () => `<div class="lang" role="group" aria-label="Language">${["en", "ar", "fr"].map((l) => `<button type="button" data-lang="${l}" lang="${l}" aria-pressed="${l === lang}">${{ en: "EN", ar: "عربي", fr: "FR" }[l]}</button>`).join("")}</div>`;
+const gradeBar = () => `<nav class="grades" aria-label="${esc(t("changeGrade"))}">${Array.from({ length: 12 }, (_, i) => i + 1).map((g) => `<a href="learn.html?g=${g}${subject && C.grades[g][subject] ? "&s=" + subject : ""}" aria-current="${g === grade}">${g}</a>`).join("")}</nav>`;
+
+function renderSubjects() {
+  document.documentElement.style.setProperty("--c", "#2ee6c5");
+  const st = stageOf(grade);
+  const cards = subjectsOf(grade).map((s) => {
+    const S = C.SUBJECTS[s], units = C.grades[grade][s], ready = units.filter((u) => u.games.length).length;
+    return `<a class="subj" style="--s:${S.color}" href="learn.html?g=${grade}&s=${s}"><div class="ic">${esc(S.icon)}</div><h3>${esc(tr(S.name))}</h3>
+      <div class="meta">${esc(t("units", { n: units.length }))} · ${esc(t("ready", { n: ready }))}</div><div class="bar"><i style="width:${Math.round(ready / units.length * 100)}%"></i></div></a>`;
+  }).join("");
+  document.title = `${t("grade", { n: grade })} · Zoyverse`;
+  return `<header class="top"><a class="pill" href="./">${esc(t("home"))}</a>${langSwitch()}</header>
+    <section><div class="kicker">${esc(tr(st.name))} · ${esc(t("aligned"))}</div>
+      <h1>${esc(t("grade", { n: grade }))}</h1>
+      <p class="lead">${esc(t("choose"))}</p></section>
+    ${gradeBar()}
+    <section class="subjects">${cards}</section>
+    <div><span class="draft">✎ ${esc(t("draft"))}</span></div>`;
+}
+function renderUnits() {
+  const S = C.SUBJECTS[subject], units = C.grades[grade][subject];
+  document.documentElement.style.setProperty("--c", S.color);
+  const list = units.map((u) => {
+    const games = u.games.filter((id) => GAMES[id]);
+    return `<article class="unit${games.length ? "" : " soon"}"><h3>${esc(tr(u.t))}</h3>
+      ${games.length ? `<div class="games">${games.map((id) => `<a class="game" href="${GAMES[id].url}" title="${esc(tr(GAMES[id].tag))}"><span class="play">▶</span>${esc(tr(GAMES[id].title))}</a>`).join("")}</div>` : `<span class="soon-tag">${esc(t("soon"))}</span>`}</article>`;
+  }).join("");
+  document.title = `${tr(S.name)} · ${t("grade", { n: grade })} · Zoyverse`;
+  return `<header class="top"><a class="pill" href="learn.html?g=${grade}">${esc(t("allSubjects"))}</a>${langSwitch()}</header>
+    <section><div class="kicker">${esc(tr(stageOf(grade).name))} · ${esc(t("grade", { n: grade }))}</div>
+      <h1><span class="spark">${esc(tr(S.name))}</span></h1>
+      <p class="lead">${esc(t("aligned"))}</p></section>
+    ${gradeBar()}
+    <div class="legend"><span>▶ ${esc(t("legendReady"))}</span><span>○ ${esc(t("legendSoon"))}</span></div>
+    <section class="units">${list}</section>
+    <div><span class="draft">✎ ${esc(t("draft"))}</span></div>`;
+}
+function render() {
+  document.documentElement.lang = lang; document.documentElement.dir = lang === "ar" ? "rtl" : "ltr";
+  document.getElementById("app").innerHTML = (subject ? renderUnits() : renderSubjects()) + `<footer>© 2026 Zoyverse</footer>`;
+}
+document.getElementById("app").addEventListener("click", (e) => {
+  const b = e.target.closest("[data-lang]"); if (!b) return;
+  lang = b.dataset.lang; try { localStorage.setItem("gq-lang", JSON.stringify(lang)); } catch {} render();
+});
+render();
+</script>
+<script src="shared/app.js"></script>
+</body>
+</html>
