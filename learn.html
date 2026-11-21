@@ -18,7 +18,10 @@ html[lang="ar"] body { font-family: "Tajawal", system-ui, sans-serif; }
 a { color: inherit; }
 .page { max-width: 1100px; margin: 0 auto; padding: calc(env(safe-area-inset-top, 0px) + 16px) max(16px, env(safe-area-inset-right)) calc(env(safe-area-inset-bottom, 0px) + 48px) max(16px, env(safe-area-inset-left)); display: grid; gap: 22px; }
 .top { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
-.pill { text-decoration: none; background: var(--panel); border: 1px solid var(--line); border-radius: 999px; padding: 9px 14px; font-size: 14px; display: inline-flex; gap: 6px; align-items: center; }
+.pill-link { text-decoration: none; background: var(--panel); border: 1px solid var(--line); border-radius: 999px; padding: 9px 14px; font-size: 14px; display: inline-flex; gap: 6px; align-items: center; }
+.catgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 16px; }
+.catgrid .cat-card { min-height: 330px; }
+@media (max-width: 520px) { .catgrid { grid-template-columns: 1fr 1fr; gap: 12px; } .catgrid .cat-card { min-height: 0; padding: 14px; gap: 10px; } .catgrid .cat-card .art { width: 84px; height: 84px; } .catgrid .cat-card h3 { font-size: 20px; } .catgrid .cat-card p { font-size: 13px; } }
 .lang { display: inline-flex; background: var(--panel); border: 1px solid var(--line); border-radius: 999px; padding: 3px; }
 .lang button { font: inherit; background: none; border: 0; border-radius: 999px; padding: 8px 12px; min-height: 38px; font-size: 14px; color: var(--muted); cursor: pointer; }
 .lang button[aria-pressed="true"] { background: var(--text); color: var(--ink); font-weight: 700; }
@@ -69,23 +72,36 @@ h1 .spark { color: var(--c); }
 footer { color: var(--muted); font-size: 13px; text-align: center; padding-top: 10px; }
 @media (max-width: 520px) { .subjects { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; } .subj { min-height: 150px; padding: 14px; } .subj h3 { font-size: 18px; } .subj .ic { width: 44px; height: 44px; font-size: 20px; } }
 </style>
+<link rel="stylesheet" href="shared/cards.css">
 <link rel="stylesheet" href="shared/touch.css">
 </head>
 <body>
 <div class="page" id="app"></div>
 <script src="shared/games-index.js"></script>
 <script src="shared/curriculum.js"></script>
+<script src="shared/cardart.js"></script>
 <script>
 const UI = {
   en: { home: "← Home", grade: "Grade {n}", gradeShort: "G{n}", subjectsFor: "Subjects for Grade {n}", choose: "Choose a subject", units: "{n} units", ready: "{n} with games", soon: "Coming soon",
     draft: "Draft curriculum map · for teacher review", aligned: "Aligned with the Cambridge International curriculum", unitsTitle: "{subject} · Grade {n}",
-    legendReady: "Units with games to play", legendSoon: "Planned units (coming soon)", changeGrade: "← Change grade", allSubjects: "← Subjects", play: "Play", chapter: "Chapter {n}", chapters: "Chapters", activity: "Activity {n}", backChapters: "← Chapters", games: "{n} games", oneGame: "1 game" },
+    legendReady: "Units with games to play", legendSoon: "Planned units (coming soon)", changeGrade: "← Change grade", allSubjects: "← Subjects", play: "Play", chapter: "Chapter {n}", chaptersN: "{n} chapters", allGrades: "Same for every grade", chapters: "Chapters", activity: "Activity {n}", backChapters: "← Chapters", games: "{n} games", oneGame: "1 game" },
   ar: { home: "→ الرئيسية", grade: "الصف {n}", gradeShort: "ص{n}", subjectsFor: "مواد الصف {n}", choose: "اختر مادة", units: "{n} وحدات", ready: "{n} فيها ألعاب", soon: "قريبًا",
     draft: "خريطة منهاج تجريبية · للمراجعة من قبل المعلمين", aligned: "متوافق مع منهاج كامبريدج الدولي", unitsTitle: "{subject} · الصف {n}",
-    legendReady: "وحدات فيها ألعاب", legendSoon: "وحدات مخطط لها (قريبًا)", changeGrade: "→ غيّر الصف", allSubjects: "→ المواد", play: "العب", chapter: "الفصل {n}", chapters: "الفصول", activity: "النشاط {n}", backChapters: "→ الفصول", games: "{n} ألعاب", oneGame: "لعبة واحدة" },
+    legendReady: "وحدات فيها ألعاب", legendSoon: "وحدات مخطط لها (قريبًا)", changeGrade: "→ غيّر الصف", allSubjects: "→ المواد", play: "العب", chapter: "الفصل {n}", chaptersN: "{n} فصول", allGrades: "نفسها لكل الصفوف", chapters: "الفصول", activity: "النشاط {n}", backChapters: "→ الفصول", games: "{n} ألعاب", oneGame: "لعبة واحدة" },
   fr: { home: "← Accueil", grade: "Niveau {n}", gradeShort: "N{n}", subjectsFor: "Matières du niveau {n}", choose: "Choisis une matière", units: "{n} unités", ready: "{n} avec des jeux", soon: "Bientôt",
     draft: "Programme provisoire · à relire par les enseignants", aligned: "Aligné sur le programme Cambridge International", unitsTitle: "{subject} · Niveau {n}",
-    legendReady: "Unités avec des jeux", legendSoon: "Unités prévues (bientôt)", changeGrade: "← Changer de niveau", allSubjects: "← Matières", play: "Jouer", chapter: "Chapitre {n}", chapters: "Chapitres", activity: "Activité {n}", backChapters: "← Chapitres", games: "{n} jeux", oneGame: "1 jeu" },
+    legendReady: "Unités avec des jeux", legendSoon: "Unités prévues (bientôt)", changeGrade: "← Changer de niveau", allSubjects: "← Matières", play: "Jouer", chapter: "Chapitre {n}", chaptersN: "{n} chapitres", allGrades: "Identique pour tous les niveaux", chapters: "Chapitres", activity: "Activité {n}", backChapters: "← Chapitres", games: "{n} jeux", oneGame: "1 jeu" },
+};
+const DESC = {
+  math: { en: "Numbers, shapes and puzzles, from counting to algebra.", ar: "الأعداد والأشكال والألغاز، من العدّ إلى الجبر.", fr: "Nombres, formes et énigmes, du calcul à l'algèbre." },
+  science: { en: "Living things, materials, forces, light and the Earth.", ar: "الكائنات الحية والمواد والقوى والضوء والأرض.", fr: "Le vivant, les matériaux, les forces, la lumière et la Terre." },
+  chemistry: { en: "Elements, the periodic table and reactions you can mix.", ar: "العناصر والجدول الدوري وتفاعلات يمكنك مزجها.", fr: "Les éléments, le tableau périodique et des réactions à mélanger." },
+  biology: { en: "Cells, the human body, animals and plants.", ar: "الخلايا وجسم الإنسان والحيوانات والنباتات.", fr: "Les cellules, le corps humain, les animaux et les plantes." },
+  physics: { en: "Forces, light, energy and motion you can play with.", ar: "القوى والضوء والطاقة والحركة بين يديك.", fr: "Forces, lumière, énergie et mouvement à manipuler." },
+  english: { en: "Phonics, reading, grammar and writing.", ar: "الأصوات والقراءة والقواعد والكتابة.", fr: "Phonétique, lecture, grammaire et écriture." },
+  arabic: { en: "Letters, reading, grammar and expression.", ar: "الحروف والقراءة والقواعد والتعبير.", fr: "Lettres, lecture, grammaire et expression." },
+  french: { en: "Words, phrases and everyday French.", ar: "كلمات وعبارات والفرنسية اليومية.", fr: "Des mots, des phrases et le français de tous les jours." },
+  geography: { en: "Countries, capitals and flags on a real satellite globe.", ar: "الدول والعواصم والأعلام على كرة أرضية حقيقية بصور الأقمار الصناعية.", fr: "Pays, capitales et drapeaux sur un vrai globe satellite." },
 };
 const C = window.ZV_CURRICULUM, GAMES = window.ZV_GAMES;
 let lang = "en";
@@ -110,17 +126,20 @@ const gradeBar = () => `<nav class="grades" aria-label="${esc(t("changeGrade"))}
 function renderSubjects() {
   document.documentElement.style.setProperty("--c", "#2ee6c5");
   const st = stageOf(grade);
-  const cards = subjectsOf(grade).map((s) => {
-    const S = C.SUBJECTS[s], units = C.grades[grade][s], ready = units.filter((u) => u.games.length).length;
-    return `<a class="subj" style="--s:${S.color}" href="learn.html?g=${grade}&s=${s}"><div class="ic">${esc(S.icon)}</div><h3>${esc(tr(S.name))}</h3>
-      <div class="meta">${esc(t("units", { n: units.length }))} · ${esc(t("ready", { n: ready }))}</div><div class="bar"><i style="width:${Math.round(ready / units.length * 100)}%"></i></div></a>`;
+  const cards = subjectsOf(grade).map((sb) => {
+    const S = C.SUBJECTS[sb], units = C.grades[grade][sb], ready = units.filter((u) => u.games.length).length;
+    const href = sb === "geography" ? "geography/" : `${sb}/?grade=${grade}`;
+    const art = sb === "geography" ? `<canvas class="art" data-globe width="224" height="224" aria-hidden="true"></canvas>` : window.ZV_ART[sb];
+    const meta = sb === "geography" ? t("allGrades") : `${t("chaptersN", { n: units.length })} · ${t("ready", { n: ready })}`;
+    return `<a class="cat-card" style="--c:${S.color}" href="${href}">${art}<div><h3>${esc(tr(S.name))}</h3><p>${esc(tr(DESC[sb]))}</p></div>
+      <div class="foot"><span class="pill play"><svg viewBox="0 0 14 14" aria-hidden="true"><path d="M3 1.8v10.4L12 7z" fill="currentColor"/></svg>${esc(t("play"))}</span><span class="meta">${esc(meta)}</span></div></a>`;
   }).join("");
   document.title = `${t("grade", { n: grade })} · Zoyverse`;
-  return `<header class="top"><a class="pill" href="./">${esc(t("changeGrade"))}</a>${langSwitch()}</header>
+  return `<header class="top"><a class="pill-link" href="./">${esc(t("changeGrade"))}</a>${langSwitch()}</header>
     <section><div class="kicker">${esc(tr(st.name))} · ${esc(t("aligned"))}</div>
       <h1>${esc(t("grade", { n: grade }))}</h1>
       <p class="lead">${esc(t("choose"))}</p></section>
-    <section class="subjects">${cards}</section>
+    <section class="catgrid">${cards}</section>
     <div><span class="draft">✎ ${esc(t("draft"))}</span></div>`;
 }
 function renderUnits() {
@@ -134,7 +153,7 @@ function renderUnits() {
     return href ? `<a class="chap" href="${href}">${inner}</a>` : `<div class="chap soon" aria-disabled="true">${inner}</div>`;
   }).join("");
   document.title = `${tr(S.name)} · ${t("grade", { n: grade })} · Zoyverse`;
-  return `<header class="top"><a class="pill" href="learn.html?g=${grade}">${esc(t("allSubjects"))}</a>${langSwitch()}</header>
+  return `<header class="top"><a class="pill-link" href="learn.html?g=${grade}">${esc(t("allSubjects"))}</a>${langSwitch()}</header>
     <section><div class="kicker">${esc(t("grade", { n: grade }))} · ${esc(tr(stageOf(grade).name))}</div>
       <h1><span class="spark">${esc(tr(S.name))}</span></h1>
       <p class="lead">${esc(t("aligned"))}</p></section>
@@ -146,7 +165,7 @@ function renderChapter() {
   const S = C.SUBJECTS[subject], u = C.grades[grade][subject][chap], games = u.games.filter((id) => GAMES[id]);
   document.documentElement.style.setProperty("--c", S.color);
   document.title = `${tr(u.t)} · ${tr(S.name)} · Zoyverse`;
-  return `<header class="top"><a class="pill" href="learn.html?g=${grade}&s=${subject}">${esc(t("backChapters"))}</a>${langSwitch()}</header>
+  return `<header class="top"><a class="pill-link" href="${subject}/?grade=${grade}">${esc(t("backChapters"))}</a>${langSwitch()}</header>
     <section><div class="kicker">${esc(tr(S.name))} · ${esc(t("grade", { n: grade }))} · ${esc(t("chapter", { n: chap + 1 }))}</div>
       <h1><span class="spark">${esc(tr(u.t))}</span></h1></section>
     <section class="chapters">${games.map((id, k) => `<a class="chap" href="${gameHref(id)}"><span class="cnum">${esc(t("activity", { n: k + 1 }))}</span><h3>${esc(tr(GAMES[id].title))}</h3><p class="cdesc">${esc(tr(GAMES[id].tag))}</p><span class="cfoot"><span class="cplay">▶ ${esc(t("play"))}</span></span></a>`).join("")}</section>`;
@@ -154,6 +173,7 @@ function renderChapter() {
 function render() {
   document.documentElement.lang = lang; document.documentElement.dir = lang === "ar" ? "rtl" : "ltr";
   document.getElementById("app").innerHTML = (chap !== null ? renderChapter() : subject ? renderUnits() : renderSubjects()) + `<footer>© 2026 Zoyverse</footer>`;
+  const gl = document.querySelector("[data-globe]"); if (gl && window.zvMiniGlobe) window.zvMiniGlobe(gl, "img/earth-mini.jpg");
 }
 document.getElementById("app").addEventListener("click", (e) => {
   const b = e.target.closest("[data-lang]"); if (!b) return;

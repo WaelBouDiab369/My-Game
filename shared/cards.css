@@ -1,0 +1,31 @@
+/* Zoyverse category cards (the animated cards from the first home page), shared by the grade page. */
+:root { --geo: #2ee6c5; --chem: #b8f03a; --phys: #4d8dff; --math: #ffb547; --bio: #ff5c9a; }
+.cat-card { --c: var(--geo); position: relative; display: grid; grid-template-rows: auto 1fr auto; gap: 14px; text-decoration: none; text-align: start; background: linear-gradient(160deg, color-mix(in srgb, var(--c) 16%, transparent), transparent 55%), var(--panel); border: 1px solid var(--line); border-radius: 24px; padding: 20px; backdrop-filter: blur(12px); overflow: hidden; transition: transform .25s ease, border-color .25s, box-shadow .25s; min-height: 330px; flex: 0 0 calc((100% - 64px) / 5); min-width: 0; box-sizing: border-box; }
+.cat-card::after { content: ""; position: absolute; inset: auto -30% -60% auto; width: 70%; aspect-ratio: 1; border-radius: 50%; background: radial-gradient(circle, color-mix(in srgb, var(--c) 35%, transparent), transparent 70%); pointer-events: none; transition: transform .4s; }
+@media (hover: hover) { .cat-card:hover, .cat-card:focus-visible { transform: translateY(-4px); border-color: color-mix(in srgb, var(--c) 70%, transparent); box-shadow: 0 18px 50px -20px var(--c); } }
+@media (hover: hover) { .cat-card:hover::after { transform: scale(1.25); } }
+.cat-card .art { width: 112px; height: 112px; max-width: 100%; display: block; }
+.cat-card h3 { font-family: var(--font-display); font-weight: 800; font-size: 27px; line-height: 1.05; margin: 0; letter-spacing: -0.02em; overflow-wrap: anywhere; }
+.cat-card p { margin: 8px 0 0; color: var(--muted); line-height: 1.45; max-width: 40ch; }
+.cat-card .foot { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; position: relative; z-index: 1; }
+.pill { display: inline-flex; align-items: center; gap: 6px; border-radius: 999px; padding: 6px 12px; font-size: 13px; font-weight: 700; }
+.pill.play { background: var(--c); color: #071016; }
+.pill.play svg { width: 14px; height: 14px; }
+.pill.soon { border: 1px dashed color-mix(in srgb, var(--c) 60%, transparent); color: var(--c); }
+.meta { font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.cat-card.shake { animation: shake .4s; }
+@keyframes shake { 25% { translate: -6px 0; } 75% { translate: 6px 0; } }
+
+/* illustrations */
+.spin { animation: spin 18s linear infinite; transform-origin: 50% 50%; transform-box: fill-box; }
+.spin-r { animation: spin 9s linear infinite reverse; transform-origin: 50px 50px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.meridian { animation: meridian 6s linear infinite; transform-origin: 50px 50px; }
+@keyframes meridian { 0% { transform: scaleX(1); } 50% { transform: scaleX(0.05); } 100% { transform: scaleX(1); } }
+.bubble { animation: bubble 2.6s ease-in infinite; }
+@keyframes bubble { 0% { transform: translateY(0); opacity: 0; } 15% { opacity: 1; } 100% { transform: translateY(-34px); opacity: 0; } }
+.wave { stroke-dasharray: 220; animation: draw 4s ease-in-out infinite; }
+@keyframes draw { 0% { stroke-dashoffset: 220; } 60%, 100% { stroke-dashoffset: 0; } }
+.rung { transform-box: fill-box; transform-origin: center; animation: twist 2.4s ease-in-out infinite; }
+@keyframes twist { 0%, 100% { transform: scaleX(1); } 50% { transform: scaleX(-1); } }
+html[lang="ar"] .cat-card h3 { line-height: 1.25; }

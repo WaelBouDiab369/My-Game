@@ -155,3 +155,5 @@ html[lang="ar"] * { letter-spacing: 0 !important; text-transform: none !importan
 @media (max-width: 900px) { .hhero { grid-template-columns: 1fr; min-height: 0; } .hhero .art { width: min(80%, 380px); order: -1; } }
 @media (max-width: 520px) { .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; } .gcard .gbody p { display: none; } .gcard .gbody b { font-size: 16px; } }
 [dir="rtl"] .flipx { display: inline-block; transform: scaleX(-1); }
+.gcard.soon { opacity: .55; cursor: default; }
+.gcard.soon .gart canvas { filter: grayscale(.6) brightness(.7); }

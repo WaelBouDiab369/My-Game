@@ -330,6 +330,14 @@
     U("D.C. circuits|دوائر التيار المستمر|Les circuits en courant continu", "physics:circuits"),
   ];
 
+  // Grades 7-9: the science units are shown as three subjects, Biology, Chemistry and Physics (like Grades 10-12).
+  const STRAND = {
+    7: { biology: [0, 1], chemistry: [2, 3, 4], physics: [5, 6, 7] },
+    8: { biology: [0, 1, 2, 3], chemistry: [4, 5, 6], physics: [7, 8, 9] },
+    9: { biology: [0, 1], chemistry: [2, 3, 4], physics: [5, 6, 7, 8] },
+  };
+  for (const g of [7, 8, 9]) { const sci = G[g].science; for (const k in STRAND[g]) G[g][k] = STRAND[g][k].map((i) => sci[i]); delete G[g].science; }
+
   // ---------------------------------------------------------------- ENGLISH
   const EN = {
     1: ["Letters and their sounds (phonics)|الحروف وأصواتها|Les lettres et leurs sons", "Reading short words and sentences|قراءة كلمات وجمل قصيرة|Lire des mots et des phrases courtes", "Capital letters and full stops|الحروف الكبيرة والنقطة|Majuscules et points", "Stories and rhymes|القصص والأناشيد|Histoires et comptines", "Writing simple sentences|كتابة جمل بسيطة|Écrire des phrases simples"],
@@ -394,5 +402,5 @@
     G[g].geography = GEO_ALL.map(([t, ...games]) => U(t, ...games));
   }
 
-  window.ZV_CURRICULUM = { SUBJECTS, STAGES, grades: G, order: ["math", "science", "biology", "chemistry", "physics", "english", "arabic", "french", "geography"] };
+  window.ZV_CURRICULUM = { SUBJECTS, STAGES, grades: G, order: ["math", "science", "chemistry", "biology", "physics", "english", "arabic", "french", "geography"] };
 })();

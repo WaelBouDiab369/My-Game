@@ -15,17 +15,17 @@
   MQ.reduce = reduce;
 
   const UI = {
-    en: { home: "← Home", back: "← {subject}", learn: "Learn", play: "Play", startChallenge: "Start the challenge", explore: "Explore", round: "Round", score: "Score", streak: "Streak",
+    en: { gradeN: "Grade {n}", toGrade: "← Grade {n}", chaptersStat: "chapters", readyStat: "with games", soonCh: "Coming soon", chapterN: "Chapter {n}", activities: "{n} activities", home: "← Home", back: "← {subject}", learn: "Learn", play: "Play", startChallenge: "Start the challenge", explore: "Explore", round: "Round", score: "Score", streak: "Streak",
       toChapters: "← Chapters", next: "Next →", finish: "See results", easy: "Easy", normal: "Normal", best: "Best: {score}", noBest: "Not played yet", again: "Play again", other: "More games",
       correct: "Correct!", wrong: "Not quite.", great: "Brilliant!", good: "Well done!", ok: "Good start!", tryMore: "Keep practising!", youLearn: "You will learn",
       sound: "Sound", games: "games", lessons: "lessons", langs: "languages", newBadge: "New", soonBadge: "Coming soon", check: "Check", reset: "Reset", hint: "Hint",
       outOf: "{a} of {b} correct", learnPrompt: "Explore freely. When you are ready, start the challenge.", level: "Level" },
-    ar: { home: "→ الرئيسية", back: "→ {subject}", learn: "تعلّم", play: "العب", startChallenge: "ابدأ التحدي", explore: "استكشف", round: "الجولة", score: "النقاط", streak: "سلسلة",
+    ar: { gradeN: "الصف {n}", toGrade: "→ الصف {n}", chaptersStat: "فصول", readyStat: "فيها ألعاب", soonCh: "قريبًا", chapterN: "الفصل {n}", activities: "{n} أنشطة", home: "→ الرئيسية", back: "→ {subject}", learn: "تعلّم", play: "العب", startChallenge: "ابدأ التحدي", explore: "استكشف", round: "الجولة", score: "النقاط", streak: "سلسلة",
       toChapters: "→ الفصول", next: "التالي ←", finish: "اعرض النتيجة", easy: "سهل", normal: "عادي", best: "أفضل نتيجة: {score}", noBest: "لم تلعب بعد", again: "العب مجددًا", other: "ألعاب أخرى",
       correct: "صحيح!", wrong: "ليست الإجابة الصحيحة.", great: "رائع!", good: "أحسنت!", ok: "بداية جيدة!", tryMore: "واصل التدرّب!", youLearn: "ستتعلّم",
       sound: "الصوت", games: "لعبة", lessons: "درسًا", langs: "لغات", newBadge: "جديد", soonBadge: "قريبًا", check: "تحقّق", reset: "إعادة", hint: "تلميح",
       outOf: "{a} من {b} صحيحة", learnPrompt: "استكشف بحرية، وعندما تكون جاهزًا ابدأ التحدي.", level: "المستوى" },
-    fr: { home: "← Accueil", back: "← {subject}", learn: "Apprendre", play: "Jouer", startChallenge: "Commencer le défi", explore: "Explorer", round: "Manche", score: "Score", streak: "Série",
+    fr: { gradeN: "Niveau {n}", toGrade: "← Niveau {n}", chaptersStat: "chapitres", readyStat: "avec des jeux", soonCh: "Bientôt", chapterN: "Chapitre {n}", activities: "{n} activités", home: "← Accueil", back: "← {subject}", learn: "Apprendre", play: "Jouer", startChallenge: "Commencer le défi", explore: "Explorer", round: "Manche", score: "Score", streak: "Série",
       toChapters: "← Chapitres", next: "Suivant →", finish: "Voir le résultat", easy: "Facile", normal: "Normal", best: "Record : {score}", noBest: "Pas encore joué", again: "Rejouer", other: "Autres jeux",
       correct: "Bravo !", wrong: "Pas tout à fait.", great: "Brillant !", good: "Bien joué !", ok: "Bon début !", tryMore: "Continue à t'entraîner !", youLearn: "Tu vas apprendre",
       sound: "Son", games: "jeux", lessons: "leçons", langs: "langues", newBadge: "Nouveau", soonBadge: "Bientôt", check: "Vérifier", reset: "Recommencer", hint: "Indice",
@@ -152,7 +152,7 @@
   MQ.playPage = (subject) => {
     const qs = new URLSearchParams(location.search), id = qs.get("g");
     // Opened from a grade's chapter list: the back button returns there, and the game knows the student's grade.
-    const back = (qs.get("back") || "").match(/^learn\.html\?[\w=&.-]*$/) ? "../" + qs.get("back") : "./";
+    const back = (qs.get("back") || "").match(/^(learn\.html\?[\w=&.-]*|[a-z]+\/\?grade=\d+)$/) ? "../" + qs.get("back") : "./";
     MQ.grade = parseInt(qs.get("grade"), 10) || null;
     const app = document.getElementById("app");
     const s = document.createElement("script"); s.src = `games/${id}.js`;
@@ -276,11 +276,48 @@
     }
   };
 
+  // ---------- a subject page for one grade: its chapters ----------
+  function gradeHub(subject, grade, chapters) {
+    const app = document.getElementById("app");
+    const stage = (window.ZV_CURRICULUM.STAGES.find((x) => x.grades.includes(grade)) || {}).name;
+    const ids = [...new Set(chapters.flatMap((c) => c.games).filter((g) => !g.startsWith("geo:")))];
+    const file = (gid) => { const [folder, id] = gid.split(":"); return folder === subject.id ? `games/${id}.js` : `../${folder}/games/${id}.js`; };
+    const playUrl = (gid) => { const [folder, id] = gid.split(":"); return `${folder === subject.id ? "" : `../${folder}/`}play.html?g=${id}&grade=${grade}&back=${encodeURIComponent(`${subject.id}/?grade=${grade}`)}`; };
+    let left = ids.length; if (!left) render();
+    ids.forEach((gid) => { const sc = document.createElement("script"); sc.src = file(gid); sc.onload = sc.onerror = () => { if (--left === 0) render(); }; document.head.appendChild(sc); });
+    function render() {
+      const ready = chapters.filter((c) => c.games.length).length;
+      app.innerHTML = `
+        <header class="top"><div class="left"><a class="pillbtn" href="../learn.html?g=${grade}">${MQ.esc(MQ.ui("toGrade", { n: grade }))}</a></div><div class="right">${MQ.langSwitch()}</div></header>
+        <section class="hhero"><div><div class="kicker">${MQ.esc(MQ.ui("gradeN", { n: grade }))}${stage ? " · " + MQ.esc(MQ.tr(stage)) : ""} · ${MQ.esc(MQ.tr(subject.name))}</div>
+          <h1>${MQ.esc(MQ.tr(subject.titleA))} <span class="glow">${MQ.esc(MQ.tr(subject.titleB))}</span></h1><p>${MQ.esc(MQ.tr(subject.intro))}</p>
+          <div class="hstats"><div><b>${chapters.length}</b><span>${MQ.esc(MQ.ui("chaptersStat"))}</span></div><div><b>${ready}</b><span>${MQ.esc(MQ.ui("readyStat"))}</span></div><div><b>3</b><span>${MQ.esc(MQ.ui("langs"))}</span></div></div></div>
+          <div class="art"><canvas id="heroArt"></canvas></div></section>
+        <section class="cards">${chapters.map((c, i) => {
+          const games = c.games.filter((g) => MQ.games[g.split(":")[1]]), first = games[0];
+          const href = games.length === 1 ? playUrl(first) : games.length > 1 ? `../learn.html?g=${grade}&s=${subject.id}&c=${i}` : "";
+          const body = `<div class="gart"><canvas data-thumb="${first ? first.split(":")[1] : ""}"></canvas></div><div class="gbody"><small>${MQ.esc(MQ.ui("chapterN", { n: i + 1 }))}</small><b>${MQ.esc(MQ.tr(c.t))}</b>
+            <div class="gmeta">${games.length > 1 ? `<span class="badge">${MQ.esc(MQ.ui("activities", { n: games.length }))}</span>` : ""}${games.length ? `<span class="badge best">▶ ${MQ.esc(MQ.ui("play"))}</span>` : `<span class="badge">${MQ.esc(MQ.ui("soonCh"))}</span>`}</div></div>`;
+          return href ? `<a class="gcard" href="${href}" style="--i:${i}">${body}</a>` : `<div class="gcard soon" style="--i:${i}" aria-disabled="true">${body}</div>`;
+        }).join("")}</section>`;
+      document.title = `${MQ.tr(subject.name)} · ${MQ.ui("gradeN", { n: grade })} · Zoyverse`;
+      MQ.thumb(document.getElementById("heroArt"), subject.hero);
+      app.querySelectorAll("[data-thumb]").forEach((cv) => { const g = MQ.games[cv.dataset.thumb]; MQ.thumb(cv, g ? g.thumb : subject.hero); });
+    }
+    MQ.onLang(render);
+    MQ.setLang(lang);
+  }
+
   // ---------- the subject page ----------
   MQ.hubPage = (subject) => {
     MQ.sky(subject.rgb);
     document.documentElement.style.setProperty("--c", subject.color);
     const app = document.getElementById("app");
+    // Opened from a grade (?grade=N): show that grade's chapters for this subject, in the same card design.
+    let grade = parseInt(new URLSearchParams(location.search).get("grade"), 10); const CUR = window.ZV_CURRICULUM;
+    // Subjects that exist only per grade (Science, English, Arabic, French) use the grade chosen on the home page.
+    if (!subject.games.length && !(grade >= 1)) { grade = store.get("zv-grade"); if (!(grade >= 1 && grade <= 12)) { location.replace("../"); return; } }
+    if (grade >= 1 && grade <= 12 && CUR && CUR.grades[grade] && CUR.grades[grade][subject.id]) return gradeHub(subject, grade, CUR.grades[grade][subject.id]);
     let loaded = 0;
     subject.games.forEach((id) => { const s = document.createElement("script"); s.src = `games/${id}.js`; s.onload = s.onerror = () => { if (++loaded === subject.games.length) render(); }; document.head.appendChild(s); });
     function render() {
