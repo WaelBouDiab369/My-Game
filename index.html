@@ -153,7 +153,7 @@ html[lang="ar"] .cat-card h3 { line-height: 1.25; }
       <div class="foot"><span class="pill play"><svg viewBox="0 0 14 14" aria-hidden="true"><path d="M3 1.8v10.4L12 7z" fill="currentColor"/></svg><span data-t="play"></span></span><span class="meta" data-t="geoMeta"></span></div>
     </a>
 
-    <button class="cat-card" type="button" style="--c: var(--chem)" data-cat="chem">
+    <a class="cat-card" style="--c: var(--chem)" href="chemistry/" data-cat="chem">
       <svg class="art" viewBox="0 0 100 100" aria-hidden="true">
         <path d="M40 12h20M43 12v24L22 76c-3 7 1 12 8 12h40c7 0 11-5 8-12L57 36V12" fill="none" stroke="#e8ffc0" stroke-width="3" stroke-linejoin="round"/>
         <path d="M30 62h40l7 15c2 5-1 9-6 9H29c-5 0-8-4-6-9z" fill="#b8f03a" fill-opacity=".85"/>
@@ -162,10 +162,10 @@ html[lang="ar"] .cat-card h3 { line-height: 1.25; }
         <circle class="bubble" style="animation-delay:-1.7s" cx="49" cy="68" r="2.6" fill="#f4ffd9"/>
       </svg>
       <div><h3 data-t="chem"></h3><p data-t="chemD"></p></div>
-      <div class="foot"><span class="pill soon" data-t="soon"></span></div>
-    </button>
+      <div class="foot"><span class="pill play"><svg viewBox="0 0 14 14" aria-hidden="true"><path d="M3 1.8v10.4L12 7z" fill="currentColor"/></svg><span data-t="play"></span></span><span class="meta" data-t="sciMeta"></span></div>
+    </a>
 
-    <button class="cat-card" type="button" style="--c: var(--phys)" data-cat="phys">
+    <a class="cat-card" style="--c: var(--phys)" href="physics/" data-cat="phys">
       <svg class="art" viewBox="0 0 100 100" aria-hidden="true">
         <g fill="none" stroke="#bcd3ff" stroke-width="2">
           <ellipse cx="50" cy="50" rx="40" ry="14"/>
@@ -178,10 +178,10 @@ html[lang="ar"] .cat-card h3 { line-height: 1.25; }
         <g transform="rotate(-60 50 50)"><circle r="4" fill="#ffffff"><animateMotion dur="5s" repeatCount="indefinite" path="M10 50a40 14 0 1 0 80 0a40 14 0 1 0-80 0"/></circle></g>
       </svg>
       <div><h3 data-t="phys"></h3><p data-t="physD"></p></div>
-      <div class="foot"><span class="pill soon" data-t="soon"></span></div>
-    </button>
+      <div class="foot"><span class="pill play"><svg viewBox="0 0 14 14" aria-hidden="true"><path d="M3 1.8v10.4L12 7z" fill="currentColor"/></svg><span data-t="play"></span></span><span class="meta" data-t="sciMeta"></span></div>
+    </a>
 
-    <button class="cat-card" type="button" style="--c: var(--math)" data-cat="math">
+    <a class="cat-card" style="--c: var(--math)" href="math/" data-cat="math">
       <svg class="art" viewBox="0 0 100 100" aria-hidden="true">
         <path d="M10 50h80M20 85V15" stroke="#ffe2b0" stroke-opacity=".5" stroke-width="1.5"/>
         <path class="wave" d="M20 50c7-26 13-26 20 0s13 26 20 0 13-26 20 0" fill="none" stroke="#ffb547" stroke-width="4" stroke-linecap="round"/>
@@ -189,10 +189,10 @@ html[lang="ar"] .cat-card h3 { line-height: 1.25; }
         <text x="26" y="88" font-family="Bricolage Grotesque, serif" font-weight="800" font-size="15" fill="#ffd38a">∑ √ ∞</text>
       </svg>
       <div><h3 data-t="math"></h3><p data-t="mathD"></p></div>
-      <div class="foot"><span class="pill soon" data-t="soon"></span></div>
-    </button>
+      <div class="foot"><span class="pill play"><svg viewBox="0 0 14 14" aria-hidden="true"><path d="M3 1.8v10.4L12 7z" fill="currentColor"/></svg><span data-t="play"></span></span><span class="meta" data-t="sciMeta"></span></div>
+    </a>
 
-    <button class="cat-card" type="button" style="--c: var(--bio)" data-cat="bio">
+    <a class="cat-card" style="--c: var(--bio)" href="biology/" data-cat="bio">
       <svg class="art" viewBox="0 0 100 100" aria-hidden="true">
         <path d="M34 10c0 12 32 12 32 24s-32 12-32 24 32 12 32 24" fill="none" stroke="#ff5c9a" stroke-width="3" stroke-opacity=".9"/>
         <path d="M66 10c0 12-32 12-32 24s32 12 32 24-32 12-32 24" fill="none" stroke="#ffb3cf" stroke-width="3" stroke-opacity=".9"/>
@@ -208,8 +208,8 @@ html[lang="ar"] .cat-card h3 { line-height: 1.25; }
         <circle cx="76" cy="24" r="9" fill="none" stroke="#ffd0e1" stroke-width="2"/><circle cx="76" cy="24" r="3" fill="#ffd0e1"/>
       </svg>
       <div><h3 data-t="bio"></h3><p data-t="bioD"></p></div>
-      <div class="foot"><span class="pill soon" data-t="soon"></span></div>
-    </button>
+      <div class="foot"><span class="pill play"><svg viewBox="0 0 14 14" aria-hidden="true"><path d="M3 1.8v10.4L12 7z" fill="currentColor"/></svg><span data-t="play"></span></span><span class="meta" data-t="sciMeta"></span></div>
+    </a>
   </section>
 
 </div>
@@ -222,13 +222,13 @@ const T = {
     heroA: "What will you", heroB: "discover today?",
     heroSub: "Pick a science and play. Every game teaches you something real, for curious kids and grown-ups alike.",
     didYouKnow: "Did you know?", nextFact: "Another fact",
-    pick: "Choose a science", pickSub: "More games are being built",
+    pick: "Choose a science", pickSub: "50+ games to learn by playing",
     geo: "Geography", geoD: "Countries, capitals and flags on a real satellite globe.", geoMeta: "17 topics · 197 countries",
     chem: "Chemistry", chemD: "Elements, the periodic table and reactions you can mix.",
     phys: "Physics", physD: "Forces, light, energy and motion you can play with.",
     math: "Math", mathD: "Numbers, shapes and puzzles, from counting to algebra.",
     bio: "Biology", bioD: "Cells, the human body, animals and plants.",
-    play: "Play", soon: "Coming soon",
+    play: "Play", soon: "Coming soon", sciMeta: "10 games",
     soonToast: "{name} is coming soon. Geography is ready to play now.",
    
     cats: { geo: "Geography", chem: "Chemistry", phys: "Physics", math: "Math", bio: "Biology" },
@@ -247,13 +247,13 @@ const T = {
     heroA: "ماذا ستكتشف", heroB: "اليوم؟",
     heroSub: "اختر علمًا وابدأ اللعب. كل لعبة تعلّمك شيئًا حقيقيًا، للصغار والكبار الفضوليين.",
     didYouKnow: "هل تعلم؟", nextFact: "معلومة أخرى",
-    pick: "اختر علمًا", pickSub: "ألعاب جديدة قيد الإنشاء",
+    pick: "اختر علمًا", pickSub: "أكثر من 50 لعبة للتعلّم باللعب",
     geo: "الجغرافيا", geoD: "الدول والعواصم والأعلام على كرة أرضية حقيقية بصور الأقمار الصناعية.", geoMeta: "17 موضوعًا · 197 دولة",
     chem: "الكيمياء", chemD: "العناصر والجدول الدوري وتفاعلات يمكنك مزجها.",
     phys: "الفيزياء", physD: "القوى والضوء والطاقة والحركة بين يديك.",
     math: "الرياضيات", mathD: "الأعداد والأشكال والألغاز، من العدّ إلى الجبر.",
     bio: "الأحياء", bioD: "الخلايا وجسم الإنسان والحيوانات والنباتات.",
-    play: "العب", soon: "قريبًا",
+    play: "العب", soon: "قريبًا", sciMeta: "10 ألعاب",
     soonToast: "{name} قادمة قريبًا. الجغرافيا جاهزة للعب الآن.",
    
     cats: { geo: "الجغرافيا", chem: "الكيمياء", phys: "الفيزياء", math: "الرياضيات", bio: "الأحياء" },
@@ -272,13 +272,13 @@ const T = {
     heroA: "Que vas-tu", heroB: "découvrir aujourd'hui ?",
     heroSub: "Choisis une science et joue. Chaque jeu t'apprend quelque chose de vrai, pour les enfants curieux comme pour les grands.",
     didYouKnow: "Le savais-tu ?", nextFact: "Un autre",
-    pick: "Choisis une science", pickSub: "D'autres jeux sont en préparation",
+    pick: "Choisis une science", pickSub: "Plus de 50 jeux pour apprendre en jouant",
     geo: "Géographie", geoD: "Pays, capitales et drapeaux sur un vrai globe satellite.", geoMeta: "17 thèmes · 197 pays",
     chem: "Chimie", chemD: "Les éléments, le tableau périodique et des réactions à mélanger.",
     phys: "Physique", physD: "Forces, lumière, énergie et mouvement à manipuler.",
     math: "Maths", mathD: "Nombres, formes et énigmes, du calcul à l'algèbre.",
     bio: "Biologie", bioD: "Les cellules, le corps humain, les animaux et les plantes.",
-    play: "Jouer", soon: "Bientôt",
+    play: "Jouer", soon: "Bientôt", sciMeta: "10 jeux",
     soonToast: "{name} arrive bientôt. La géographie est déjà prête.",
    
     cats: { geo: "Géographie", chem: "Chimie", phys: "Physique", math: "Maths", bio: "Biologie" },

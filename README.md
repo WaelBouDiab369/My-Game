@@ -6,7 +6,13 @@ Science games for curious kids and adults, in English, Arabic and French.
 - Geography hub: `geography/index.html`, with 17 playable topics and 6 coming soon.
   - `geography/world/`: countries, capitals and flags (the GeoQuest game below).
   - `geography/explore/`: one engine for 14 map topics (continents, oceans, seas, straits, rivers, lakes, islands, archipelagos, deserts, mountain ranges, mountains, regions, cities, latitude and longitude), opened as `explore/?t=<topic>`. Data in `explore/data/`, built by `tools/build-topics.js` from Natural Earth.
-- Chemistry, Physics, Math, Biology: coming soon.
+- Chemistry, Physics, Math, Biology: 10 games each, every game teaching one lesson.
+  - Each subject folder has `index.html` (the subject page), `play.html` (opens a game with `play.html?g=<game>`), `subject.js` (colour, hero animation, game list and shared data) and `games/<game>.js` (one file per game, with its English, Arabic and French text).
+  - `shared/shell.js` is the engine they all use (intro, learn mode, rounds, scoring, stars, best scores, sound, languages); `shared/game.css` is the shared look.
+  - Chemistry: atom builder, periodic table, states of matter, element symbols, molecule builder, balancing equations, pH lab, separating mixtures, metals and non-metals, physical vs chemical changes.
+  - Physics: circuits, gravity on other worlds, projectiles, pendulum, float or sink, force and motion, mirrors and light, sound waves, magnets, energy on a ramp.
+  - Math: times tables, fractions, number line, balance-scale equations, angles, area and perimeter, coordinates, prime numbers, percentages, number sequences.
+  - Biology: cell explorer, body organs, skeleton, food chains, animal classes, photosynthesis lab, DNA builder, heart and blood, digestion, life cycles.
 
 Play: https://waelboudiab369.github.io/My-Game/
 
