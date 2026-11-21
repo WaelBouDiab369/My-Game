@@ -1,0 +1,9 @@
+{
+  "appId": "com.zoyverse.app",
+  "appName": "Zoyverse",
+  "webDir": "www",
+  "android": { "backgroundColor": "#050811" },
+  "plugins": {
+    "SystemBars": { "insetsHandling": "css", "initialViewportFitValueHint": "cover", "style": "DARK" }
+  }
+}

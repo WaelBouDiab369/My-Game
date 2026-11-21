@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="About Zoyverse: science games for curious kids and adults.">
+<title>About · Zoyverse</title>
+<link rel="stylesheet" href="shared/fonts/fonts.css">
+<link rel="stylesheet" href="shared/info.css">
+</head>
+<body>
+<div class="page">
+  <header class="top">
+    <a class="pill" id="home" href="./">← Home</a>
+    <div class="lang" role="group" aria-label="Language">
+      <button type="button" data-lang="en" lang="en">EN</button>
+      <button type="button" data-lang="ar" lang="ar">عربي</button>
+      <button type="button" data-lang="fr" lang="fr">FR</button>
+    </div>
+  </header>
+  <main id="content"></main>
+  <footer>© 2026 Wael Bou Diab · Zoyverse</footer>
+</div>
+<script>
+// Third-party credits are the same in every language (names of works and their licences).
+const CREDITS = `<ul>
+  <li><b>Natural Earth</b>: maps, rivers, lakes, mountains, places and capital positions (public domain)</li>
+  <li><b>world-countries</b> by Mohammed Le Doze: country data (Open Database License, ODbL 1.0)</li>
+  <li><b>world-atlas</b> by Mike Bostock: country borders from Natural Earth (ISC licence)</li>
+  <li><b>Unicode CLDR</b>: Arabic and French place names (Unicode License)</li>
+  <li><b>flag-icons</b> by Lipis: country flags (MIT licence)</li>
+  <li><b>NASA</b> Blue Marble and Black Marble: Earth images (public domain)</li>
+  <li><b>globe.gl</b> and <b>three.js</b>: 3D globe (MIT licence)</li>
+  <li><b>d3-geo</b>, <b>d3-array</b> and <b>topojson-client</b>: map drawing (ISC licence)</li>
+  <li><b>Bricolage Grotesque</b>, <b>Atkinson Hyperlegible</b> and <b>Tajawal</b> fonts (SIL Open Font License)</li>
+</ul>
+<p class="small">The country database built from these sources (geography/world/data/countries.json) is shared under the Open Database License (ODbL 1.0).</p>`;
+window.PAGE = {
+  title: { en: "About", ar: "حول", fr: "À propos" },
+  en: `<h1>About <span class="spark">Zoyverse</span></h1>
+    <p class="lead">Science games for curious kids and grown-ups: geography, chemistry, physics, math and biology, in English, Arabic and French.</p>
+    <div class="card"><p class="author">Created by <b>Wael Bou Diab</b>.</p>
+      <p>Zoyverse is named after Zoya, a name that comes from the Greek word for <i>life</i>. Its aim is to help children and adults understand life and the world around them, one game at a time.</p></div>
+    <div class="card"><h2>Copyright</h2><p>© 2026 Wael Bou Diab. All rights reserved.</p>
+      <p>The Zoyverse name, games, design, text and code may not be copied, republished or sold without written permission. The third-party materials listed below remain under their own licences.</p></div>
+    <div class="card"><h2>Privacy</h2><p>Zoyverse collects no personal data, shows no ads and uses no tracking. Read the <a href="privacy.html">privacy policy</a>.</p></div>
+    <div class="card" id="credits"><h2>Credits</h2><p>Zoyverse is made with these free resources. Thank you to their authors.</p>${CREDITS}</div>`,
+  ar: `<h1>حول <span class="spark">Zoyverse</span></h1>
+    <p class="lead">ألعاب علمية للأطفال والكبار الفضوليين: الجغرافيا والكيمياء والفيزياء والرياضيات والأحياء، بالعربية والإنجليزية والفرنسية.</p>
+    <div class="card"><p class="author">من إعداد <b>وائل بو دياب</b>.</p>
+      <p>سُمّيت Zoyverse تيمّنًا بزويا، وهو اسم مأخوذ من الكلمة اليونانية التي تعني <i>الحياة</i>. هدفها أن تساعد الأطفال والكبار على فهم الحياة والعالم من حولهم، لعبةً بعد لعبة.</p></div>
+    <div class="card"><h2>حقوق النشر</h2><p>© 2026 وائل بو دياب. جميع الحقوق محفوظة.</p>
+      <p>لا يجوز نسخ اسم Zoyverse أو ألعابه أو تصميمه أو نصوصه أو برمجته أو إعادة نشرها أو بيعها دون إذن خطي. تبقى المواد الخارجية المذكورة أدناه خاضعة لتراخيصها الخاصة.</p></div>
+    <div class="card"><h2>الخصوصية</h2><p>لا تجمع Zoyverse أي بيانات شخصية، ولا تعرض إعلانات، ولا تستخدم أي تتبّع. اقرأ <a href="privacy.html">سياسة الخصوصية</a>.</p></div>
+    <div class="card" id="credits"><h2>شكر وتقدير</h2><p>صُنعت Zoyverse بالاستعانة بهذه الموارد المجانية. شكرًا لأصحابها.</p><div dir="ltr" style="text-align:left">${CREDITS}</div></div>`,
+  fr: `<h1>À propos de <span class="spark">Zoyverse</span></h1>
+    <p class="lead">Des jeux de sciences pour les enfants et les adultes curieux : géographie, chimie, physique, maths et biologie, en français, en anglais et en arabe.</p>
+    <div class="card"><p class="author">Créé par <b>Wael Bou Diab</b>.</p>
+      <p>Zoyverse porte le nom de Zoya, un prénom qui vient du mot grec signifiant <i>la vie</i>. Son but : aider les enfants et les adultes à comprendre la vie et le monde qui les entoure, un jeu à la fois.</p></div>
+    <div class="card"><h2>Droits d'auteur</h2><p>© 2026 Wael Bou Diab. Tous droits réservés.</p>
+      <p>Le nom Zoyverse, ses jeux, son design, ses textes et son code ne peuvent être copiés, republiés ou vendus sans autorisation écrite. Les ressources tierces listées ci-dessous restent sous leur propre licence.</p></div>
+    <div class="card"><h2>Confidentialité</h2><p>Zoyverse ne collecte aucune donnée personnelle, n'affiche aucune publicité et n'utilise aucun pistage. Lire la <a href="privacy.html">politique de confidentialité</a>.</p></div>
+    <div class="card" id="credits"><h2>Crédits</h2><p>Zoyverse utilise ces ressources libres. Merci à leurs auteurs.</p>${CREDITS}</div>`,
+};
+</script>
+<script src="shared/info.js"></script>
+<script src="shared/app.js"></script>
+</body>
+</html>

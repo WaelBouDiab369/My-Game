@@ -1,4 +1,4 @@
-// MindQuest science games: the shared engine.
+// Zoyverse science games: the shared engine.
 // A game file calls MQ.register({...}) with its texts, a live thumbnail, an optional "explore" sandbox and a round().
 // The shell provides the screens (intro, learn, play, results), scoring, stars, sound and the three languages.
 (function () {
@@ -159,8 +159,7 @@
       const key = `mq-best-${subject.id}-${def.id}`;
       app.innerHTML = `
         <header class="top"><div class="left"><a class="pillbtn" href="./" id="backLink"></a></div>
-          <div class="right"><span class="chip" id="cScore" hidden><span data-ui="score"></span> <b id="score">0</b></span><span class="chip" id="cStreak" hidden><span data-ui="streak"></span> <b id="streak">0</b></span>
-          <button class="pillbtn" type="button" id="mute"></button>${MQ.langSwitch()}</div></header>
+          <div class="right"><button class="pillbtn" type="button" id="mute"></button>${MQ.langSwitch()}</div></header>
         <main id="screen"></main>`;
       const $ = (q) => app.querySelector(q);
       const T = (k, v) => fill((def.str && ((def.str[lang] && def.str[lang][k]) ?? (def.str.en && def.str.en[k]))) ?? MQ.ui(k, v), v);
@@ -195,14 +194,14 @@
       }
       function chrome() {
         $("#backLink").textContent = MQ.ui("back", { subject: MQ.tr(subject.name) });
-        $("#mute").textContent = (muted ? "🔇 " : "🔊 ") + MQ.ui("sound");
-        document.title = `${MQ.tr(def.title)} · ${MQ.tr(subject.name)} · MindQuest`;
+        $("#mute").innerHTML = (muted ? "🔇" : "🔊") + ` <span class="lbl">${MQ.esc(MQ.ui("sound"))}</span>`; $("#mute").setAttribute("aria-label", MQ.ui("sound"));
+        document.title = `${MQ.tr(def.title)} · ${MQ.tr(subject.name)} · Zoyverse`;
       }
       $("#mute").addEventListener("click", () => { muted = !muted; store.set("mq-muted", muted); chrome(); if (!muted) MQ.sound.click(); });
       const nRounds = () => (typeof def.rounds === "function" ? def.rounds(S.level) : def.rounds || 8);
 
       function intro() {
-        S.mode = "intro"; $("#cScore").hidden = $("#cStreak").hidden = true;
+        S.mode = "intro";
         const best = store.get(key);
         $("#screen").innerHTML = `<section class="intro">
           <div><div class="kicker">${MQ.esc(MQ.tr(subject.name))}</div><h1>${MQ.esc(MQ.tr(def.title))}</h1><p class="tag">${MQ.esc(MQ.tr(def.tag))}</p>
@@ -219,7 +218,7 @@
       }
       function gameScreen() {
         $("#screen").innerHTML = `<section class="game"><div class="progress"><i id="bar"></i></div>
-          <div class="hud"><span class="chip" id="roundChip"></span><span class="grow"></span></div>
+          <div class="hud"><span class="chip" id="roundChip"></span><span class="grow"></span><span class="chip" id="cScore"><span data-ui="score">${MQ.esc(MQ.ui("score"))}</span> <b id="score">0</b></span><span class="chip" id="cStreak"><span data-ui="streak">${MQ.esc(MQ.ui("streak"))}</span> <b id="streak">0</b></span></div>
           <div><div class="prompt" id="prompt"></div><div class="subprompt" id="sub"></div></div>
           <div class="stage" id="stage"></div><div id="fb" class="feedback" hidden></div>
           <div class="actions"><button class="btn" id="next" hidden></button><button class="btn" id="startC" hidden></button></div></section>`;
@@ -228,7 +227,7 @@
         $("#stage").addEventListener("animationend", () => $("#stage").classList.remove("shake"));
       }
       function learn() {
-        S.mode = "learn"; gameScreen(); S.fb = null; renderFb();
+        S.mode = "learn"; gameScreen(); $("#cScore").hidden = $("#cStreak").hidden = true; S.fb = null; renderFb();
         $("#roundChip").textContent = MQ.ui("explore"); $("#bar").style.width = "0";
         api.prompt(() => MQ.esc(MQ.tr(def.title)), () => MQ.esc(MQ.ui("learnPrompt")));
         const b = $("#startC"); b.hidden = false; b.textContent = MQ.ui("startChallenge") + " ▶";
@@ -236,7 +235,7 @@
       }
       function play() {
         Object.assign(S, { mode: "play", i: 0, n: nRounds(), score: 0, streak: 0, right: 0 });
-        gameScreen(); $("#cScore").hidden = $("#cStreak").hidden = false; hud(); startRound();
+        gameScreen(); hud(); startRound();
         scrollTo({ top: 0, behavior: "smooth" });
       }
       function startRound() {
@@ -258,7 +257,7 @@
           <div class="actions" style="justify-content:center"><button class="btn" id="again">${MQ.esc(MQ.ui("again"))}</button><a class="btn ghost" href="./" style="text-decoration:none">${MQ.esc(MQ.ui("other"))}</a></div></section>`;
         $("#again").addEventListener("click", play);
       }
-      function hud() { $("#score").textContent = S.score; $("#streak").textContent = S.streak; }
+      function hud() { if (!$("#score")) return; $("#score").textContent = S.score; $("#streak").textContent = S.streak; }
       function renderPrompt() { if (!S.prompt || !$("#prompt")) return; const [p, s] = S.prompt; $("#prompt").innerHTML = typeof p === "function" ? p() : p; $("#sub").innerHTML = s ? (typeof s === "function" ? s() : s) : ""; }
       function renderFb() { const f = $("#fb"); if (!f) return; if (!S.fb) { f.hidden = true; return; } f.className = "feedback " + S.fb.kind; f.innerHTML = S.fb.fn(); f.hidden = false; }
       document.addEventListener("keydown", (e) => { if (e.key === "Enter" && S.mode === "play" && S.locked && document.activeElement !== $("#next") && !$("#next").hidden) { e.preventDefault(); nextRound(); } });
@@ -281,7 +280,7 @@
       const games = subject.games.map((id) => MQ.games[id]).filter(Boolean);
       app.innerHTML = `
         <header class="top"><div class="left"><a class="pillbtn" href="../">${MQ.esc(MQ.ui("home"))}</a></div><div class="right">${MQ.langSwitch()}</div></header>
-        <section class="hhero"><div><div class="kicker">MindQuest · ${MQ.esc(MQ.tr(subject.name))}</div>
+        <section class="hhero"><div><div class="kicker">Zoyverse · ${MQ.esc(MQ.tr(subject.name))}</div>
           <h1>${MQ.esc(MQ.tr(subject.titleA))} <span class="glow">${MQ.esc(MQ.tr(subject.titleB))}</span></h1><p>${MQ.esc(MQ.tr(subject.intro))}</p>
           <div class="hstats"><div><b>${games.length}</b><span>${MQ.esc(MQ.ui("games"))}</span></div><div><b>${games.length}</b><span>${MQ.esc(MQ.ui("lessons"))}</span></div><div><b>3</b><span>${MQ.esc(MQ.ui("langs"))}</span></div></div></div>
           <div class="art"><canvas id="heroArt"></canvas></div></section>
@@ -290,7 +289,7 @@
           return `<a class="gcard" href="play.html?g=${g.id}" style="--i:${i}"><div class="gart"><canvas data-thumb="${g.id}"></canvas></div><div class="gbody"><small>${String(i + 1).padStart(2, "0")}</small><b>${MQ.esc(MQ.tr(g.title))}</b><p>${MQ.esc(MQ.tr(g.tag))}</p>
             <div class="gmeta"><span class="starsmini">${best ? "★".repeat(best.stars) + "☆".repeat(3 - best.stars) : ""}</span>${best ? `<span class="badge best">${MQ.esc(MQ.ui("best", { score: best.score }))}</span>` : `<span class="badge">${MQ.esc(MQ.ui("newBadge"))}</span>`}</div></div></a>`;
         }).join("")}</section>`;
-      document.title = `${MQ.tr(subject.name)} · MindQuest`;
+      document.title = `${MQ.tr(subject.name)} · Zoyverse`;
       MQ.thumb(document.getElementById("heroArt"), subject.hero);
       app.querySelectorAll("[data-thumb]").forEach((c) => MQ.thumb(c, MQ.games[c.dataset.thumb].thumb));
       const fine = matchMedia("(hover: hover) and (pointer: fine)").matches && !reduce;

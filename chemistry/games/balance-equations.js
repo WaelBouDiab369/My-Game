@@ -16,7 +16,7 @@
   function board(stage, api, eq, onCheck) {
     const n = eq.l.length + eq.r.length, k = Array(n).fill(1);
     const term = (f, i) => `<div class="panel" style="text-align:center;min-width:96px"><div class="row" style="justify-content:center;gap:6px"><button class="btn ghost small" data-i="${i}" data-d="-1">−</button><b class="big-number" style="font-size:32px;color:var(--c)" id="k${i}">1</b><button class="btn small" data-i="${i}" data-d="1">+</button></div><div class="prompt" style="font-size:26px;margin-top:6px">${CHEM.sub(f)}</div></div>`;
-    stage.innerHTML = `<div class="row" style="justify-content:center;gap:10px">${eq.l.map((f, i) => term(f, i)).join(`<b class="prompt">+</b>`)}<b class="prompt" style="color:var(--c)">→</b>${eq.r.map((f, i) => term(f, eq.l.length + i)).join(`<b class="prompt">+</b>`)}</div>
+    stage.innerHTML = `<div class="row" dir="ltr" style="justify-content:center;gap:10px">${eq.l.map((f, i) => term(f, i)).join(`<b class="prompt">+</b>`)}<b class="prompt" style="color:var(--c)">→</b>${eq.r.map((f, i) => term(f, eq.l.length + i)).join(`<b class="prompt">+</b>`)}</div>
       <div class="panel" style="margin-top:12px"><h3>${api.T("atoms")}</h3><div id="tbl"></div></div>${onCheck ? `<div class="actions" style="margin-top:12px"><button class="btn" id="check">${api.T("check")}</button></div>` : ""}`;
     function update() {
       for (let i = 0; i < n; i++) stage.querySelector("#k" + i).textContent = k[i];

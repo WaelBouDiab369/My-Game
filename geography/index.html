@@ -4,9 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="description" content="Geography games on a real satellite globe: countries, capitals, flags, continents, oceans, seas, rivers, lakes, mountains, deserts, islands and more, in English, Arabic and French.">
-<title>Geography · MindQuest</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Tajawal:wght@400;700;800&display=swap">
+<title>Geography · Zoyverse</title>
+<link rel="stylesheet" href="../shared/fonts/fonts.css">
 <style>
 /* Layout: mission-control for the planet. A live satellite Earth fills the hero beside the title and counters;
    below, filter chips and a wall of animated topic cards, each a small living scene of its subject. */
@@ -22,7 +21,7 @@ html, body { min-height: 100%; }
 html, body { overflow-x: clip; }
 body { margin: 0; background: var(--ink); color: var(--text); font-family: var(--font-body); font-size: 16px; }
 #sky { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 0; display: block; }
-.page { position: relative; z-index: 1; max-width: 1240px; margin: 0 auto; padding-block: 16px 64px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: grid; gap: 28px; }
+.page { position: relative; z-index: 1; max-width: 1240px; margin: 0 auto; padding-block: calc(env(safe-area-inset-top, 0px) + 16px) calc(env(safe-area-inset-bottom, 0px) + 64px); padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: grid; gap: 28px; }
 a { color: inherit; }
 button { font: inherit; color: inherit; cursor: pointer; }
 :focus-visible { outline: 3px solid var(--land); outline-offset: 3px; }
@@ -34,6 +33,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .lang { display: inline-flex; background: var(--panel); border: 1px solid var(--line); border-radius: 999px; padding: 3px; backdrop-filter: blur(10px); }
 .lang button { background: none; border: 0; border-radius: 999px; padding: 6px 12px; font-size: 14px; color: var(--muted); }
 .lang button[aria-pressed="true"] { background: var(--text); color: var(--ink); font-weight: 700; }
+@media (pointer: coarse) { .lang button { min-height: 38px; padding: 8px 12px; } }
 
 /* hero */
 .hero { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); align-items: center; gap: 24px; min-height: 460px; }
@@ -222,7 +222,7 @@ html[lang="ar"] .hero h1 { line-height: 1.15; }
 <script src="js/cards.js"></script>
 <script>
 const T = {
-  en: { home: "← Home", kicker: "MindQuest · Geography", titleA: "Explore the", titleB: "Earth", intro: "Spin a real satellite globe and learn the whole planet: countries, oceans, rivers, mountains and more. Every topic has a study map and games to test yourself.",
+  en: { home: "← Home", kicker: "Zoyverse · Geography", titleA: "Explore the", titleB: "Earth", intro: "Spin a real satellite globe and learn the whole planet: countries, oceans, rivers, mountains and more. Every topic has a study map and games to test yourself.",
     statGames: "games to play", statCountries: "countries", statPlaces: "places to discover", statLangs: "languages", ctaStart: "Start with countries", surprise: "Surprise me",
     all: "All", soon: "Coming soon", soonMsg: "This topic is being built.", toLearn: "{n} to learn", best: "Best {n}", fresh: "New",
     sec: { world: ["Countries", "of the world"], land: ["Land", ""], water: ["Water", ""], people: ["People", "and places"], earth: ["How the Earth", "works"] },
@@ -233,7 +233,7 @@ const T = {
       rivers: ["Rivers", "The great rivers of the world."], lakes: ["Lakes", "The biggest and most famous lakes."], cities: ["Cities", "The biggest cities on Earth."],
       latlong: ["Latitude & longitude", "The lines of the globe and coordinates."], earth: ["Inside the Earth", "Crust, mantle and core."], atmosphere: ["Atmosphere", "The layers of air around us."],
       watercycle: ["The water cycle", "How water travels around the planet."], biomes: ["Biomes", "Forests, grasslands, deserts and tundra."], climate: ["Climate change", "Why the Earth is warming."], volcanoes: ["Volcanoes", "Famous volcanoes and how they erupt."] } },
-  ar: { home: "→ الرئيسية", kicker: "MindQuest · الجغرافيا", titleA: "استكشف", titleB: "الأرض", intro: "دوّر كرة أرضية حقيقية بصور الأقمار الصناعية وتعلّم الكوكب كله: الدول والمحيطات والأنهار والجبال وأكثر. لكل موضوع خريطة للتعلّم وألعاب لاختبار نفسك.",
+  ar: { home: "→ الرئيسية", kicker: "Zoyverse · الجغرافيا", titleA: "استكشف", titleB: "الأرض", intro: "دوّر كرة أرضية حقيقية بصور الأقمار الصناعية وتعلّم الكوكب كله: الدول والمحيطات والأنهار والجبال وأكثر. لكل موضوع خريطة للتعلّم وألعاب لاختبار نفسك.",
     statGames: "لعبة", statCountries: "دولة", statPlaces: "مكان لتكتشفه", statLangs: "لغات", ctaStart: "ابدأ بالدول", surprise: "فاجئني",
     all: "الكل", soon: "قريبًا", soonMsg: "هذا الموضوع قيد الإنشاء.", toLearn: "{n} للتعلّم", best: "أفضل نتيجة {n}", fresh: "جديد",
     sec: { world: ["دول", "العالم"], land: ["اليابسة", ""], water: ["المياه", ""], people: ["الناس", "والأماكن"], earth: ["كيف تعمل", "الأرض"] },
@@ -244,7 +244,7 @@ const T = {
       rivers: ["الأنهار", "أعظم أنهار العالم."], lakes: ["البحيرات", "أكبر البحيرات وأشهرها."], cities: ["المدن", "أكبر مدن العالم."],
       latlong: ["خطوط الطول والعرض", "خطوط الكرة الأرضية والإحداثيات."], earth: ["باطن الأرض", "القشرة والوشاح واللب."], atmosphere: ["الغلاف الجوي", "طبقات الهواء من حولنا."],
       watercycle: ["دورة الماء", "كيف ينتقل الماء حول الكوكب."], biomes: ["المناطق الحيوية", "الغابات والمراعي والصحاري والتندرا."], climate: ["تغيّر المناخ", "لماذا ترتفع حرارة الأرض."], volcanoes: ["البراكين", "أشهر البراكين وكيف تثور."] } },
-  fr: { home: "← Accueil", kicker: "MindQuest · Géographie", titleA: "Explore la", titleB: "Terre", intro: "Fais tourner un vrai globe satellite et découvre toute la planète : pays, océans, fleuves, montagnes et plus encore. Chaque thème a une carte pour apprendre et des jeux pour te tester.",
+  fr: { home: "← Accueil", kicker: "Zoyverse · Géographie", titleA: "Explore la", titleB: "Terre", intro: "Fais tourner un vrai globe satellite et découvre toute la planète : pays, océans, fleuves, montagnes et plus encore. Chaque thème a une carte pour apprendre et des jeux pour te tester.",
     statGames: "jeux", statCountries: "pays", statPlaces: "lieux à découvrir", statLangs: "langues", ctaStart: "Commencer par les pays", surprise: "Surprends-moi",
     all: "Tout", soon: "Bientôt", soonMsg: "Ce thème est en préparation.", toLearn: "{n} à apprendre", best: "Record {n}", fresh: "Nouveau",
     sec: { world: ["Pays", "du monde"], land: ["Terres", ""], water: ["Eaux", ""], people: ["Villes", "et repères"], earth: ["Comment marche", "la Terre"] },
@@ -589,5 +589,6 @@ let globeLabels = () => {};
   cv.addEventListener("pointerup", up); cv.addEventListener("pointercancel", up);
 })();
 </script>
+<script src="../shared/app.js"></script>
 </body>
 </html>

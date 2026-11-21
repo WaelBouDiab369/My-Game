@@ -1,4 +1,4 @@
-/* MindQuest science games: one look for every subject. The subject colour arrives as --c. */
+/* Zoyverse science games: one look for every subject. The subject colour arrives as --c. */
 :root {
   --ink: #050811; --panel: rgba(13, 19, 36, 0.78); --panel-2: rgba(22, 30, 56, 0.92); --text: #f2f5fc; --muted: #a6b2c9; --line: rgba(200, 215, 245, 0.14);
   --good: #4ade80; --bad: #fb7185; --warn: #ffb547; --c: #4da3ff;
@@ -14,9 +14,10 @@ body { margin: 0; background: var(--ink); color: var(--text); font-family: var(-
 a { color: inherit; }
 button { font: inherit; color: inherit; cursor: pointer; }
 :focus-visible { outline: 3px solid var(--c); outline-offset: 3px; }
-.wrap { position: relative; z-index: 1; max-width: 1180px; margin: 0 auto; padding-block: 14px 48px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: grid; gap: 20px; }
+.wrap { position: relative; z-index: 1; max-width: 1180px; margin: 0 auto; padding-block: calc(env(safe-area-inset-top, 0px) + 14px) calc(env(safe-area-inset-bottom, 0px) + 48px); padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: grid; gap: 20px; }
 .top { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
-.top .left, .top .right { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.top .left, .top .right { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; min-width: 0; }
+.top .right { justify-content: flex-end; margin-inline-start: auto; }
 .pillbtn { text-decoration: none; background: var(--panel); border: 1px solid var(--line); border-radius: 999px; padding: 8px 14px; font-size: 14px; backdrop-filter: blur(10px); }
 .pillbtn:hover { border-color: var(--text); }
 .lang { display: inline-flex; background: var(--panel); border: 1px solid var(--line); border-radius: 999px; padding: 3px; backdrop-filter: blur(10px); }
@@ -38,8 +39,8 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .intro h1 { font-family: var(--font-display); font-weight: 800; font-size: clamp(36px, 5.6vw, 64px); line-height: 1; letter-spacing: -0.03em; margin: 8px 0 0; text-wrap: balance; }
 .intro p.tag { color: var(--muted); font-size: 18px; line-height: 1.5; margin: 12px 0 0; }
 .learnlist { margin: 16px 0 0; padding: 0; list-style: none; display: grid; gap: 8px; }
-.learnlist li { display: flex; gap: 10px; align-items: flex-start; line-height: 1.45; }
-.learnlist li::before { content: ""; flex: none; width: 8px; height: 8px; margin-top: 8px; border-radius: 50%; background: var(--c); box-shadow: 0 0 10px var(--c); }
+.learnlist li { position: relative; padding-inline-start: 18px; line-height: 1.45; }
+.learnlist li::before { content: ""; position: absolute; inset-inline-start: 0; top: 8px; width: 8px; height: 8px; border-radius: 50%; background: var(--c); box-shadow: 0 0 10px var(--c); }
 .introbtns { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 20px; align-items: center; }
 .levels { display: inline-flex; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 3px; }
 .levels button { background: none; border: 0; border-radius: 9px; padding: 8px 12px; font-size: 14px; color: var(--muted); }
@@ -70,7 +71,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
 
 /* common widgets for games */
 .row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
-.col { display: grid; gap: 10px; }
+.col { display: grid; gap: 10px; grid-template-columns: minmax(0, 1fr); }
 .split { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 14px; align-items: start; }
 .panel { background: rgba(255,255,255,.04); border: 1px solid var(--line); border-radius: 16px; padding: 12px; }
 .panel h3 { margin: 0 0 8px; font-family: var(--font-display); font-size: 16px; color: var(--muted); font-weight: 700; letter-spacing: .02em; }
@@ -108,7 +109,16 @@ svg text { font-family: var(--font-body); }
 .end .score { font-family: var(--font-display); font-size: 64px; font-weight: 800; color: var(--c); line-height: 1; }
 
 html[lang="ar"] * { letter-spacing: 0 !important; text-transform: none !important; }
-@media (max-width: 820px) { .intro { grid-template-columns: 1fr; } .split { grid-template-columns: 1fr; } }
+@media (max-width: 820px) { .intro { grid-template-columns: minmax(0, 1fr); } .split { grid-template-columns: minmax(0, 1fr); } }
+.intro h1, .hhero h1, .prompt { overflow-wrap: break-word; }
+/* phones: the sound button keeps only its icon, and the top bar stays on screen */
+@media (max-width: 560px) { #mute .lbl { display: none; } .pillbtn { padding: 8px 12px; } .chip { padding: 6px 10px; } }
+/* touch screens: comfortable tap targets and easy-to-grab sliders */
+@media (pointer: coarse) {
+  .lang button { min-height: 38px; padding: 8px 12px; }
+  .pillbtn, .levels button { min-height: 40px; }
+  .slider input[type=range] { height: 34px; }
+}
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
 
 /* ---------- subject hub ---------- */
@@ -144,3 +154,4 @@ html[lang="ar"] * { letter-spacing: 0 !important; text-transform: none !importan
 .gcard .starsmini { color: #ffd54f; letter-spacing: 2px; }
 @media (max-width: 900px) { .hhero { grid-template-columns: 1fr; min-height: 0; } .hhero .art { width: min(80%, 380px); order: -1; } }
 @media (max-width: 520px) { .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; } .gcard .gbody p { display: none; } .gcard .gbody b { font-size: 16px; } }
+[dir="rtl"] .flipx { display: inline-block; transform: scaleX(-1); }

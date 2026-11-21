@@ -1,4 +1,4 @@
-# MindQuest
+# Zoyverse
 
 Science games for curious kids and adults, in English, Arabic and French.
 
@@ -15,6 +15,24 @@ Science games for curious kids and adults, in English, Arabic and French.
   - Biology: cell explorer, body organs, skeleton, food chains, animal classes, photosynthesis lab, DNA builder, heart and blood, digestion, life cycles.
 
 Play: https://waelboudiab369.github.io/My-Game/
+
+- About and privacy policy: `about.html` (author, copyright, credits) and `privacy.html` (EN/AR/FR). Fonts are stored in `shared/fonts/`, so the site and app contact no outside server.
+
+## Android app (android-app/)
+
+The Android app (package `com.zoyverse.app`) packages the same website with Capacitor, so it works offline.
+
+```
+cd android-app && npm install
+node copy-web.js && npx cap sync android      # copy the website into the app
+cd android && ./gradlew bundleRelease          # app/build/outputs/bundle/release/app-release.aab
+```
+
+- Needs Java 21 and the Android SDK (platform 36, build-tools 36) with `sdk.dir` in `android/local.properties`.
+- Signing uses the private upload key in `android-app/signing/` (`zoyverse-upload.jks` + `keystore.properties`). It is never committed; keep a safe backup.
+- Raise `versionCode` (and `versionName`) in `android/app/build.gradle` for every new upload.
+- `shared/app.js` makes the phone's Back button go back a page (it does nothing on the website).
+- Icons and splash are generated from `android-app/assets/` with `npx capacitor-assets generate --android`.
 
 ## GeoQuest (geography/world/)
 
@@ -45,4 +63,6 @@ Play: https://waelboudiab369.github.io/My-Game/geography/world/
 - `tools/check-data.js` (at the top level): cross-checks the data against five independent sources and lists anything to review.
 - `tools/build-data.js` (at the top level): rebuilds `geography/data/` and `geography/flags/` from npm packages; the tables at its top control which places are included, capitals and translations.
 
-Data: Natural Earth (public domain) for the map topics, world-countries (ODbL), Natural Earth via world-atlas (public domain), country-state-city (capital coordinates), Unicode CLDR (Arabic and French city names), flag-icons (MIT), NASA Blue Marble imagery (public domain). Globe: globe.gl.
+Licence: the Zoyverse games, design, text and code are © 2026 Wael Bou Diab, all rights reserved. `geography/world/data/countries.json` is a derived database of world-countries and is shared under the ODbL 1.0.
+
+Data: Natural Earth (public domain) for the map topics, world-countries (ODbL), Natural Earth via world-atlas (public domain), Natural Earth populated places (capital coordinates, public domain), Unicode CLDR (Arabic and French city names), flag-icons (MIT), NASA Blue Marble imagery (public domain). Globe: globe.gl.

@@ -1,7 +1,8 @@
 // Builds geography/world/data/countries.json, geography/world/data/borders.json and geography/world/flags/*.svg from npm packages.
 //
 //   mkdir pkgs && cd pkgs
-//   npm pack world-countries@5.1.0 world-atlas@2.0.2 country-state-city@3.2.1 cldr-dates-full@47.0.0 flag-icons@7.6.0
+//   npm pack world-countries@5.1.0 world-atlas@2.0.2 topojson-client@3.1.0 cldr-dates-full@47.0.0 flag-icons@7.6.0
+//   plus Natural Earth (public domain) in pkgs/natural-earth-vector: git sparse-checkout of github.com/nvkelso/natural-earth-vector, folder geojson/
 //   for f in *.tgz; do mkdir -p "${f%.tgz}" && tar xzf "$f" -C "${f%.tgz}"; done
 //   cd .. && node tools/build-data.js pkgs geography/world
 //
@@ -15,7 +16,12 @@ const wc = require(pkg("world-countries-5.1.0/package/countries.json"));
 const topo = require(pkg("world-atlas-2.0.2/package/countries-50m.json"));
 const topo10 = require(pkg("world-atlas-2.0.2/package/countries-10m.json"));
 const topojson = require(pkg("topojson-client-3.1.0/package/dist/topojson-client.js"));
-const cities = require(pkg("country-state-city-3.2.1/package/lib/assets/city.json"));
+// Capital positions: Natural Earth populated places (public domain). Rows are [name, countryCode, "", lat, lng].
+const cities = [];
+for (const f of JSON.parse(fs.readFileSync(pkg("natural-earth-vector/geojson/ne_10m_populated_places.geojson"), "utf8")).features) {
+  const q = f.properties, names = new Set([q.NAME, q.NAMEASCII, ...(q.NAMEALT ? String(q.NAMEALT).split("|") : [])].filter(Boolean));
+  for (const cc of new Set([q.ISO_A2, q.ADM0_A3, q.SOV_A3].filter((c) => c && c !== "-99"))) for (const n of names) cities.push([n, cc, "", q.LATITUDE, q.LONGITUDE]);
+}
 const tz = (l) => require(pkg(`cldr-dates-full-47.0.0/package/main/${l}/timeZoneNames.json`)).main[l].dates.timeZoneNames.zone;
 const tzAr = tz("ar"), tzFr = tz("fr");
 
@@ -60,7 +66,7 @@ const CAP_I18N = {
 const CAP_ALSO = {
   BOL: ["لا باز"], PSE: ["رام الله", "القدس"], ISR: ["تل أبيب", "Tel-Aviv", "Tel Aviv-Yafo"], ZAF: ["كيب تاون", "بلومفونتين", "Le Cap"], KOR: ["سول"], UKR: ["Kiev"], LKA: ["كولومبو"], MYS: ["بوتراجايا"], SWZ: ["لوبامبا"],
 };
-// Capital coordinates the city database does not cover (or gets wrong). [lat, lng]
+// Capital coordinates Natural Earth does not cover (or names differently). [lat, lng]
 const CAP_LL = {
   ASM: [-14.2756, -170.702], ABW: [12.524, -70.027], BMU: [32.2949, -64.783], VGB: [18.4286, -64.6185], CYM: [19.2866, -81.3744], TCD: [12.1348, 15.0557],
   CUW: [12.1091, -68.9316], FRO: [62.0079, -6.79], PYF: [-17.535, -149.5696], GIB: [36.1408, -5.3536], GRL: [64.1814, -51.6941], GUM: [13.4757, 144.7489],
@@ -68,6 +74,7 @@ const CAP_LL = {
   MRT: [18.0735, -15.9582], MEX: [19.4326, -99.1332], MCO: [43.7384, 7.4246], MNG: [47.8864, 106.9057], NCL: [-22.2758, 166.458], NER: [13.5116, 2.1254],
   MNP: [15.185, 145.7467], PSE: [31.7834, 35.2339], PRY: [-25.2637, -57.5759], PRI: [18.4655, -66.1057], KNA: [17.3026, -62.7177], SXM: [18.026, -63.0458],
   SSD: [4.8594, 31.5713], TJK: [38.5598, 68.787], TCA: [21.4612, -71.1419], VIR: [18.3419, -64.9307], VAT: [41.9029, 12.4534], ESH: [27.1253, -13.1625],
+  AND: [42.5063, 1.5218], DNK: [55.6761, 12.5683], NRU: [-0.5477, 166.9209],
   CRI: [9.9333, -84.0833], ARE: [24.4539, 54.3773], COL: [4.711, -74.0721], FSM: [6.9248, 158.1611], PAN: [8.9824, -79.5199], PLW: [7.5006, 134.6242],
 };
 // Short notes shown after answering and in Study mode, for capitals that are disputed or shared.
@@ -126,7 +133,7 @@ const out = sel.map((x) => {
     capFr = (CAP_I18N[id] && CAP_I18N[id][1]) || zoneCity(tzFr, z) || capEn[0];
     if (!capAr) missing.push(id + " arabic capital");
     capLL = CAP_LL[id] || null;
-    if (!capLL) for (const c of capEn) { const hit = (byCC[x.cca2] || []).find((r) => norm(r[0]) === norm(c)); if (hit) { capLL = [+(+hit[3]).toFixed(4), +(+hit[4]).toFixed(4)]; break; } }
+    if (!capLL) for (const c of capEn) { const hit = [...(byCC[x.cca2] || []), ...(byCC[x.cca3] || [])].find((r) => norm(r[0]) === norm(c)); if (hit) { capLL = [+(+hit[3]).toFixed(4), +(+hit[4]).toFixed(4)]; break; } }
     if (!capLL) missing.push(id + " capital coordinates");
   }
   const en = NAME_EN[id] || x.name.common;

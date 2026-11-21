@@ -9,7 +9,8 @@
     MQ.draw.bg(ctx, W, H, "#241a0d", "#0d0905");
     const y = H * 0.55, x0 = W * 0.06, x1 = W * 0.94, X = (v) => x0 + ((v - lo) / (hi - lo)) * (x1 - x0);
     ctx.strokeStyle = "#ffe8b0"; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(x0 - 10, y); ctx.lineTo(x1 + 10, y); ctx.stroke();
-    for (let v = lo; v <= hi + 1e-9; v += step) { const big = Math.abs(v - Math.round(v)) < 1e-9; ctx.fillStyle = v === 0 ? "#ffb547" : "#ffe8b0"; ctx.fillRect(X(v) - 1, y - (big ? 12 : 6), 2, big ? 24 : 12); if (big) MQ.draw.text(ctx, String(Math.round(v)), X(v), y + 28, 15, v < 0 ? "#ff8787" : "#fff"); }
+    const px = Math.abs(X(1) - X(0)), every = [1, 2, 5, 10, 20, 50].find((k) => px * k >= 24) || 100;
+    for (let v = lo; v <= hi + 1e-9; v += step) { const big = Math.abs(v - Math.round(v)) < 1e-9; ctx.fillStyle = v === 0 ? "#ffb547" : "#ffe8b0"; ctx.fillRect(X(v) - 1, y - (big ? 12 : 6), 2, big ? 24 : 12); const iv = Math.round(v); if (big && (iv % every === 0 || iv === lo || iv === hi)) MQ.draw.text(ctx, String(iv), X(v), y + 28, px < 24 ? 13 : 15, v < 0 ? "#ff8787" : "#fff"); }
     marks.forEach(([v, c, label]) => { MQ.draw.glowCircle(ctx, X(v), y, 8, c, 14); if (label != null) MQ.draw.text(ctx, label, X(v), y - 30, 16, c, "center", 800); });
     return { X, inv: (px) => lo + ((px - x0) / (x1 - x0)) * (hi - lo) };
   }
@@ -23,7 +24,7 @@
       fr: ["Les nombres <b>grandissent vers la droite</b> et diminuent vers la gauche.", "Les <b>nombres négatifs</b> sont plus petits que zéro, à gauche.", "Les <b>décimaux</b> se trouvent entre les entiers."] },
     thumb(ctx, t, W, H) { const v = Math.sin(t / 1500) * 8; line(ctx, W, H, -10, 10, 1, [[v, "#ffb547", show(Math.round(v * 2) / 2)]], t); },
     explore(stage, api) {
-      let mk = []; const box = api.el(`<div dir="ltr"></div>`); stage.appendChild(box); const c = api.canvas(box, 0.3, { maxH: 220 }); let geo = null;
+      let mk = []; const box = api.el(`<div dir="ltr"></div>`); stage.appendChild(box); const c = api.canvas(box, stage.clientWidth < 520 ? 0.5 : 0.3, { maxH: 220 }); let geo = null;
       c.draw = (ctx, t, W, H) => (geo = line(ctx, W, H, -10, 10, 0.5, mk, t));
       c.cv.addEventListener("click", (e) => { const [x] = c.pos(e), v = Math.round(geo.inv(x) * 10) / 10; mk = [[v, "#ffb547", show(v)]]; api.info(() => api.esc(api.t(v < 0 ? "neg" : "dec"))); });
       api.info(() => api.esc(api.t("exp")));
@@ -36,7 +37,7 @@
       else { lo = -100; hi = 100; step = 10; n = -95 + api.rnd(39) * 5; }
       const tol = (hi - lo) * (easy ? 0.03 : 0.025);
       api.prompt(() => api.T("place", { n: show(n) }));
-      const box = api.el(`<div dir="ltr"></div>`); stage.appendChild(box); const c = api.canvas(box, 0.3, { maxH: 220 }); let geo = null, marks = [];
+      const box = api.el(`<div dir="ltr"></div>`); stage.appendChild(box); const c = api.canvas(box, stage.clientWidth < 520 ? 0.5 : 0.3, { maxH: 220 }); let geo = null, marks = [];
       c.draw = (ctx, t, W, H) => (geo = line(ctx, W, H, lo, hi, step, marks, t));
       c.cv.addEventListener("click", (e) => {
         if (api.locked || !geo) return; const [x] = c.pos(e), v = geo.inv(x), ok = Math.abs(v - n) <= tol;

@@ -40,7 +40,7 @@
   // Tap the cards in the right order. items: [{id, e (emoji), n}], right: array of ids in order
   function order(stage, api, items, right, explain) {
     const picked = [];
-    stage.innerHTML = `<div class="row" id="slots" style="justify-content:center;gap:8px;min-height:96px;margin-bottom:14px">${right.map((_, k) => `<div class="panel slot" style="min-width:96px;min-height:86px;display:grid;place-items:center;border-style:dashed;text-align:center"><span class="subprompt">${k + 1}</span></div>`).join('<b style="color:var(--c);font-size:22px">→</b>')}</div>
+    stage.innerHTML = `<div class="row" id="slots" style="justify-content:center;gap:8px;min-height:96px;margin-bottom:14px">${right.map((_, k) => `<div class="panel slot" style="min-width:96px;min-height:86px;display:grid;place-items:center;border-style:dashed;text-align:center"><span class="subprompt">${k + 1}</span></div>`).join('<b class="flipx" style="color:var(--c);font-size:22px">→</b>')}</div>
       <div class="choice-grid" id="pool">${api.shuffle(items).map((it) => `<button class="choice" data-id="${it.id}"><span class="big">${it.e}</span>${api.N(it.n)}</button>`).join("")}</div>
       <div class="actions" style="margin-top:12px"><button class="btn ghost small" id="undo">↶</button><button class="btn" id="check" disabled>${api.T("check")}</button></div>`;
     const slots = [...stage.querySelectorAll(".slot")];

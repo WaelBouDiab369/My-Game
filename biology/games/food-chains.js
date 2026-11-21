@@ -26,7 +26,7 @@
       MQ.draw.bg(ctx, W, H, "#123a1f", "#071509"); const ch = CHAINS[Math.floor(t / 3500) % CHAINS.length], n = ch.length, k = ((t % 3500) / 3500) * (n + 0.5);
       ch.forEach(([, e], i) => { const x = W * (i + 0.5) / n, y = H / 2 + Math.sin(t / 400 + i) * 4; ctx.globalAlpha = i < k ? 1 : 0.25; ctx.font = `${H * 0.26}px serif`; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText(e, x, y); if (i < n - 1) MQ.draw.text(ctx, "→", x + W / n / 2, H / 2, H * 0.12, "#8ce99a"); }); ctx.globalAlpha = 1;
     },
-    explore(stage, api) { stage.innerHTML = CHAINS.map((ch) => `<div class="panel" style="margin-bottom:8px"><div class="row" style="gap:6px">${ch.map(([, e, n]) => `<span class="token">${e} ${api.N(n)}</span>`).join('<b style="color:var(--c)">→</b>')}</div></div>`).join("") + `<p class="subprompt">${api.T("producer")} ${api.T("consumer")}</p>`; },
+    explore(stage, api) { stage.innerHTML = CHAINS.map((ch) => `<div class="panel" style="margin-bottom:8px"><div class="row" style="gap:6px">${ch.map(([, e, n]) => `<span class="token">${e} ${api.N(n)}</span>`).join('<b class="flipx" style="color:var(--c)">→</b>')}</div></div>`).join("") + `<p class="subprompt">${api.T("producer")} ${api.T("consumer")}</p>`; },
     round(stage, api, i) {
       const ch = CHAINS[(i + api.rnd(CHAINS.length)) % CHAINS.length], items = ch.map(([id, e, n]) => ({ id, e, n }));
       api.prompt(() => api.T("build"), () => api.T("how"));

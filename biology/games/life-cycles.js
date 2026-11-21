@@ -21,7 +21,7 @@
       ctx.strokeStyle = "rgba(140,233,154,.35)"; ctx.lineWidth = 2; ctx.setLineDash([5, 6]); ctx.beginPath(); ctx.arc(cx, cy, R, 0, 6.283); ctx.stroke(); ctx.setLineDash([]);
       c.st.forEach(([, e], i) => { const a = -Math.PI / 2 + (i / 4) * 6.283; ctx.globalAlpha = i === k ? 1 : 0.4; ctx.font = `${H * (i === k ? 0.22 : 0.15)}px serif`; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText(e, cx + Math.cos(a) * R, cy + Math.sin(a) * R); }); ctx.globalAlpha = 1;
     },
-    explore(stage, api) { stage.innerHTML = CYCLES.map((c) => `<div class="panel" style="margin-bottom:8px"><b>${api.N(c.n)}</b><div class="row" style="gap:6px;margin-top:6px">${c.st.map(([, e, n]) => `<span class="token">${e} ${api.N(n)}</span>`).join('<b style="color:var(--c)">→</b>')}</div><div class="subprompt" style="margin-top:6px">${api.N(c.fact)}</div></div>`).join(""); },
+    explore(stage, api) { stage.innerHTML = CYCLES.map((c) => `<div class="panel" style="margin-bottom:8px"><b>${api.N(c.n)}</b><div class="row" style="gap:6px;margin-top:6px">${c.st.map(([, e, n]) => `<span class="token">${e} ${api.N(n)}</span>`).join('<b class="flipx" style="color:var(--c)">→</b>')}</div><div class="subprompt" style="margin-top:6px">${api.N(c.fact)}</div></div>`).join(""); },
     round(stage, api, i) {
       const c = CYCLES[(i + api.rnd(CYCLES.length)) % CYCLES.length];
       api.prompt(() => api.T("order", { x: api.tr(c.n).toLowerCase() }), () => api.T("how"));

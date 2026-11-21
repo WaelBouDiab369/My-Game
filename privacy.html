@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Zoyverse privacy policy: no personal data, no ads, no tracking.">
+<title>Privacy Policy · Zoyverse</title>
+<link rel="stylesheet" href="shared/fonts/fonts.css">
+<link rel="stylesheet" href="shared/info.css">
+</head>
+<body>
+<div class="page">
+  <header class="top">
+    <a class="pill" id="home" href="./">← Home</a>
+    <div class="lang" role="group" aria-label="Language">
+      <button type="button" data-lang="en" lang="en">EN</button>
+      <button type="button" data-lang="ar" lang="ar">عربي</button>
+      <button type="button" data-lang="fr" lang="fr">FR</button>
+    </div>
+  </header>
+  <main id="content"></main>
+  <footer>© 2026 Wael Bou Diab · Zoyverse</footer>
+</div>
+<script>
+// Contact address for privacy questions. Leave empty until the app email is ready; the contact paragraph is then left out.
+const CONTACT = "";
+const mail = CONTACT ? `<a href="mailto:${CONTACT}">${CONTACT}</a>` : "";
+window.PAGE = {
+  title: { en: "Privacy Policy", ar: "سياسة الخصوصية", fr: "Politique de confidentialité" },
+  en: `<h1>Privacy <span class="spark">Policy</span></h1>
+    <p class="lead">Effective 21 November 2026. This policy covers the Zoyverse app and the Zoyverse website.</p>
+    <div class="card"><h2>In short</h2><ul>
+      <li>Zoyverse does <b>not</b> collect, store or share any personal information.</li>
+      <li>There are <b>no accounts</b>, <b>no ads</b>, <b>no analytics</b> and <b>no tracking</b>.</li>
+      <li>Zoyverse is safe for children and is designed to comply with children's privacy laws such as COPPA and GDPR.</li></ul></div>
+    <div class="card"><h2>What stays on your device</h2>
+      <p>To remember your progress, Zoyverse saves a few settings <b>only on your own device</b>: your chosen language, sound on or off, difficulty level, and your best score and stars in each game.</p>
+      <p>This information never leaves your device and is never sent to us or to anyone else. You can delete it at any time by clearing the app's data (Android Settings → Apps → Zoyverse → Storage → Clear data) or your browser's site data.</p></div>
+    <div class="card"><h2>Internet and permissions</h2>
+      <p>Everything Zoyverse needs, including the maps, pictures and fonts, is included in the app. The app does not ask for access to your camera, microphone, location, contacts or files.</p></div>
+    <div class="card"><h2>Third parties</h2>
+      <p>Zoyverse contains no third-party advertising, analytics or social-media code. If you download Zoyverse from an app store, that store (for example Google Play) handles the download under its own privacy policy.</p></div>
+    <div class="card"><h2>Changes</h2>
+      <p>If Zoyverse adds new features in the future, such as optional player accounts, this policy will be updated <b>before</b> those features are released, and the date above will change.</p></div>
+    ${mail ? `<div class="card"><h2>Contact</h2><p>Questions about privacy? Write to ${mail}.</p></div>` : ""}`,
+  ar: `<h1>سياسة <span class="spark">الخصوصية</span></h1>
+    <p class="lead">سارية اعتبارًا من 21 تشرين الثاني/نوفمبر 2026. تشمل هذه السياسة تطبيق Zoyverse وموقعه الإلكتروني.</p>
+    <div class="card"><h2>باختصار</h2><ul>
+      <li>لا تجمع Zoyverse أي معلومات شخصية، ولا تخزّنها، ولا تشاركها.</li>
+      <li><b>لا حسابات</b>، و<b>لا إعلانات</b>، و<b>لا تحليلات</b>، و<b>لا تتبّع</b>.</li>
+      <li>Zoyverse آمنة للأطفال، وقد صُمّمت لتتوافق مع قوانين حماية خصوصية الأطفال مثل COPPA وGDPR.</li></ul></div>
+    <div class="card"><h2>ما يبقى على جهازك</h2>
+      <p>لتتذكّر تقدّمك، تحفظ Zoyverse بعض الإعدادات <b>على جهازك فقط</b>: اللغة التي اخترتها، وتشغيل الصوت أو إيقافه، ومستوى الصعوبة، وأفضل نتيجة ونجوم في كل لعبة.</p>
+      <p>لا تغادر هذه المعلومات جهازك أبدًا، ولا تُرسل إلينا ولا إلى أي جهة أخرى. يمكنك حذفها في أي وقت بمسح بيانات التطبيق (إعدادات أندرويد ← التطبيقات ← Zoyverse ← التخزين ← مسح البيانات) أو بمسح بيانات الموقع في متصفحك.</p></div>
+    <div class="card"><h2>الإنترنت والأذونات</h2>
+      <p>كل ما تحتاجه Zoyverse، من خرائط وصور وخطوط، موجود داخل التطبيق. لا يطلب التطبيق الوصول إلى الكاميرا أو الميكروفون أو الموقع أو جهات الاتصال أو الملفات.</p></div>
+    <div class="card"><h2>الجهات الخارجية</h2>
+      <p>لا تحتوي Zoyverse على أي إعلانات أو أدوات تحليل أو شبكات تواصل اجتماعي تابعة لجهات خارجية. إذا نزّلت Zoyverse من متجر تطبيقات (مثل Google Play)، فإن المتجر يتولّى التنزيل وفق سياسة الخصوصية الخاصة به.</p></div>
+    <div class="card"><h2>التغييرات</h2>
+      <p>إذا أضافت Zoyverse ميزات جديدة مستقبلًا، مثل حسابات اختيارية للّاعبين، فسيتم تحديث هذه السياسة <b>قبل</b> إطلاق تلك الميزات، وسيتغيّر التاريخ أعلاه.</p></div>
+    ${mail ? `<div class="card"><h2>التواصل</h2><p>لأي سؤال عن الخصوصية، راسلنا على <span dir="ltr">${mail}</span>.</p></div>` : ""}`,
+  fr: `<h1>Politique de <span class="spark">confidentialité</span></h1>
+    <p class="lead">En vigueur le 21 novembre 2026. Cette politique couvre l'application et le site Zoyverse.</p>
+    <div class="card"><h2>En bref</h2><ul>
+      <li>Zoyverse ne collecte, ne conserve et ne partage <b>aucune</b> information personnelle.</li>
+      <li><b>Pas de compte</b>, <b>pas de publicité</b>, <b>pas de statistiques</b> et <b>pas de pistage</b>.</li>
+      <li>Zoyverse convient aux enfants et a été conçu pour respecter les lois sur la vie privée des enfants, comme la COPPA et le RGPD.</li></ul></div>
+    <div class="card"><h2>Ce qui reste sur ton appareil</h2>
+      <p>Pour mémoriser ta progression, Zoyverse enregistre quelques réglages <b>uniquement sur ton appareil</b> : la langue choisie, le son activé ou non, le niveau de difficulté, et ton meilleur score et tes étoiles dans chaque jeu.</p>
+      <p>Ces informations ne quittent jamais ton appareil et ne sont jamais envoyées à nous ni à personne d'autre. Tu peux les effacer à tout moment en vidant les données de l'application (Paramètres Android → Applications → Zoyverse → Stockage → Effacer les données) ou les données du site dans ton navigateur.</p></div>
+    <div class="card"><h2>Internet et autorisations</h2>
+      <p>Tout ce dont Zoyverse a besoin, y compris les cartes, les images et les polices, est inclus dans l'application. Elle ne demande l'accès ni à l'appareil photo, ni au micro, ni à la position, ni aux contacts, ni aux fichiers.</p></div>
+    <div class="card"><h2>Services tiers</h2>
+      <p>Zoyverse ne contient aucune publicité, aucun outil de statistiques et aucun code de réseau social tiers. Si tu télécharges Zoyverse depuis une boutique d'applications (par exemple Google Play), cette boutique gère le téléchargement selon sa propre politique de confidentialité.</p></div>
+    <div class="card"><h2>Modifications</h2>
+      <p>Si Zoyverse ajoute de nouvelles fonctions à l'avenir, comme des comptes joueurs facultatifs, cette politique sera mise à jour <b>avant</b> leur sortie et la date ci-dessus changera.</p></div>
+    ${mail ? `<div class="card"><h2>Contact</h2><p>Une question sur la confidentialité ? Écris à ${mail}.</p></div>` : ""}`,
+};
+</script>
+<script src="shared/info.js"></script>
+<script src="shared/app.js"></script>
+</body>
+</html>

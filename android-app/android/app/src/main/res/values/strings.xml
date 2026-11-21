@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Zoyverse</string>
+    <string name="title_activity_main">Zoyverse</string>
+    <string name="package_name">com.zoyverse.app</string>
+    <string name="custom_url_scheme">com.zoyverse.app</string>
+</resources>

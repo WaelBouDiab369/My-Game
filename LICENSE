@@ -1,0 +1,20 @@
+Copyright (c) 2026 Wael Bou Diab. All rights reserved.
+
+Zoyverse, including its name, games, design, text, images made for it, and source code,
+is the property of Wael Bou Diab. No part of it may be copied, modified, republished,
+distributed or sold without prior written permission from the copyright holder.
+
+Third-party materials included in this project remain under their own licences:
+
+- geography/world/data/countries.json is a derived database of world-countries
+  (Mohammed Le Doze) and is made available under the Open Database License (ODbL 1.0):
+  https://opendatacommons.org/licenses/odbl/1-0/
+- geography/world/flags/: flag-icons, MIT licence (see geography/world/flags/LICENSE).
+- geography/world/vendor/: globe.gl (MIT), d3-geo and d3-array (ISC), topojson-client (ISC);
+  licences are next to each file.
+- shared/fonts/: Bricolage Grotesque, Atkinson Hyperlegible and Tajawal, SIL Open Font License
+  (see the LICENSE files in shared/fonts/).
+- Natural Earth map data and NASA Earth imagery are in the public domain.
+- Arabic and French place names from Unicode CLDR, Unicode License v3.
+
+See about.html for the full list of credits.

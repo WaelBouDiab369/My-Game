@@ -105,6 +105,7 @@ html[dir="rtl"] .timer i { transform-origin: right; }
 .lang { display: inline-flex; background: var(--panel); border: 1px solid var(--line); border-radius: 999px; padding: 2px; backdrop-filter: blur(8px); }
 .lang button { background: none; border: 0; border-radius: 999px; padding: 4px 10px; font-size: 13px; color: var(--muted); }
 .lang button[aria-pressed="true"] { background: var(--amber); color: var(--amber-ink); font-weight: 700; }
+@media (pointer: coarse) { .lang button { min-height: 36px; padding: 7px 11px; font-size: 14px; } }
 .toggle { display: inline-flex; align-items: center; gap: 8px; }
 .level-hint { font-size: 13px; color: var(--muted); }
 .study-head { display: flex; gap: 14px; align-items: center; }
