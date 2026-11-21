@@ -63,13 +63,30 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .section-title { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: -16px; }
 .section-title h2 { font-family: var(--font-display); font-weight: 800; font-size: 24px; margin: 0; }
 .section-title span { color: var(--muted); font-size: 14px; }
+.welcome h1 { font-family: var(--font-display); font-weight: 800; font-size: clamp(40px, 7vw, 84px); line-height: 0.95; letter-spacing: -0.035em; margin: 0; text-wrap: balance; }
+.welcome h1 .spark { padding: 0 .12em .1em 0; margin-inline-end: -.12em; background: linear-gradient(90deg, var(--geo), var(--chem) 30%, var(--math) 55%, var(--bio) 80%, var(--phys)); background-size: 200% 100%; -webkit-background-clip: text; background-clip: text; color: transparent; animation: shimmer 8s linear infinite; }
+.welcome p { margin: 16px 0 0; color: var(--muted); font-size: 18px; line-height: 1.5; max-width: 56ch; }
+.account { position: relative; background: var(--panel); border: 1px dashed var(--line); border-radius: 24px; padding: 18px; display: grid; gap: 14px; }
+.acc-head { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.acc-head h2 { font-family: var(--font-display); font-weight: 800; font-size: 22px; margin: 0; }
+.soon-badge { font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: #ffd38a; background: rgba(255,181,71,.1); border: 1px solid rgba(255,181,71,.35); border-radius: 999px; padding: 4px 10px; }
+.acc-fields { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: 10px; }
+.acc-fields label { display: grid; gap: 6px; font-size: 13px; color: var(--muted); }
+.acc-fields input { width: 100%; min-width: 0; box-sizing: border-box; font: inherit; font-size: 16px; color: var(--text); background: rgba(255,255,255,.04); border: 1px solid var(--line); border-radius: 12px; padding: 11px 12px; opacity: .6; }
+.acc-btns { display: flex; gap: 10px; flex-wrap: wrap; }
+.abtn { font: inherit; font-weight: 800; border-radius: 999px; padding: 11px 18px; border: 1px solid var(--line); background: rgba(255,255,255,.08); color: var(--muted); cursor: not-allowed; }
+.abtn.ghost { background: none; }
+.gbtn[aria-pressed="true"] { background: var(--g); color: #04110d; border-color: transparent; box-shadow: 0 10px 30px -10px var(--g); }
+.enter { justify-self: start; font: inherit; font-family: var(--font-display); font-size: 20px; font-weight: 800; border: 0; border-radius: 999px; padding: 15px 28px; background: linear-gradient(90deg, #2ee6c5, #4d8dff); color: #04110d; cursor: pointer; box-shadow: 0 16px 40px -18px #2ee6c5; }
+.enter:disabled { opacity: .45; cursor: default; box-shadow: none; }
+@media (max-width: 520px) { .acc-fields { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } .enter { justify-self: stretch; } .gbtn { font-size: 22px; } }
 .gradepick { display: grid; gap: 16px; }
 .gp-title { margin-bottom: 0; }
 .stages { display: grid; grid-template-columns: 2fr 1fr 0.75fr 0.5fr; gap: 12px; }
 .stage { background: var(--panel); border: 1px solid var(--line); border-radius: 22px; padding: 14px; display: grid; gap: 10px; align-content: start; }
 .stage b { font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
-.stage .gl { display: flex; flex-wrap: wrap; gap: 8px; }
-.gbtn { --g: #2ee6c5; text-decoration: none; display: grid; place-items: center; align-content: center; width: 60px; height: 60px; border-radius: 16px; font-family: var(--font-display); font-weight: 800; font-size: 26px; line-height: 1;
+.stage .gl { display: grid; grid-template-columns: repeat(var(--n, 3), minmax(0, 60px)); gap: 8px; }
+.gbtn { --g: #2ee6c5; text-decoration: none; display: grid; place-items: center; align-content: center; width: 100%; aspect-ratio: 1; border-radius: 16px; font-family: var(--font-display); font-weight: 800; font-size: 26px; line-height: 1;
   background: linear-gradient(150deg, color-mix(in srgb, var(--g) 30%, transparent), color-mix(in srgb, var(--g) 8%, transparent)); border: 1px solid color-mix(in srgb, var(--g) 45%, transparent); color: var(--text); transition: transform .15s; }
 @media (hover: hover) { .gbtn:hover { transform: translateY(-2px); } }
 .continue { justify-self: start; text-decoration: none; display: inline-flex; gap: 10px; align-items: center; padding: 12px 18px; border-radius: 999px; font-weight: 800; background: linear-gradient(90deg, #2ee6c5, #4d8dff); color: #04110d; }
@@ -148,93 +165,26 @@ html[lang="ar"] .cat-card h3 { line-height: 1.25; }
     </div>
   </header>
 
-  <section class="hero">
-    <div>
-      <h1><span data-t="heroA"></span> <span class="spark" data-t="heroB"></span></h1>
-      <p data-t="heroSub"></p>
+  <section class="welcome">
+    <h1><span data-t="heroA"></span> <span class="spark" data-t="heroB"></span></h1>
+    <p data-t="heroSub"></p>
+  </section>
+
+  <section class="account" aria-labelledby="accTitle">
+    <div class="acc-head"><h2 id="accTitle" data-t="accTitle"></h2><span class="soon-badge" data-t="soon"></span></div>
+    <div class="acc-fields">
+      <label><span data-t="accName"></span><input type="text" disabled autocomplete="off"></label>
+      <label><span data-t="accAge"></span><input type="number" disabled></label>
     </div>
-    <aside class="fact" id="fact" aria-live="polite">
-      <div class="label"><b><i class="dot"></i><span data-t="didYouKnow"></span></b><button class="nextfact" type="button" id="nextFact" data-t="nextFact"></button></div>
-      <div class="text" id="factText"></div>
-      <div class="cat" id="factCat"></div>
-    </aside>
+    <div class="acc-btns"><button type="button" class="abtn" disabled data-t="accCreate"></button><button type="button" class="abtn ghost" disabled data-t="accSignIn"></button></div>
+    <p class="gp-note" data-t="accNote"></p>
   </section>
 
   <section class="gradepick" aria-labelledby="gpTitle">
     <div class="section-title gp-title"><h2 id="gpTitle" data-t="gradeTitle"></h2><span data-t="gradeSub"></span></div>
-    <a class="continue" id="continueGrade" hidden href="learn.html"></a>
     <div class="stages" id="stages"></div>
+    <button type="button" class="enter" id="enter" disabled></button>
     <p class="gp-note" data-t="gradeNote"></p>
-  </section>
-
-  <section>
-    <div class="section-title"><h2 data-t="pick"></h2><span data-t="pickSub"></span></div>
-  </section>
-
-  <section class="grid" id="grid">
-    <a class="cat-card" style="--c: var(--geo)" href="geography/" data-cat="geo">
-      <canvas class="art" id="miniGlobe" width="224" height="224" aria-hidden="true"></canvas>
-      <div><h3 data-t="geo"></h3><p data-t="geoD"></p></div>
-      <div class="foot"><span class="pill play"><svg viewBox="0 0 14 14" aria-hidden="true"><path d="M3 1.8v10.4L12 7z" fill="currentColor"/></svg><span data-t="play"></span></span><span class="meta" data-t="geoMeta"></span></div>
-    </a>
-
-    <a class="cat-card" style="--c: var(--chem)" href="chemistry/" data-cat="chem">
-      <svg class="art" viewBox="0 0 100 100" aria-hidden="true">
-        <path d="M40 12h20M43 12v24L22 76c-3 7 1 12 8 12h40c7 0 11-5 8-12L57 36V12" fill="none" stroke="#e8ffc0" stroke-width="3" stroke-linejoin="round"/>
-        <path d="M30 62h40l7 15c2 5-1 9-6 9H29c-5 0-8-4-6-9z" fill="#b8f03a" fill-opacity=".85"/>
-        <circle class="bubble" cx="42" cy="70" r="3" fill="#f4ffd9"/>
-        <circle class="bubble" style="animation-delay:-.9s" cx="55" cy="74" r="2.2" fill="#f4ffd9"/>
-        <circle class="bubble" style="animation-delay:-1.7s" cx="49" cy="68" r="2.6" fill="#f4ffd9"/>
-      </svg>
-      <div><h3 data-t="chem"></h3><p data-t="chemD"></p></div>
-      <div class="foot"><span class="pill play"><svg viewBox="0 0 14 14" aria-hidden="true"><path d="M3 1.8v10.4L12 7z" fill="currentColor"/></svg><span data-t="play"></span></span><span class="meta" data-t="sciMeta"></span></div>
-    </a>
-
-    <a class="cat-card" style="--c: var(--phys)" href="physics/" data-cat="phys">
-      <svg class="art" viewBox="0 0 100 100" aria-hidden="true">
-        <g fill="none" stroke="#bcd3ff" stroke-width="2">
-          <ellipse cx="50" cy="50" rx="40" ry="14"/>
-          <ellipse cx="50" cy="50" rx="40" ry="14" transform="rotate(60 50 50)"/>
-          <ellipse cx="50" cy="50" rx="40" ry="14" transform="rotate(-60 50 50)"/>
-        </g>
-        <circle cx="50" cy="50" r="7" fill="#4d8dff"/>
-        <circle r="4" fill="#ffffff"><animateMotion dur="3s" repeatCount="indefinite" path="M10 50a40 14 0 1 0 80 0a40 14 0 1 0-80 0"/></circle>
-        <g transform="rotate(60 50 50)"><circle r="4" fill="#9dc0ff"><animateMotion dur="4s" repeatCount="indefinite" path="M90 50a40 14 0 1 0 -80 0a40 14 0 1 0 80 0"/></circle></g>
-        <g transform="rotate(-60 50 50)"><circle r="4" fill="#ffffff"><animateMotion dur="5s" repeatCount="indefinite" path="M10 50a40 14 0 1 0 80 0a40 14 0 1 0-80 0"/></circle></g>
-      </svg>
-      <div><h3 data-t="phys"></h3><p data-t="physD"></p></div>
-      <div class="foot"><span class="pill play"><svg viewBox="0 0 14 14" aria-hidden="true"><path d="M3 1.8v10.4L12 7z" fill="currentColor"/></svg><span data-t="play"></span></span><span class="meta" data-t="sciMeta"></span></div>
-    </a>
-
-    <a class="cat-card" style="--c: var(--math)" href="math/" data-cat="math">
-      <svg class="art" viewBox="0 0 100 100" aria-hidden="true">
-        <path d="M10 50h80M20 85V15" stroke="#ffe2b0" stroke-opacity=".5" stroke-width="1.5"/>
-        <path class="wave" d="M20 50c7-26 13-26 20 0s13 26 20 0 13-26 20 0" fill="none" stroke="#ffb547" stroke-width="4" stroke-linecap="round"/>
-        <text x="66" y="30" font-family="Bricolage Grotesque, serif" font-weight="800" font-size="26" fill="#fff1d6">π</text>
-        <text x="26" y="88" font-family="Bricolage Grotesque, serif" font-weight="800" font-size="15" fill="#ffd38a">∑ √ ∞</text>
-      </svg>
-      <div><h3 data-t="math"></h3><p data-t="mathD"></p></div>
-      <div class="foot"><span class="pill play"><svg viewBox="0 0 14 14" aria-hidden="true"><path d="M3 1.8v10.4L12 7z" fill="currentColor"/></svg><span data-t="play"></span></span><span class="meta" data-t="sciMeta"></span></div>
-    </a>
-
-    <a class="cat-card" style="--c: var(--bio)" href="biology/" data-cat="bio">
-      <svg class="art" viewBox="0 0 100 100" aria-hidden="true">
-        <path d="M34 10c0 12 32 12 32 24s-32 12-32 24 32 12 32 24" fill="none" stroke="#ff5c9a" stroke-width="3" stroke-opacity=".9"/>
-        <path d="M66 10c0 12-32 12-32 24s32 12 32 24-32 12-32 24" fill="none" stroke="#ffb3cf" stroke-width="3" stroke-opacity=".9"/>
-        <g stroke-width="3" stroke-linecap="round" stroke-opacity=".75">
-          <line class="rung" x1="34" y1="16" x2="66" y2="16" stroke="#ff5c9a" style="animation-delay:0s"/>
-          <line class="rung" x1="34" y1="27" x2="66" y2="27" stroke="#ffb3cf" style="animation-delay:-.3s"/>
-          <line class="rung" x1="34" y1="38" x2="66" y2="38" stroke="#ff5c9a" style="animation-delay:-.6s"/>
-          <line class="rung" x1="34" y1="49" x2="66" y2="49" stroke="#ffb3cf" style="animation-delay:-.9s"/>
-          <line class="rung" x1="34" y1="60" x2="66" y2="60" stroke="#ff5c9a" style="animation-delay:-1.2s"/>
-          <line class="rung" x1="34" y1="71" x2="66" y2="71" stroke="#ffb3cf" style="animation-delay:-1.5s"/>
-          <line class="rung" x1="34" y1="82" x2="66" y2="82" stroke="#ff5c9a" style="animation-delay:-1.8s"/>
-        </g>
-        <circle cx="76" cy="24" r="9" fill="none" stroke="#ffd0e1" stroke-width="2"/><circle cx="76" cy="24" r="3" fill="#ffd0e1"/>
-      </svg>
-      <div><h3 data-t="bio"></h3><p data-t="bioD"></p></div>
-      <div class="foot"><span class="pill play"><svg viewBox="0 0 14 14" aria-hidden="true"><path d="M3 1.8v10.4L12 7z" fill="currentColor"/></svg><span data-t="play"></span></span><span class="meta" data-t="sciMeta"></span></div>
-    </a>
   </section>
 
   <footer class="site-foot"><a href="about.html" data-t="about"></a><span aria-hidden="true">·</span><a href="privacy.html" data-t="privacy"></a><span aria-hidden="true">·</span><span>© 2026 Zoyverse</span></footer>
@@ -245,8 +195,9 @@ html[lang="ar"] .cat-card h3 { line-height: 1.25; }
 <script>
 const T = {
   en: {
-    heroA: "What will you", heroB: "discover today?",
-    heroSub: "Choose a grade and play. Every game teaches something real from the school curriculum, for curious kids and grown-ups alike.",
+    heroA: "Welcome to", heroB: "Zoyverse",
+    heroSub: "Choose your grade and start learning by playing. Every game follows the school curriculum.",
+    accTitle: "Student account", soon: "Coming soon", accName: "Name", accAge: "Age", accCreate: "Create account", accSignIn: "Sign in", accNote: "Accounts will save each student's name, grade and progress. For now, just choose a grade.", enter: "Enter Zoyverse — Grade {n} →", enterPick: "Choose a grade to enter",
     didYouKnow: "Did you know?", nextFact: "Another fact",
     pick: "Or explore by science", pickSub: "50+ games to learn by playing",
     gradeTitle: "Choose your grade", gradeSub: "Parents and teachers: pick the student's grade", gradeNote: "Games follow the Cambridge International curriculum, Grades 1 to 12: Math, Science, English, Arabic, French and World Geography.", continueGrade: "Continue Grade {n} →", stages: ["Primary", "Lower Secondary", "IGCSE", "A Level"],
@@ -271,8 +222,9 @@ const T = {
     ],
   },
   ar: {
-    heroA: "ماذا ستكتشف", heroB: "اليوم؟",
-    heroSub: "اختر الصف وابدأ اللعب. كل لعبة تعلّمك شيئًا حقيقيًا من المنهاج المدرسي، للصغار والكبار الفضوليين.",
+    heroA: "مرحبًا بك في", heroB: "Zoyverse",
+    heroSub: "اختر صفّك وابدأ التعلّم باللعب. كل لعبة تتبع المنهاج المدرسي.",
+    accTitle: "حساب الطالب", soon: "قريبًا", accName: "الاسم", accAge: "العمر", accCreate: "أنشئ حسابًا", accSignIn: "سجّل الدخول", accNote: "ستحفظ الحسابات اسم كل طالب وصفّه وتقدّمه. حاليًا، اختر الصف فقط.", enter: "ادخل Zoyverse — الصف {n} ←", enterPick: "اختر صفًا للدخول",
     didYouKnow: "هل تعلم؟", nextFact: "معلومة أخرى",
     pick: "أو استكشف حسب العلم", pickSub: "أكثر من 50 لعبة للتعلّم باللعب",
     gradeTitle: "اختر صفّك", gradeSub: "أيها الأهل والمعلمون: اختاروا صف الطالب", gradeNote: "الألعاب تتبع منهاج كامبريدج الدولي من الصف الأول حتى الثاني عشر: الرياضيات والعلوم والإنجليزية والعربية والفرنسية وجغرافيا العالم.", continueGrade: "تابع الصف {n} ←", stages: ["المرحلة الابتدائية", "المرحلة المتوسطة", "IGCSE", "A Level"],
@@ -297,8 +249,9 @@ const T = {
     ],
   },
   fr: {
-    heroA: "Que vas-tu", heroB: "découvrir aujourd'hui ?",
-    heroSub: "Choisis un niveau et joue. Chaque jeu t'apprend quelque chose de vrai du programme scolaire, pour les enfants curieux comme pour les grands.",
+    heroA: "Bienvenue dans", heroB: "Zoyverse",
+    heroSub: "Choisis ton niveau et apprends en jouant. Chaque jeu suit le programme scolaire.",
+    accTitle: "Compte élève", soon: "Bientôt", accName: "Prénom", accAge: "Âge", accCreate: "Créer un compte", accSignIn: "Se connecter", accNote: "Les comptes enregistreront le prénom, le niveau et les progrès de chaque élève. Pour l'instant, choisis simplement un niveau.", enter: "Entrer dans Zoyverse — niveau {n} →", enterPick: "Choisis un niveau pour entrer",
     didYouKnow: "Le savais-tu ?", nextFact: "Un autre",
     pick: "Ou explore par science", pickSub: "Plus de 50 jeux pour apprendre en jouant",
     gradeTitle: "Choisis ton niveau", gradeSub: "Parents et enseignants : choisissez le niveau de l'élève", gradeNote: "Les jeux suivent le programme Cambridge International, du niveau 1 au niveau 12 : maths, sciences, anglais, arabe, français et géographie du monde.", continueGrade: "Continuer le niveau {n} →", stages: ["Primaire", "Collège", "IGCSE", "A Level"],
@@ -335,37 +288,27 @@ function applyLang() {
   document.querySelectorAll("[data-t]").forEach((el) => { el.textContent = d[el.dataset.t]; });
   document.querySelectorAll("[data-lang]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.lang === lang)));
   renderGrades();
-  showFact(false);
 }
 // Grade picker: Primary 1-6, Lower Secondary 7-9, IGCSE 10-11, A Level 12. Each grade opens its subjects.
 const STAGE_GRADES = [[1, 2, 3, 4, 5, 6], [7, 8, 9], [10, 11], [12]], STAGE_COLORS = ["#2ee6c5", "#4d8dff", "#b18cff", "#ff5c9a"];
+let chosen = null;
+try { const g = JSON.parse(localStorage.getItem("zv-grade")); if (g >= 1 && g <= 12) chosen = g; } catch {}
 function renderGrades() {
   const d = T[lang];
-  document.getElementById("stages").innerHTML = STAGE_GRADES.map((gs, i) => `<div class="stage"><b>${d.stages[i]}</b><div class="gl">${gs.map((g) => `<a class="gbtn" style="--g:${STAGE_COLORS[i]}" href="learn.html?g=${g}" aria-label="${d.stages[i]} ${g}">${g}</a>`).join("")}</div></div>`).join("");
-  let last = null; try { last = JSON.parse(localStorage.getItem("zv-grade")); } catch {}
-  const c = document.getElementById("continueGrade");
-  if (last >= 1 && last <= 12) { c.hidden = false; c.href = "learn.html?g=" + last; c.textContent = d.continueGrade.replace("{n}", last); } else c.hidden = true;
+  document.getElementById("stages").innerHTML = STAGE_GRADES.map((gs, i) => `<div class="stage"><b>${d.stages[i]}</b><div class="gl" style="--n:${gs.length}">${gs.map((g) => `<button type="button" class="gbtn" style="--g:${STAGE_COLORS[i]}" data-grade="${g}" aria-pressed="${g === chosen}" aria-label="${d.stages[i]} ${g}">${g}</button>`).join("")}</div></div>`).join("");
+  const e = document.getElementById("enter");
+  e.disabled = !chosen; e.textContent = chosen ? d.enter.replace("{n}", chosen) : d.enterPick;
 }
-function showFact(animate) {
-  const d = T[lang], [cat, text] = d.facts[factIndex], box = document.getElementById("fact"), el = document.getElementById("factText");
-  const put = () => { el.textContent = text; document.getElementById("factCat").textContent = d.cats[cat]; box.style.setProperty("--fact-c", COLORS[cat]); el.classList.remove("fade"); };
-  if (animate) { el.classList.add("fade"); setTimeout(put, 350); } else put();
-}
-function nextFact() { factIndex = (factIndex + 1) % T.en.facts.length; showFact(true); clearInterval(factTimer); factTimer = setInterval(nextFact, 9000); }
-document.getElementById("nextFact").addEventListener("click", nextFact);
-factTimer = setInterval(nextFact, 9000);
+document.getElementById("stages").addEventListener("click", (ev) => {
+  const b = ev.target.closest("[data-grade]"); if (!b) return;
+  chosen = +b.dataset.grade; try { localStorage.setItem("zv-grade", JSON.stringify(chosen)); } catch {} renderGrades();
+});
+document.getElementById("enter").addEventListener("click", () => { if (chosen) location.href = "learn.html?g=" + chosen; });
+
 document.querySelector(".lang").addEventListener("click", (e) => {
   const b = e.target.closest("[data-lang]"); if (!b) return;
   lang = b.dataset.lang; try { localStorage.setItem("gq-lang", JSON.stringify(lang)); } catch {}
   applyLang();
-});
-let toastTimer;
-document.getElementById("grid").addEventListener("click", (e) => {
-  const card = e.target.closest("button.cat-card"); if (!card) return;
-  card.classList.remove("shake"); void card.offsetWidth; card.classList.add("shake");
-  const t = document.getElementById("toast");
-  t.textContent = T[lang].soonToast.replace("{name}", T[lang].cats[card.dataset.cat]);
-  t.classList.add("show"); clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove("show"), 2600);
 });
 applyLang();
 

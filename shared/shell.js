@@ -16,17 +16,17 @@
 
   const UI = {
     en: { home: "← Home", back: "← {subject}", learn: "Learn", play: "Play", startChallenge: "Start the challenge", explore: "Explore", round: "Round", score: "Score", streak: "Streak",
-      next: "Next →", finish: "See results", easy: "Easy", normal: "Normal", best: "Best: {score}", noBest: "Not played yet", again: "Play again", other: "More games",
+      toChapters: "← Chapters", next: "Next →", finish: "See results", easy: "Easy", normal: "Normal", best: "Best: {score}", noBest: "Not played yet", again: "Play again", other: "More games",
       correct: "Correct!", wrong: "Not quite.", great: "Brilliant!", good: "Well done!", ok: "Good start!", tryMore: "Keep practising!", youLearn: "You will learn",
       sound: "Sound", games: "games", lessons: "lessons", langs: "languages", newBadge: "New", soonBadge: "Coming soon", check: "Check", reset: "Reset", hint: "Hint",
       outOf: "{a} of {b} correct", learnPrompt: "Explore freely. When you are ready, start the challenge.", level: "Level" },
     ar: { home: "→ الرئيسية", back: "→ {subject}", learn: "تعلّم", play: "العب", startChallenge: "ابدأ التحدي", explore: "استكشف", round: "الجولة", score: "النقاط", streak: "سلسلة",
-      next: "التالي ←", finish: "اعرض النتيجة", easy: "سهل", normal: "عادي", best: "أفضل نتيجة: {score}", noBest: "لم تلعب بعد", again: "العب مجددًا", other: "ألعاب أخرى",
+      toChapters: "→ الفصول", next: "التالي ←", finish: "اعرض النتيجة", easy: "سهل", normal: "عادي", best: "أفضل نتيجة: {score}", noBest: "لم تلعب بعد", again: "العب مجددًا", other: "ألعاب أخرى",
       correct: "صحيح!", wrong: "ليست الإجابة الصحيحة.", great: "رائع!", good: "أحسنت!", ok: "بداية جيدة!", tryMore: "واصل التدرّب!", youLearn: "ستتعلّم",
       sound: "الصوت", games: "لعبة", lessons: "درسًا", langs: "لغات", newBadge: "جديد", soonBadge: "قريبًا", check: "تحقّق", reset: "إعادة", hint: "تلميح",
       outOf: "{a} من {b} صحيحة", learnPrompt: "استكشف بحرية، وعندما تكون جاهزًا ابدأ التحدي.", level: "المستوى" },
     fr: { home: "← Accueil", back: "← {subject}", learn: "Apprendre", play: "Jouer", startChallenge: "Commencer le défi", explore: "Explorer", round: "Manche", score: "Score", streak: "Série",
-      next: "Suivant →", finish: "Voir le résultat", easy: "Facile", normal: "Normal", best: "Record : {score}", noBest: "Pas encore joué", again: "Rejouer", other: "Autres jeux",
+      toChapters: "← Chapitres", next: "Suivant →", finish: "Voir le résultat", easy: "Facile", normal: "Normal", best: "Record : {score}", noBest: "Pas encore joué", again: "Rejouer", other: "Autres jeux",
       correct: "Bravo !", wrong: "Pas tout à fait.", great: "Brillant !", good: "Bien joué !", ok: "Bon début !", tryMore: "Continue à t'entraîner !", youLearn: "Tu vas apprendre",
       sound: "Son", games: "jeux", lessons: "leçons", langs: "langues", newBadge: "Nouveau", soonBadge: "Bientôt", check: "Vérifier", reset: "Recommencer", hint: "Indice",
       outOf: "{a} sur {b} justes", learnPrompt: "Explore librement. Quand tu es prêt, lance le défi.", level: "Niveau" },
@@ -150,7 +150,10 @@
 
   // ---------- the game page ----------
   MQ.playPage = (subject) => {
-    const id = new URLSearchParams(location.search).get("g");
+    const qs = new URLSearchParams(location.search), id = qs.get("g");
+    // Opened from a grade's chapter list: the back button returns there, and the game knows the student's grade.
+    const back = (qs.get("back") || "").match(/^learn\.html\?[\w=&.-]*$/) ? "../" + qs.get("back") : "./";
+    MQ.grade = parseInt(qs.get("grade"), 10) || null;
     const app = document.getElementById("app");
     const s = document.createElement("script"); s.src = `games/${id}.js`;
     s.onload = () => { const def = MQ.games[id]; if (!def) location.replace("./"); else run(def, subject); };
@@ -162,7 +165,7 @@
       const S = { mode: "intro", level: store.get(`mq-level-${subject.id}`) || "normal", i: 0, n: 8, score: 0, streak: 0, right: 0, locked: false, fb: null, prompt: null };
       const key = `mq-best-${subject.id}-${def.id}`;
       app.innerHTML = `
-        <header class="top"><div class="left"><a class="pillbtn" href="./" id="backLink"></a></div>
+        <header class="top"><div class="left"><a class="pillbtn" href="${back}" id="backLink"></a></div>
           <div class="right"><button class="pillbtn" type="button" id="mute"></button>${MQ.langSwitch()}</div></header>
         <main id="screen"></main>`;
       const $ = (q) => app.querySelector(q);
@@ -170,7 +173,7 @@
       // Translatable fragments: a game writes api.T("key") or api.N({en,ar,fr}) and the text follows language changes.
       const enc = (o) => MQ.esc(JSON.stringify(o));
       const api = {
-        def, subject, get lang() { return lang; }, get level() { return S.level; }, get round() { return S.i; }, get locked() { return S.locked; },
+        def, subject, grade: MQ.grade, get lang() { return lang; }, get level() { return S.level; }, get round() { return S.i; }, get locked() { return S.locked; },
         t: T, tr: MQ.tr, esc: MQ.esc, fmt: MQ.fmt, rnd: MQ.rnd, pick: MQ.pick, shuffle: MQ.shuffle, el: MQ.el, canvas: MQ.canvas, sound: MQ.sound, dragSort: MQ.dragSort,
         T: (k, v) => `<span data-k="${MQ.esc(k)}"${v ? ` data-v="${enc(v)}"` : ""}>${MQ.esc(T(k, v))}</span>`,
         H: (k, v) => `<span data-kh="${MQ.esc(k)}"${v ? ` data-v="${enc(v)}"` : ""}>${T(k, v)}</span>`,
@@ -197,7 +200,7 @@
         root.querySelectorAll("[data-ui]").forEach((n) => (n.textContent = MQ.ui(n.dataset.ui)));
       }
       function chrome() {
-        $("#backLink").textContent = MQ.ui("back", { subject: MQ.tr(subject.name) });
+        $("#backLink").textContent = back === "./" ? MQ.ui("back", { subject: MQ.tr(subject.name) }) : MQ.ui("toChapters");
         $("#mute").innerHTML = (muted ? "🔇" : "🔊") + ` <span class="lbl">${MQ.esc(MQ.ui("sound"))}</span>`; $("#mute").setAttribute("aria-label", MQ.ui("sound"));
         document.title = `${MQ.tr(def.title)} · ${MQ.tr(subject.name)} · Zoyverse`;
       }
@@ -258,7 +261,7 @@
         const msg = stars === 3 ? "great" : stars === 2 ? "good" : stars === 1 ? "ok" : "tryMore";
         $("#screen").innerHTML = `<section class="stage end"><div class="kicker">${MQ.esc(MQ.tr(def.title))}</div><div class="stars">${[0, 1, 2].map((k) => `<span class="${k < stars ? "on" : ""}" style="animation-delay:${k * 0.18}s">★</span>`).join("")}</div>
           <div class="prompt">${MQ.esc(MQ.ui(msg))}</div><div class="score">${S.score}</div><div class="subprompt">${MQ.esc(MQ.ui("outOf", { a: S.right, b: S.n }))}</div>
-          <div class="actions" style="justify-content:center"><button class="btn" id="again">${MQ.esc(MQ.ui("again"))}</button><a class="btn ghost" href="./" style="text-decoration:none">${MQ.esc(MQ.ui("other"))}</a></div></section>`;
+          <div class="actions" style="justify-content:center"><button class="btn" id="again">${MQ.esc(MQ.ui("again"))}</button><a class="btn ghost" href="${back}" style="text-decoration:none">${MQ.esc(MQ.ui("other"))}</a></div></section>`;
         $("#again").addEventListener("click", play);
       }
       function hud() { if (!$("#score")) return; $("#score").textContent = S.score; $("#streak").textContent = S.streak; }

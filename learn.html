@@ -53,6 +53,19 @@ h1 .spark { color: var(--c); }
 @media (hover: hover) { .game:hover { background: color-mix(in srgb, var(--c) 26%, transparent); } }
 .soon-tag { font-size: 13px; color: var(--muted); }
 .legend { display: flex; gap: 16px; flex-wrap: wrap; color: var(--muted); font-size: 14px; }
+.chapters { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; }
+.chap { position: relative; text-decoration: none; display: grid; grid-template-rows: auto 1fr auto; gap: 8px; padding: 16px; border-radius: 20px; min-height: 150px;
+  background: linear-gradient(155deg, color-mix(in srgb, var(--c) 16%, transparent), transparent 60%), var(--panel); border: 1px solid color-mix(in srgb, var(--c) 35%, var(--line)); transition: transform .2s, border-color .2s; }
+@media (hover: hover) { a.chap:hover { transform: translateY(-3px); border-color: var(--c); } }
+.chap .cnum { font-size: 12px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--c); }
+.chap h3 { margin: 0; font-family: var(--font-display); font-weight: 800; font-size: 19px; line-height: 1.25; }
+.chap .cdesc { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.4; }
+.chap .cfoot { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.chap .cplay { display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; border-radius: 999px; background: var(--c); color: #04110d; font-weight: 800; font-size: 14px; }
+.chap .cmeta { color: var(--muted); font-size: 13px; }
+.chap.soon { background: var(--panel); border-color: var(--line); border-style: dashed; opacity: .6; }
+.chap.soon .cnum { color: var(--muted); }
+@media (max-width: 520px) { .chapters { grid-template-columns: 1fr; } .chap { min-height: 0; } }
 footer { color: var(--muted); font-size: 13px; text-align: center; padding-top: 10px; }
 @media (max-width: 520px) { .subjects { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; } .subj { min-height: 150px; padding: 14px; } .subj h3 { font-size: 18px; } .subj .ic { width: 44px; height: 44px; font-size: 20px; } }
 </style>
@@ -66,24 +79,29 @@ footer { color: var(--muted); font-size: 13px; text-align: center; padding-top: 
 const UI = {
   en: { home: "← Home", grade: "Grade {n}", gradeShort: "G{n}", subjectsFor: "Subjects for Grade {n}", choose: "Choose a subject", units: "{n} units", ready: "{n} with games", soon: "Coming soon",
     draft: "Draft curriculum map · for teacher review", aligned: "Aligned with the Cambridge International curriculum", unitsTitle: "{subject} · Grade {n}",
-    legendReady: "Units with games to play", legendSoon: "Planned units (coming soon)", changeGrade: "Change grade", allSubjects: "← All subjects", play: "Play" },
+    legendReady: "Units with games to play", legendSoon: "Planned units (coming soon)", changeGrade: "← Change grade", allSubjects: "← Subjects", play: "Play", chapter: "Chapter {n}", chapters: "Chapters", activity: "Activity {n}", backChapters: "← Chapters", games: "{n} games", oneGame: "1 game" },
   ar: { home: "→ الرئيسية", grade: "الصف {n}", gradeShort: "ص{n}", subjectsFor: "مواد الصف {n}", choose: "اختر مادة", units: "{n} وحدات", ready: "{n} فيها ألعاب", soon: "قريبًا",
     draft: "خريطة منهاج تجريبية · للمراجعة من قبل المعلمين", aligned: "متوافق مع منهاج كامبريدج الدولي", unitsTitle: "{subject} · الصف {n}",
-    legendReady: "وحدات فيها ألعاب", legendSoon: "وحدات مخطط لها (قريبًا)", changeGrade: "غيّر الصف", allSubjects: "→ كل المواد", play: "العب" },
+    legendReady: "وحدات فيها ألعاب", legendSoon: "وحدات مخطط لها (قريبًا)", changeGrade: "→ غيّر الصف", allSubjects: "→ المواد", play: "العب", chapter: "الفصل {n}", chapters: "الفصول", activity: "النشاط {n}", backChapters: "→ الفصول", games: "{n} ألعاب", oneGame: "لعبة واحدة" },
   fr: { home: "← Accueil", grade: "Niveau {n}", gradeShort: "N{n}", subjectsFor: "Matières du niveau {n}", choose: "Choisis une matière", units: "{n} unités", ready: "{n} avec des jeux", soon: "Bientôt",
     draft: "Programme provisoire · à relire par les enseignants", aligned: "Aligné sur le programme Cambridge International", unitsTitle: "{subject} · Niveau {n}",
-    legendReady: "Unités avec des jeux", legendSoon: "Unités prévues (bientôt)", changeGrade: "Changer de niveau", allSubjects: "← Toutes les matières", play: "Jouer" },
+    legendReady: "Unités avec des jeux", legendSoon: "Unités prévues (bientôt)", changeGrade: "← Changer de niveau", allSubjects: "← Matières", play: "Jouer", chapter: "Chapitre {n}", chapters: "Chapitres", activity: "Activité {n}", backChapters: "← Chapitres", games: "{n} jeux", oneGame: "1 jeu" },
 };
 const C = window.ZV_CURRICULUM, GAMES = window.ZV_GAMES;
 let lang = "en";
 try { const s = JSON.parse(localStorage.getItem("gq-lang")); if (UI[s]) lang = s; } catch {}
 const q = new URLSearchParams(location.search);
-let grade = Math.min(12, Math.max(1, parseInt(q.get("g"), 10) || 1)), subject = q.get("s");
+let stored = null; try { stored = JSON.parse(localStorage.getItem("zv-grade")); } catch {}
+let grade = parseInt(q.get("g"), 10) || stored, subject = q.get("s"), chap = q.has("c") ? parseInt(q.get("c"), 10) : null;
+if (!(grade >= 1 && grade <= 12)) location.replace("./");
 if (subject && !(C.grades[grade] || {})[subject]) subject = null;
+if (chap !== null && !(subject && C.grades[grade][subject][chap])) chap = null;
 try { localStorage.setItem("zv-grade", JSON.stringify(grade)); } catch {}
 const t = (k, v = {}) => UI[lang][k].replace(/\{(\w+)\}/g, (_, x) => v[x]);
 const tr = (o) => (o && (o[lang] || o.en)) || "";
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+const here = () => `learn.html?g=${grade}${subject ? "&s=" + subject : ""}${chap !== null ? "&c=" + chap : ""}`;
+const gameHref = (id) => { const u = GAMES[id].url; return u + (u.includes("?") ? "&" : "?") + "grade=" + grade + "&back=" + encodeURIComponent(here()); };
 const stageOf = (g) => C.STAGES.find((s) => s.grades.includes(g));
 const subjectsOf = (g) => C.order.filter((s) => C.grades[g][s]);
 const langSwitch = () => `<div class="lang" role="group" aria-label="Language">${["en", "ar", "fr"].map((l) => `<button type="button" data-lang="${l}" lang="${l}" aria-pressed="${l === lang}">${{ en: "EN", ar: "عربي", fr: "FR" }[l]}</button>`).join("")}</div>`;
@@ -98,35 +116,44 @@ function renderSubjects() {
       <div class="meta">${esc(t("units", { n: units.length }))} · ${esc(t("ready", { n: ready }))}</div><div class="bar"><i style="width:${Math.round(ready / units.length * 100)}%"></i></div></a>`;
   }).join("");
   document.title = `${t("grade", { n: grade })} · Zoyverse`;
-  return `<header class="top"><a class="pill" href="./">${esc(t("home"))}</a>${langSwitch()}</header>
+  return `<header class="top"><a class="pill" href="./">${esc(t("changeGrade"))}</a>${langSwitch()}</header>
     <section><div class="kicker">${esc(tr(st.name))} · ${esc(t("aligned"))}</div>
       <h1>${esc(t("grade", { n: grade }))}</h1>
       <p class="lead">${esc(t("choose"))}</p></section>
-    ${gradeBar()}
     <section class="subjects">${cards}</section>
     <div><span class="draft">✎ ${esc(t("draft"))}</span></div>`;
 }
 function renderUnits() {
   const S = C.SUBJECTS[subject], units = C.grades[grade][subject];
   document.documentElement.style.setProperty("--c", S.color);
-  const list = units.map((u) => {
-    const games = u.games.filter((id) => GAMES[id]);
-    return `<article class="unit${games.length ? "" : " soon"}"><h3>${esc(tr(u.t))}</h3>
-      ${games.length ? `<div class="games">${games.map((id) => `<a class="game" href="${GAMES[id].url}" title="${esc(tr(GAMES[id].tag))}"><span class="play">▶</span>${esc(tr(GAMES[id].title))}</a>`).join("")}</div>` : `<span class="soon-tag">${esc(t("soon"))}</span>`}</article>`;
+  const cards = units.map((u, k) => {
+    const games = u.games.filter((id) => GAMES[id]), n = games.length;
+    const href = n === 1 ? gameHref(games[0]) : n > 1 ? `learn.html?g=${grade}&s=${subject}&c=${k}` : null;
+    const inner = `<span class="cnum">${esc(t("chapter", { n: k + 1 }))}</span><h3>${esc(tr(u.t))}</h3>
+      <span class="cfoot">${n ? `<span class="cplay">▶ ${esc(t("play"))}</span><span class="cmeta">${esc(n === 1 ? t("oneGame") : t("games", { n }))}</span>` : `<span class="soon-tag">${esc(t("soon"))}</span>`}</span>`;
+    return href ? `<a class="chap" href="${href}">${inner}</a>` : `<div class="chap soon" aria-disabled="true">${inner}</div>`;
   }).join("");
   document.title = `${tr(S.name)} · ${t("grade", { n: grade })} · Zoyverse`;
   return `<header class="top"><a class="pill" href="learn.html?g=${grade}">${esc(t("allSubjects"))}</a>${langSwitch()}</header>
-    <section><div class="kicker">${esc(tr(stageOf(grade).name))} · ${esc(t("grade", { n: grade }))}</div>
+    <section><div class="kicker">${esc(t("grade", { n: grade }))} · ${esc(tr(stageOf(grade).name))}</div>
       <h1><span class="spark">${esc(tr(S.name))}</span></h1>
       <p class="lead">${esc(t("aligned"))}</p></section>
-    ${gradeBar()}
-    <div class="legend"><span>▶ ${esc(t("legendReady"))}</span><span>○ ${esc(t("legendSoon"))}</span></div>
-    <section class="units">${list}</section>
+    <section class="chapters">${cards}</section>
     <div><span class="draft">✎ ${esc(t("draft"))}</span></div>`;
+}
+// A chapter with several games: its activities, in order.
+function renderChapter() {
+  const S = C.SUBJECTS[subject], u = C.grades[grade][subject][chap], games = u.games.filter((id) => GAMES[id]);
+  document.documentElement.style.setProperty("--c", S.color);
+  document.title = `${tr(u.t)} · ${tr(S.name)} · Zoyverse`;
+  return `<header class="top"><a class="pill" href="learn.html?g=${grade}&s=${subject}">${esc(t("backChapters"))}</a>${langSwitch()}</header>
+    <section><div class="kicker">${esc(tr(S.name))} · ${esc(t("grade", { n: grade }))} · ${esc(t("chapter", { n: chap + 1 }))}</div>
+      <h1><span class="spark">${esc(tr(u.t))}</span></h1></section>
+    <section class="chapters">${games.map((id, k) => `<a class="chap" href="${gameHref(id)}"><span class="cnum">${esc(t("activity", { n: k + 1 }))}</span><h3>${esc(tr(GAMES[id].title))}</h3><p class="cdesc">${esc(tr(GAMES[id].tag))}</p><span class="cfoot"><span class="cplay">▶ ${esc(t("play"))}</span></span></a>`).join("")}</section>`;
 }
 function render() {
   document.documentElement.lang = lang; document.documentElement.dir = lang === "ar" ? "rtl" : "ltr";
-  document.getElementById("app").innerHTML = (subject ? renderUnits() : renderSubjects()) + `<footer>© 2026 Zoyverse</footer>`;
+  document.getElementById("app").innerHTML = (chap !== null ? renderChapter() : subject ? renderUnits() : renderSubjects()) + `<footer>© 2026 Zoyverse</footer>`;
 }
 document.getElementById("app").addEventListener("click", (e) => {
   const b = e.target.closest("[data-lang]"); if (!b) return;
