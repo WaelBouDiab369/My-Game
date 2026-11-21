@@ -239,8 +239,22 @@
 
   // ---------- running the cards ----------
   const live = [];
-  function mount(el) {
+  // Phones and tablets play each card as a seamless video loop (recorded from these same drawings), which their
+  // video chip plays smoothly; computers keep drawing the cards live. If a video cannot play, the card is drawn live.
+  const VIDEO_CARDS = new Set(["countries", "capitals", "continents", "islands", "archipelagos", "regions", "deserts", "ranges", "mountains", "oceans", "seas", "straits", "rivers", "lakes", "cities", "latlong"]);
+  const PHONE = !window.__recDpr && matchMedia("(pointer: coarse)").matches;
+  const vio = "IntersectionObserver" in window ? new IntersectionObserver((es) => es.forEach((e) => { const v = e.target.querySelector("video.live"); if (!v) return; if (e.isIntersecting) v.play().catch(() => {}); else v.pause(); }), { rootMargin: "60px" }) : null;
+  function mountVideo(el, id) {
+    const v = document.createElement("video"); v.className = "live"; v.muted = true; v.loop = true; v.playsInline = true; v.setAttribute("playsinline", ""); v.setAttribute("muted", ""); v.preload = "metadata";
+    v.innerHTML = `<source src="video/${id}.webm" type="video/webm"><source src="video/${id}.mp4" type="video/mp4">`;
+    let fell = false; const fallback = () => { if (fell) return; fell = true; v.remove(); el.classList.remove("is-live"); mount(el, true); io && io.observe(el); };
+    v.lastElementChild.addEventListener("error", fallback);
+    v.addEventListener("loadeddata", () => el.classList.add("is-live"));
+    el.appendChild(v); if (vio) vio.observe(el); else v.play().catch(() => {});
+  }
+  function mount(el, noVideo) {
     const id = el.dataset.live, spec = CARDS[id]; if (!spec) return;
+    if (PHONE && !noVideo && VIDEO_CARDS.has(id)) return mountVideo(el, id);
     const canvas = document.createElement("canvas"); canvas.className = "live"; el.appendChild(canvas);
     const ctx = canvas.getContext("2d"), cam = spec.cam.type === "globe" ? makeGlobe(el, spec.cam) : makeView(el, spec.cam);
     const card = { el, canvas, ctx, cam, spec, data: null, ready: false, on: false, W: 0, H: 0, s: 1, img: null, t0: performance.now() + Math.random() * 5000 };
@@ -275,7 +289,7 @@
   addEventListener("resize", () => { clearTimeout(resizeT); resizeT = setTimeout(() => live.forEach((c) => c.ready && size(c)), 150); });
   window.mountLiveCards = function (root) {
     for (let i = live.length - 1; i >= 0; i--) if (!document.body.contains(live[i].el)) { io && io.unobserve(live[i].el); live.splice(i, 1); }
-    root.querySelectorAll("[data-live]").forEach((el) => { if (el.querySelector("canvas.live")) return; mount(el); if (io) io.observe(el); else live[live.length - 1].on = true; });
+    root.querySelectorAll("[data-live]").forEach((el) => { if (el.querySelector("canvas.live, video.live")) return; const n = live.length; mount(el); if (live.length === n) return; if (io) io.observe(el); else live[live.length - 1].on = true; });
   };
   requestAnimationFrame(loop);
 })();

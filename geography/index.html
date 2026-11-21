@@ -95,6 +95,8 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .art svg { width: 100%; height: 100%; display: block; transition: opacity .6s; }
 .art canvas.live { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; transition: opacity .7s; }
 .art.is-live canvas.live { opacity: 1; }
+.art video.live { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; opacity: 0; transition: opacity .7s; }
+.art.is-live video.live { opacity: 1; }
 .art.is-live svg { opacity: 0; }
 .art[data-live] { background: radial-gradient(1px 1px at 12% 20%, #fff8, transparent), radial-gradient(1px 1px at 72% 14%, #fff7, transparent), radial-gradient(1px 1px at 88% 70%, #fff6, transparent), radial-gradient(1px 1px at 30% 84%, #fff6, transparent), radial-gradient(1.2px 1.2px at 52% 46%, #fff5, transparent), radial-gradient(circle at 50% 120%, #14254a, #070c1a 70%); }
 .art .shine { position: absolute; inset: 0; background: radial-gradient(circle at var(--mx, 50%) var(--my, 0%), rgba(255,255,255,.22), transparent 45%); opacity: 0; transition: opacity .3s; pointer-events: none; }
