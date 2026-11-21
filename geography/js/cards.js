@@ -17,6 +17,9 @@
     return g;
   }
   const ease = (k) => 0.5 - Math.cos(k * Math.PI) / 2;
+  // Every card repeats exactly: map views every 21 s, globes one full turn every 63 s, and every effect fits
+  // a whole number of times into that, so the animation can loop forever with no visible jump.
+  const LOOP_VIEW = 21000, LOOP_GLOBE = 63000, SPIN = 360 / (LOOP_GLOBE / 1000), TAU = 2 * Math.PI;
   const cycle = (t, period) => ((t % period) + period) % period / period;
   const COL = { amber: "255,181,71", teal: "46,230,197", blue: "120,200,255", pink: "255,111,174", white: "255,255,255", lime: "190,240,90" };
 
@@ -69,7 +72,7 @@
       async ready() { this.img = await loadImg(opt.tex || "dayHi"); },
       layout(w, h) { W = w; H = h; },
       draw(ctx, _img, t) {
-        const [[s, w], [n, e]] = opt.box, k = reduce ? 0.5 : ease(cycle(t, opt.period || 16000));
+        const [[s, w], [n, e]] = opt.box, k = reduce ? 0.5 : 0.5 - 0.5 * Math.cos(2 * Math.PI * cycle(t, opt.period || LOOP_VIEW));
         const z = 1 + (opt.zoom ?? 0.12) * k, panX = (opt.pan ? opt.pan[0] : 0) * k, panY = (opt.pan ? opt.pan[1] : 0) * k;
         const cLng = (w + e) / 2 + panX, cLat = (s + n) / 2 + panY;
         const spanLng = (e - w) / z, spanLat = spanLng * (H / W);
@@ -99,7 +102,7 @@
     ctx.strokeStyle = `rgba(${rgb},${alpha})`; ctx.lineWidth = width; ctx.stroke(); ctx.shadowBlur = 0;
   }
   function pulseAt(ctx, x, y, t, rgb, s = 1, phase = 0) {
-    const k = cycle(t + phase, 2200);
+    const k = cycle(t + phase, 2100);
     ctx.strokeStyle = `rgba(${rgb},${1 - k})`; ctx.lineWidth = 1.6 * s; ctx.beginPath(); ctx.arc(x, y, (3 + k * 14) * s, 0, 6.283); ctx.stroke();
     ctx.fillStyle = `rgb(${rgb})`; ctx.shadowColor = `rgb(${rgb})`; ctx.shadowBlur = 8 * s; ctx.beginPath(); ctx.arc(x, y, 2.6 * s, 0, 6.283); ctx.fill(); ctx.shadowBlur = 0;
   }
@@ -130,102 +133,102 @@
 
   // ---------- the cards ----------
   const CARDS = {
-    countries: { cam: { type: "globe", lng: 20, tilt: 22, spin: 5, size: 0.47 }, data: countriesGeo, draw(ctx, path, d, t, s, cam) {
+    countries: { cam: { type: "globe", lng: 20, tilt: 22, spin: SPIN, size: 0.47 }, data: countriesGeo, draw(ctx, path, d, t, s, cam) {
       ctx.beginPath(); path(d.mesh); ctx.strokeStyle = "rgba(255,255,255,.45)"; ctx.lineWidth = 0.7 * s; ctx.stroke();
-      const step = 900, i = Math.floor(t / step), k = cycle(t, step);
-      for (let j = 0; j < 4; j++) {   // light up a few countries in turn
-        const n = d.feats.length, f = d.feats[((((i - j) * 37) % n) + n) % n]; if (!f) continue;
+      const step = 875, steps = LOOP_GLOBE / step, i = Math.floor(t / step), k = cycle(t, step);
+      for (let j = 0; j < 4; j++) {   // light up a few countries in turn (the same sequence every turn of the globe)
+        const n = d.feats.length, q = (((i - j) % steps) + steps) % steps, f = d.feats[(q * 37) % n]; if (!f) continue;
         const a = j === 0 ? k : 1 - j * 0.28; if (a <= 0) continue;
         glowPath(ctx, path, f, ["255,181,71", "46,230,197", "255,111,174", "120,200,255"][(i - j + 400) % 4], 0.9 * a, 1.4 * s, 0.35 * a);
       }
     } },
-    capitals: { cam: { type: "globe", tex: "night", lng: 15, tilt: 24, spin: 4, size: 0.47 }, data: () => loadJSON("world/data/countries.json"), draw(ctx, path, list, t, s, cam) {
+    capitals: { cam: { type: "globe", tex: "night", lng: 15, tilt: 24, spin: SPIN, size: 0.47 }, data: () => loadJSON("world/data/countries.json"), draw(ctx, path, list, t, s, cam) {
       list.forEach((c, i) => { if (!c.capLL || c.sov) return; const p = visible(cam.proj, c.capLL[1], c.capLL[0]); if (!p) return;
         const k = cycle(t + i * 377, 3000); ctx.fillStyle = `rgba(255,214,120,${0.55 + 0.45 * Math.sin(k * 6.283)})`; ctx.beginPath(); ctx.arc(p[0], p[1], 1.6 * s, 0, 6.283); ctx.fill();
         if (i % 9 === Math.floor(t / 700) % 9) pulseAt(ctx, p[0], p[1], t, "255,214,120", s * 0.9, i * 50); });
     } },
-    continents: { cam: { type: "globe", lng: 10, tilt: 20, spin: 7, size: 0.47 }, data: () => topic("continents"), draw(ctx, path, feats, t, s) {
+    continents: { cam: { type: "globe", lng: 10, tilt: 20, spin: SPIN, size: 0.47 }, data: () => topic("continents"), draw(ctx, path, feats, t, s) {
       const C = { africa: "255,159,67", antarctica: "220,232,250", asia: "29,209,161", "australia-oceania": "197,108,240", europe: "112,161,255", "north-america": "255,107,129", "south-america": "254,202,87" };
-      const n = feats.length, period = 1600, cur = Math.floor(t / period) % n, k = cycle(t, period);
+      const n = feats.length, period = 1575, cur = Math.floor(t / period) % n, k = cycle(t, period);
       feats.forEach((f, i) => { const on = i === cur ? Math.sin(k * Math.PI) : 0; glowPath(ctx, path, f.geo, C[f.id] || "255,255,255", 0.22 + 0.75 * on, (0.7 + 1.1 * on) * s, 0.14 + 0.34 * on); });
     } },
-    islands: { cam: { type: "view", box: [[-27, 36], [-10, 62]], zoom: 0.18, pan: [-2, 0.5], period: 18000 }, data: () => topic("islands"), draw(ctx, path, feats, t, s, cam, W, H) {
+    islands: { cam: { type: "view", box: [[-27, 36], [-10, 62]], zoom: 0.18, pan: [-2, 0.5], period: LOOP_VIEW }, data: () => topic("islands"), draw(ctx, path, feats, t, s, cam, W, H) {
       shimmer(ctx, W, H, t, "200,235,255", 0.12);
-      feats.forEach((f, i) => glowPath(ctx, path, f.geo, "46,230,197", 0.7 + 0.3 * Math.sin(t / 700 + i), 1.6 * s, 0.10));
+      feats.forEach((f, i) => glowPath(ctx, path, f.geo, "46,230,197", 0.7 + 0.3 * Math.sin(TAU * t / 4200 + i), 1.6 * s, 0.10));
       const m = cam.proj([46.9, -18.9]); if (m) pulseAt(ctx, m[0], m[1], t, "255,255,255", s);
     } },
-    archipelagos: { cam: { type: "view", box: [[-12, 94], [22, 132]], zoom: 0.14, pan: [3, 1], period: 20000 }, data: () => topic("archipelagos"), draw(ctx, path, feats, t, s, cam, W, H) {
+    archipelagos: { cam: { type: "view", box: [[-12, 94], [22, 132]], zoom: 0.14, pan: [3, 1], period: LOOP_VIEW }, data: () => topic("archipelagos"), draw(ctx, path, feats, t, s, cam, W, H) {
       shimmer(ctx, W, H, t, "200,235,255", 0.10);
-      ctx.setLineDash([6 * s, 5 * s]); ctx.lineDashOffset = -t / 40;
+      ctx.setLineDash([6 * s, 5 * s]); ctx.lineDashOffset = -cycle(t, 1050) * 22 * s;
       feats.forEach((f) => glowPath(ctx, path, f.geo, "255,214,120", 0.85, 1.4 * s, 0.06));
       ctx.setLineDash([]);
-      ship(ctx, cam.proj, [[100, 2.5], [104.5, 1.2], [109, 3], [114, 6], [118, 9], [121, 14]], reduce ? 0.5 : cycle(t, 16000), s);
+      ship(ctx, cam.proj, [[100, 2.5], [104.5, 1.2], [109, 3], [114, 6], [118, 9], [121, 14]], reduce ? 0.5 : cycle(t, LOOP_VIEW), s);
     } },
-    regions: { cam: { type: "view", box: [[8, 24], [42, 66]], zoom: 0.12, pan: [1, 0.5], period: 18000 }, data: () => topic("regions"), draw(ctx, path, feats, t, s) {
+    regions: { cam: { type: "view", box: [[8, 24], [42, 66]], zoom: 0.12, pan: [1, 0.5], period: LOOP_VIEW }, data: () => topic("regions"), draw(ctx, path, feats, t, s) {
       const pick = feats.filter((f) => ["arabian-peninsula", "levant", "mesopotamia", "anatolia", "balochistan", "horn-of-africa"].includes(f.id));
-      const cur = Math.floor(t / 2200) % pick.length, k = cycle(t, 2200);
-      ctx.setLineDash([7 * s, 5 * s]); ctx.lineDashOffset = -t / 35;
+      const cur = Math.floor(t / 2100) % pick.length, k = cycle(t, 2100);
+      ctx.setLineDash([7 * s, 5 * s]); ctx.lineDashOffset = -cycle(t, 1050) * 24 * s;
       pick.forEach((f, i) => glowPath(ctx, path, f.geo, "255,143,112", i === cur ? 1 : 0.6, (i === cur ? 2.2 : 1.3) * s, i === cur ? 0.28 * Math.sin(k * Math.PI) : 0.05));
       ctx.setLineDash([]);
     } },
-    deserts: { cam: { type: "view", box: [[8, -18], [36, 58]], zoom: 0.16, pan: [6, 1], period: 22000 }, data: () => topic("deserts"), draw(ctx, path, feats, t, s, cam, W, H) {
-      feats.forEach((f, i) => glowPath(ctx, path, f.geo, "255,190,90", 0.55 + 0.4 * Math.sin(t / 900 + i), 1.2 * s, 0.12 + 0.1 * Math.sin(t / 900 + i)));
-      ctx.globalAlpha = 0.18 + 0.08 * Math.sin(t / 400); const g = ctx.createLinearGradient(0, 0, 0, H); g.addColorStop(0, "rgba(255,170,60,.0)"); g.addColorStop(1, "rgba(255,170,60,.6)"); ctx.fillStyle = g; ctx.fillRect(0, 0, W, H); ctx.globalAlpha = 1;
+    deserts: { cam: { type: "view", box: [[8, -18], [36, 58]], zoom: 0.16, pan: [6, 1], period: LOOP_VIEW }, data: () => topic("deserts"), draw(ctx, path, feats, t, s, cam, W, H) {
+      feats.forEach((f, i) => glowPath(ctx, path, f.geo, "255,190,90", 0.55 + 0.4 * Math.sin(TAU * t / 5250 + i), 1.2 * s, 0.12 + 0.1 * Math.sin(TAU * t / 5250 + i)));
+      ctx.globalAlpha = 0.18 + 0.08 * Math.sin(TAU * t / 2625); const g = ctx.createLinearGradient(0, 0, 0, H); g.addColorStop(0, "rgba(255,170,60,.0)"); g.addColorStop(1, "rgba(255,170,60,.6)"); ctx.fillStyle = g; ctx.fillRect(0, 0, W, H); ctx.globalAlpha = 1;
     } },
-    ranges: { cam: { type: "view", box: [[24, 62], [46, 102]], zoom: 0.14, pan: [2, 0], period: 20000 }, data: () => topic("ranges"), draw(ctx, path, feats, t, s) {
+    ranges: { cam: { type: "view", box: [[24, 62], [46, 102]], zoom: 0.14, pan: [2, 0], period: LOOP_VIEW }, data: () => topic("ranges"), draw(ctx, path, feats, t, s) {
       const cur = Math.floor(t / 1500) % feats.length;
       feats.forEach((f, i) => glowPath(ctx, path, f.geo, "255,255,255", i === cur ? 0.95 : 0.55, (i === cur ? 2 : 1.1) * s, i === cur ? 0.22 : 0.06));
     } },
-    mountains: { cam: { type: "view", box: [[24, 72], [38, 96]], zoom: 0.18, pan: [3.5, -1], period: 20000 }, data: () => topic("mountains"), draw(ctx, path, feats, t, s, cam) {
+    mountains: { cam: { type: "view", box: [[24, 72], [38, 96]], zoom: 0.18, pan: [3.5, -1], period: LOOP_VIEW }, data: () => topic("mountains"), draw(ctx, path, feats, t, s, cam) {
       feats.forEach((f, i) => { const p = cam.proj([f.ll[1], f.ll[0]]); if (!p) return; pulseAt(ctx, p[0], p[1], t, "255,255,255", s, i * 400); });
       const ev = feats.find((f) => f.id === "mount-everest"); if (ev) { const p = cam.proj([ev.ll[1], ev.ll[0]]); label(ctx, p[0], p[1], "8,848 m", s); }
     } },
-    oceans: { cam: { type: "globe", lng: -160, tilt: 10, spin: 6, size: 0.47 }, data: () => topic("oceans"), draw(ctx, path, feats, t, s, cam, W, H) {
+    oceans: { cam: { type: "globe", lng: -160, tilt: 10, spin: SPIN, size: 0.47 }, data: () => topic("oceans"), draw(ctx, path, feats, t, s, cam, W, H) {
       const cur = Math.floor(t / 1800) % feats.length, k = cycle(t, 1800);
       feats.forEach((f, i) => glowPath(ctx, path, f.geo, "120,200,255", i === cur ? 0.9 : 0.25, (i === cur ? 1.6 : 0.8) * s, i === cur ? 0.25 * Math.sin(k * Math.PI) : 0));
       ctx.save(); ctx.beginPath(); ctx.arc(W / 2, H / 2, Math.min(W, H) * 0.47, 0, 6.283); ctx.clip(); shimmer(ctx, W, H, t, "220,240,255", 0.16); ctx.restore();
     } },
-    seas: { cam: { type: "view", box: [[28, -8], [48, 44]], zoom: 0.12, pan: [4, 0.5], period: 20000 }, data: () => topic("seas"), draw(ctx, path, feats, t, s, cam, W, H) {
+    seas: { cam: { type: "view", box: [[28, -8], [48, 44]], zoom: 0.12, pan: [4, 0.5], period: LOOP_VIEW }, data: () => topic("seas"), draw(ctx, path, feats, t, s, cam, W, H) {
       shimmer(ctx, W, H, t, "200,235,255", 0.10);
       const pick = feats.filter((f) => ["mediterranean-sea", "black-sea", "adriatic-sea", "aegean-sea", "tyrrhenian-sea", "ionian-sea", "red-sea", "caspian-sea"].includes(f.id));
-      const cur = Math.floor(t / 1600) % pick.length, k = cycle(t, 1600);
+      const cur = Math.floor(t / 1750) % pick.length, k = cycle(t, 1750);
       pick.forEach((f, i) => glowPath(ctx, path, f.geo, "120,200,255", i === cur ? 1 : 0.45, (i === cur ? 2 : 1) * s, i === cur ? 0.3 * Math.sin(k * Math.PI) : 0.04));
     } },
-    straits: { cam: { type: "view", box: [[10, 20], [44, 62]], zoom: 0.12, pan: [1, -0.5], period: 20000 }, data: () => topic("straits"), draw(ctx, path, feats, t, s, cam, W, H) {
+    straits: { cam: { type: "view", box: [[10, 20], [44, 62]], zoom: 0.12, pan: [1, -0.5], period: LOOP_VIEW }, data: () => topic("straits"), draw(ctx, path, feats, t, s, cam, W, H) {
       shimmer(ctx, W, H, t, "200,235,255", 0.10);
-      ship(ctx, cam.proj, [[26, 34.3], [32.3, 31.4], [32.6, 29.8], [34.5, 26], [38.5, 20], [42, 15], [43.4, 12.6], [46, 12.2], [51, 13.5]], reduce ? 0.5 : cycle(t, 18000), s);
+      ship(ctx, cam.proj, [[26, 34.3], [32.3, 31.4], [32.6, 29.8], [34.5, 26], [38.5, 20], [42, 15], [43.4, 12.6], [46, 12.2], [51, 13.5]], reduce ? 0.5 : cycle(t, LOOP_VIEW), s);
       feats.forEach((f, i) => { const p = cam.proj([f.ll[1], f.ll[0]]); if (!p || p[0] < 0 || p[0] > W || p[1] < 0 || p[1] > H) return; pulseAt(ctx, p[0], p[1], t, "255,214,120", s * 1.1, i * 500); });
     } },
-    rivers: { cam: { type: "view", box: [[-34, -18], [36, 52]], zoom: 0.1, pan: [0, 2], period: 22000 }, data: () => topic("rivers"), draw(ctx, path, feats, t, s) {
+    rivers: { cam: { type: "view", box: [[-34, -18], [36, 52]], zoom: 0.1, pan: [0, 2], period: LOOP_VIEW }, data: () => topic("rivers"), draw(ctx, path, feats, t, s) {
       ctx.lineCap = "round"; ctx.lineJoin = "round";
       feats.forEach((f) => { ctx.beginPath(); path(f.geo); ctx.strokeStyle = "rgba(40,140,255,.9)"; ctx.lineWidth = 3 * s; ctx.shadowColor = "rgba(80,170,255,.9)"; ctx.shadowBlur = 8 * s; ctx.stroke(); ctx.shadowBlur = 0; });
-      ctx.setLineDash([5 * s, 10 * s]); ctx.lineDashOffset = -t / 30;
+      ctx.setLineDash([5 * s, 10 * s]); ctx.lineDashOffset = -cycle(t, 1050) * 30 * s;
       feats.forEach((f) => { ctx.beginPath(); path(f.geo); ctx.strokeStyle = "rgba(220,245,255,.95)"; ctx.lineWidth = 1.4 * s; ctx.stroke(); });
       ctx.setLineDash([]);
     } },
-    lakes: { cam: { type: "view", box: [[38, -94], [52, -72]], zoom: 0.14, pan: [1.5, 0], period: 18000 }, data: () => topic("lakes"), draw(ctx, path, feats, t, s, cam, W, H) {
-      feats.forEach((f, i) => glowPath(ctx, path, f.geo, "120,210,255", 0.65 + 0.35 * Math.sin(t / 800 + i), 1.4 * s, 0.14));
+    lakes: { cam: { type: "view", box: [[38, -94], [52, -72]], zoom: 0.14, pan: [1.5, 0], period: LOOP_VIEW }, data: () => topic("lakes"), draw(ctx, path, feats, t, s, cam, W, H) {
+      feats.forEach((f, i) => glowPath(ctx, path, f.geo, "120,210,255", 0.65 + 0.35 * Math.sin(TAU * t / 5250 + i), 1.4 * s, 0.14));
       for (const [lng, lat, ph] of [[-87.5, 47.6, 0], [-87, 44, 700], [-82.2, 44.8, 1400], [-81.2, 42.2, 2100], [-77.8, 43.6, 2800]]) {
-        const p = cam.proj([lng, lat]), k = cycle(t + ph, 3200);
+        const p = cam.proj([lng, lat]), k = cycle(t + ph, 3500);
         ctx.strokeStyle = `rgba(230,248,255,${0.8 * (1 - k)})`; ctx.lineWidth = 1.2 * s; ctx.beginPath(); ctx.ellipse(p[0], p[1], (4 + k * 22) * s, (2 + k * 9) * s, 0, 0, 6.283); ctx.stroke();
       }
       shimmer(ctx, W, H, t, "220,240,255", 0.07);
     } },
-    cities: { cam: { type: "view", tex: "nightHi", filter: "brightness(1.35) contrast(1.6) saturate(1.1)", box: [[4, -14], [60, 92]], zoom: 0.12, pan: [6, 1], period: 22000 }, data: () => topic("cities"), draw(ctx, path, feats, t, s, cam, W, H) {
+    cities: { cam: { type: "view", tex: "nightHi", filter: "brightness(1.35) contrast(1.6) saturate(1.1)", box: [[4, -14], [60, 92]], zoom: 0.12, pan: [6, 1], period: LOOP_VIEW }, data: () => topic("cities"), draw(ctx, path, feats, t, s, cam, W, H) {
       const pts = feats.map((f) => cam.proj([f.ll[1], f.ll[0]])).filter((p) => p && p[0] > 0 && p[0] < W && p[1] > 0 && p[1] < H);
       ctx.lineWidth = 1.2 * s;
       for (let i = 0; i < 5; i++) {   // flight arcs between cities
         const a = pts[(i * 7) % pts.length], b = pts[(i * 7 + 11) % pts.length]; if (!a || !b) continue;
-        const k = cycle(t + i * 900, 4500), mx = (a[0] + b[0]) / 2, my = (a[1] + b[1]) / 2 - Math.hypot(b[0] - a[0], b[1] - a[1]) * 0.35;
+        const k = cycle(t + i * 900, 4200), mx = (a[0] + b[0]) / 2, my = (a[1] + b[1]) / 2 - Math.hypot(b[0] - a[0], b[1] - a[1]) * 0.35;
         ctx.strokeStyle = "rgba(255,214,120,.35)"; ctx.beginPath(); ctx.moveTo(a[0], a[1]); ctx.quadraticCurveTo(mx, my, b[0], b[1]); ctx.stroke();
         const x = (1 - k) * (1 - k) * a[0] + 2 * (1 - k) * k * mx + k * k * b[0], y = (1 - k) * (1 - k) * a[1] + 2 * (1 - k) * k * my + k * k * b[1];
         ctx.fillStyle = "#fff"; ctx.shadowColor = "#ffd678"; ctx.shadowBlur = 8 * s; ctx.beginPath(); ctx.arc(x, y, 2 * s, 0, 6.283); ctx.fill(); ctx.shadowBlur = 0;
       }
       pts.forEach((p, i) => { if (i % 3 === 0) pulseAt(ctx, p[0], p[1], t, "255,214,120", s * 0.8, i * 230); });
     } },
-    latlong: { cam: { type: "globe", lng: 30, tilt: 22, spin: 8, size: 0.47 }, data: async () => null, draw(ctx, path, _d, t, s, cam) {
+    latlong: { cam: { type: "globe", lng: 30, tilt: 22, spin: SPIN, size: 0.47 }, data: async () => null, draw(ctx, path, _d, t, s, cam) {
       ctx.beginPath(); path(d3.geoGraticule().step([15, 15])()); ctx.strokeStyle = "rgba(255,255,255,.28)"; ctx.lineWidth = 0.8 * s; ctx.stroke();
-      const line = (coords, rgb, w, dash) => { ctx.setLineDash(dash ? [6 * s, 5 * s] : []); ctx.lineDashOffset = -t / 40; ctx.beginPath(); path({ type: "LineString", coordinates: coords }); ctx.strokeStyle = `rgb(${rgb})`; ctx.lineWidth = w * s; ctx.shadowColor = `rgb(${rgb})`; ctx.shadowBlur = 6 * s; ctx.stroke(); ctx.shadowBlur = 0; };
+      const line = (coords, rgb, w, dash) => { ctx.setLineDash(dash ? [6 * s, 5 * s] : []); ctx.lineDashOffset = -cycle(t, 1050) * 22 * s; ctx.beginPath(); path({ type: "LineString", coordinates: coords }); ctx.strokeStyle = `rgb(${rgb})`; ctx.lineWidth = w * s; ctx.shadowColor = `rgb(${rgb})`; ctx.shadowBlur = 6 * s; ctx.stroke(); ctx.shadowBlur = 0; };
       const par = (lat) => Array.from({ length: 73 }, (_, i) => [-180 + i * 5, lat]);
       line(par(0), "255,111,174", 2.2); line(par(23.44), "255,181,71", 1.3, true); line(par(-23.44), "255,181,71", 1.3, true);
       line(Array.from({ length: 37 }, (_, i) => [0, -90 + i * 5]), "46,230,197", 2);
@@ -245,7 +248,7 @@
     Promise.all([cam.ready(), spec.data()]).then(([, d]) => { card.data = d; card.ready = true; size(card); el.classList.add("is-live"); }).catch((e) => console.warn("card", id, e));
   }
   function size(c) {
-    const r = c.el.getBoundingClientRect(), dpr = TOUCH ? 1 : Math.min(1.75, devicePixelRatio || 1);
+    const r = c.el.getBoundingClientRect(), dpr = window.__recDpr || (TOUCH ? 1 : Math.min(1.75, devicePixelRatio || 1));
     c.W = Math.max(2, Math.round(r.width * dpr)); c.H = Math.max(2, Math.round(r.height * dpr)); c.s = dpr * (r.width / 300);
     c.canvas.width = c.W; c.canvas.height = c.H; c.img = c.ctx.createImageData(c.W, c.H);
     c.cam.layout(c.W, c.H); c.path = d3.geoPath(c.cam.proj, c.ctx);
